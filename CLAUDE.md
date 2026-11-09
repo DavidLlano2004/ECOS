@@ -160,3 +160,7 @@ Reglas de cada bloqueo (para la tarea 3.3):
 - **Muros `M`:** solo en tramos de 3 casillas o más (ruinas de Culpa, arcos en el borde de la plaza del hub y a los lados de la plataforma de la Puerta del Reflejo). `generar_mapa.py` borra los muros aislados.
 - **Emoción integrada:** sigue viva. En el Pasado deambula despacio con la animación `calma` dentro de su `radio_zona`, se acerca un poco si el jugador se queda cerca y nunca lo empuja. En el Presente la aliada deambula a menos de 100 px de su bloqueo, sin atravesar muros ni pegarse al jugador o a un portal.
 - **Seguir hablando:** una integrada siempre puede interactuar. Abre el título `despues` (Pasado) o `aliada_despues` (Presente) de `Dialogos/<id>.dialogue`: 4 frases por emoción, elegidas al azar sin repetir la anterior (`frase_despues` en la escena). No concede nada ni repite el efecto. El diálogo de decisión (`start`) solo se abre con pendientes, atacadas o ignoradas.
+
+## Atribución en git
+
+Los mensajes de commit nunca llevan líneas `Co-Authored-By`, `Claude-Session` ni "Generated with Claude Code", y los pull requests tampoco llevan texto de atribución. Solo debe aparecer el perfil del usuario como autor.
