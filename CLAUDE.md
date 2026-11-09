@@ -69,6 +69,7 @@ Nota: `Player.gd` todavía no tiene la propiedad `facing`; hay que añadirla cua
 - `Assets/{Personajes,Emociones,Mundo,UI,Audio,Fuentes,Efectos}`: arte, audio y fuentes.
 - `Resources/Emociones`: datos de cada emoción en `.tres`.
 - `Dialogos/`: contenido de los diálogos.
+- `Scenes/UI/PantallaTitulo.tscn`: pantalla de título (escena principal): Comenzar -> onboarding (`Main.tscn`), Continuar -> juego. Se salta la entrada con INTERACTUAR o Enter. Shaders en `Shaders/`.
 - `Scenes/Mundo/PruebaEmociones.tscn`: arena para probar las 7 emociones (se juega con **F6**, no es la escena principal). En depuración: **F3** muestra/oculta el panel de estado, **F4** reinicia la partida y recarga la escena.
 - `addons/`: plugins (solo con permiso del usuario).
 

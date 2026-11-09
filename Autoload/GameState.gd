@@ -158,6 +158,11 @@ func guardar() -> void:
 	archivo.store_string(JSON.stringify(contenido, "\t"))
 
 
+## true si existe un archivo de guardado (no carga nada; sirve para mostrar "Continuar").
+func hay_partida_guardada() -> bool:
+	return FileAccess.file_exists(RUTA_GUARDADO)
+
+
 ## Devuelve true si se cargó una partida guardada.
 func cargar() -> bool:
 	if not FileAccess.file_exists(RUTA_GUARDADO):

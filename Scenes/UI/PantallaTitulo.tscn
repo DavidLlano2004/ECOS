@@ -1,0 +1,95 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/PantallaTitulo.gd" id="1_script"]
+
+[sub_resource type="Environment" id="Environment_titulo"]
+background_mode = 3
+glow_enabled = true
+glow_intensity = 0.8
+glow_strength = 1.1
+glow_bloom = 0.15
+glow_blend_mode = 1
+glow_hdr_threshold = 0.7
+
+[node name="PantallaTitulo" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_titulo")
+
+[node name="Mundo" type="Node2D" parent="."]
+
+[node name="Interfaz" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Letras" type="HBoxContainer" parent="Interfaz"]
+unique_name_in_owner = true
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 20.0
+offset_bottom = 86.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Subtitulo" type="Label" parent="Interfaz"]
+unique_name_in_owner = true
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 88.0
+offset_bottom = 110.0
+grow_horizontal = 2
+mouse_filter = 2
+text = "Lo que atiendes hoy define el mundo de mañana"
+horizontal_alignment = 1
+
+[node name="Menu" type="PanelContainer" parent="Interfaz"]
+unique_name_in_owner = true
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -176.0
+offset_top = -20.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Opciones" type="VBoxContainer" parent="Interfaz/Menu"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Comenzar" type="Button" parent="Interfaz/Menu/Opciones"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Comenzar"
+
+[node name="Continuar" type="Button" parent="Interfaz/Menu/Opciones"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Continuar"
+
+[node name="Salir" type="Button" parent="Interfaz/Menu/Opciones"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Salir"
+
+[node name="Transicion" type="CanvasLayer" parent="."]
+layer = 50
+
+[node name="Negro" type="ColorRect" parent="Transicion"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Musica" type="AudioStreamPlayer" parent="."]
+
+[node name="SonidoSeleccion" type="AudioStreamPlayer" parent="."]
