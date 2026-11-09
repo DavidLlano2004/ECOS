@@ -1,0 +1,100 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Mundo/PruebaEmociones.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/Personajes/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://Scenes/Emociones/Rabia.tscn" id="3_rabia"]
+[ext_resource type="PackedScene" path="res://Scenes/Emociones/Miedo.tscn" id="4_miedo"]
+[ext_resource type="PackedScene" path="res://Scenes/Emociones/Tristeza.tscn" id="5_tristeza"]
+[ext_resource type="PackedScene" path="res://Scenes/Emociones/Soledad.tscn" id="6_soledad"]
+[ext_resource type="PackedScene" path="res://Scenes/Emociones/Culpa.tscn" id="7_culpa"]
+[ext_resource type="PackedScene" path="res://Scenes/Emociones/Ansiedad.tscn" id="8_ansiedad"]
+[ext_resource type="PackedScene" path="res://Scenes/Emociones/Verguenza.tscn" id="9_verguenza"]
+
+[sub_resource type="Gradient" id="Gradient_crepusculo"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.231373, 0.164706, 0.368627, 1, 0.627451, 0.337255, 0.560784, 1, 0.909804, 0.627451, 0.439216, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fondo"]
+gradient = SubResource("Gradient_crepusculo")
+width = 8
+height = 256
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_horizontal"]
+size = Vector2(1696, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vertical"]
+size = Vector2(32, 932)
+
+[node name="PruebaEmociones" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Tinte" type="CanvasModulate" parent="."]
+color = Color(1, 0.92, 0.82, 1)
+
+[node name="Fondo" type="TextureRect" parent="."]
+z_index = -100
+texture_filter = 2
+offset_right = 1600.0
+offset_bottom = 900.0
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_fondo")
+expand_mode = 1
+
+[node name="Muros" type="StaticBody2D" parent="."]
+
+[node name="Arriba" type="CollisionShape2D" parent="Muros"]
+position = Vector2(800, -16)
+shape = SubResource("RectangleShape2D_horizontal")
+
+[node name="Abajo" type="CollisionShape2D" parent="Muros"]
+position = Vector2(800, 916)
+shape = SubResource("RectangleShape2D_horizontal")
+
+[node name="Izquierda" type="CollisionShape2D" parent="Muros"]
+position = Vector2(-16, 450)
+shape = SubResource("RectangleShape2D_vertical")
+
+[node name="Derecha" type="CollisionShape2D" parent="Muros"]
+position = Vector2(1616, 450)
+shape = SubResource("RectangleShape2D_vertical")
+
+[node name="Mundo" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Player" parent="Mundo" instance=ExtResource("2_player")]
+position = Vector2(800, 450)
+
+[node name="Rabia" parent="Mundo" instance=ExtResource("3_rabia")]
+position = Vector2(800, 100)
+
+[node name="Miedo" parent="Mundo" instance=ExtResource("4_miedo")]
+position = Vector2(1073.6, 231.8)
+
+[node name="Tristeza" parent="Mundo" instance=ExtResource("5_tristeza")]
+position = Vector2(1141.2, 527.9)
+
+[node name="Soledad" parent="Mundo" instance=ExtResource("6_soledad")]
+position = Vector2(951.9, 765.3)
+
+[node name="Culpa" parent="Mundo" instance=ExtResource("7_culpa")]
+position = Vector2(648.1, 765.3)
+
+[node name="Ansiedad" parent="Mundo" instance=ExtResource("8_ansiedad")]
+position = Vector2(458.8, 527.9)
+
+[node name="Verguenza" parent="Mundo" instance=ExtResource("9_verguenza")]
+position = Vector2(526.4, 231.8)
+
+[node name="Depuracion" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="Estado" type="Label" parent="Depuracion"]
+unique_name_in_owner = true
+offset_left = 6.0
+offset_top = 4.0
+offset_right = 330.0
+offset_bottom = 150.0
+mouse_filter = 2
+text = "Estado"

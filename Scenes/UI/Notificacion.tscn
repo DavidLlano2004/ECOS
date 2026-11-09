@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[node name="Notificacion" type="CanvasLayer"]
+layer = 20
+
+[node name="Tarjeta" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(220, 0)
+offset_right = 220.0
+mouse_filter = 2
+
+[node name="Contenido" type="VBoxContainer" parent="Tarjeta"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="Titulo" type="Label" parent="Tarjeta/Contenido"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(202, 0)
+text = "Título"
+autowrap_mode = 3
+
+[node name="Texto" type="Label" parent="Tarjeta/Contenido"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(202, 0)
+text = "Texto"
+autowrap_mode = 3

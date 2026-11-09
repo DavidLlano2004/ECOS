@@ -63,12 +63,13 @@ Nota: `Player.gd` todavía no tiene la propiedad `facing`; hay que añadirla cua
 
 ## Estructura del proyecto
 
-- `Autoload/`: singletons (`GameState`, `Dialogo`).
+- `Autoload/`: singletons (`GameState`, `Dialogo`, `Notificacion`).
 - `Scenes/{Personajes,Emociones,Mundo,UI,Objetos}`: escenas.
 - `Scripts/{Personajes,Emociones,Mundo,UI,Datos,Sistemas}`: scripts.
 - `Assets/{Personajes,Emociones,Mundo,UI,Audio,Fuentes,Efectos}`: arte, audio y fuentes.
 - `Resources/Emociones`: datos de cada emoción en `.tres`.
 - `Dialogos/`: contenido de los diálogos.
+- `Scenes/Mundo/PruebaEmociones.tscn`: arena para probar las 7 emociones (se juega con **F6**, no es la escena principal). En depuración: **F3** muestra/oculta el panel de estado, **F4** reinicia la partida y recarga la escena.
 - `addons/`: plugins (solo con permiso del usuario).
 
 ## Reglas de trabajo
