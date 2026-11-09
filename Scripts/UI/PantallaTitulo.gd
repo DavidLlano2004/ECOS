@@ -1,20 +1,28 @@
 extends Node2D
 ## Pantalla de título de ECOS (escena principal del proyecto).
 ##
-## Secuencia: negro -> aparece el cielo -> el título "ECOS" letra por letra -> subtítulo -> menú.
+## Secuencia: negro -> aparece la ilustración -> el título "ECOS" letra por letra -> subtítulo -> menú.
 ## Se puede saltar la entrada con INTERACTUAR o Enter.
-## "Comenzar": el título se disuelve hacia arriba, pasa una ola de luz, fundido a negro y onboarding.
-## "Continuar": carga la partida guardada y va al juego.
+## "Comenzar": el portal se ilumina con fuerza, el título se disuelve hacia arriba, pasa una ola de luz,
+## fundido a negro y onboarding. "Continuar": carga la partida guardada y va al juego.
 
 const ESCENA_ONBOARDING := "res://Scenes/Main.tscn"
 const ESCENA_JUEGO := "res://Scenes/Mundo/PruebaEmociones.tscn"
 const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
+const FONDO := preload("res://Assets/UI/fondo_titulo.png")
 
 const PANTALLA := Vector2(640, 360)
 const DORADO := Color("f4c77b")
 const LETRAS_TITULO := "ECOS"
-const SEGUNDOS_CIELO := 1.5
+const SEGUNDOS_APARICION := 1.5
 const SEGUNDOS_POR_LETRA := 0.32
+
+# Puntos de luz medidos sobre la ilustración (640x360)
+const FAROLES := [Vector2(52, 175), Vector2(73, 172), Vector2(105, 152), Vector2(161, 185)]
+const CENTRO_PORTAL := Vector2(320, 180)
+const RADIO_PORTAL := 37.0  # radio interior del aro
+const COLOR_PORTAL_DORADO := Color(1.0, 0.82, 0.45)
+const COLOR_PORTAL_AZUL := Color(0.5, 0.72, 1.0)
 
 @onready var mundo: Node2D = $Mundo
 @onready var contenedor_letras: HBoxContainer = %Letras
@@ -37,7 +45,15 @@ var _tween_intro: Tween
 var _tweens_letras: Array[Tween] = []
 var _fuente: Font
 
-# Capas con movimiento suave (parallax): [nodo, amplitud en píxeles, posición base]
+## Todo lo que pertenece a la ilustración (coordenadas de la imagen de 640x360).
+## Cuelga de "mundo", que es el que "respira" (escala 1.0 a 1.03).
+var _lienzo: Node2D
+var _luz_portal: PointLight2D
+var _particulas_portal: CPUParticles2D
+var _luces_faroles: Array[PointLight2D] = []
+var _textura_luz: GradientTexture2D
+
+# Capas con movimiento suave: [nodo, amplitud en píxeles, posición base]
 var _capas_parallax: Array = []
 var _tiempo := 0.0
 
@@ -46,10 +62,14 @@ func _ready() -> void:
 	if ResourceLoader.exists(RUTA_FUENTE):
 		_fuente = load(RUTA_FUENTE)
 	_crear_fondo()
+	_crear_niebla_derecha()
+	_crear_luces_faroles()
+	_crear_portal()
 	_crear_luciernagas()
 	_crear_titulo()
 	_aplicar_estilo_menu()
 	_preparar_menu()
+	_iniciar_respiracion()
 
 	# Todo empieza en negro absoluto
 	negro.color.a = 1.0
@@ -60,7 +80,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	# Movimiento lento de las capas: cada una se desplaza un poco distinto
+	# Movimiento lento de la niebla
 	_tiempo += delta
 	for capa in _capas_parallax:
 		var nodo = capa[0]  # Node2D o Control: los dos tienen "position"
@@ -91,64 +111,49 @@ func _unhandled_input(evento: InputEvent) -> void:
 		foco.pressed.emit()
 
 
-# --- Fondo: cielo nocturno generado por código ---
+# --- Fondo: la ilustración ---
 
 func _crear_fondo() -> void:
-	# Degradado: morado oscuro arriba, violeta y un toque naranja en el horizonte
+	# "mundo" está en el centro de la pantalla y "_lienzo" compensa, así el zoom parte del centro
+	mundo.position = PANTALLA / 2.0
+	_lienzo = Node2D.new()
+	_lienzo.position = -PANTALLA / 2.0
+	mundo.add_child(_lienzo)
+
+	var ilustracion := Sprite2D.new()
+	ilustracion.texture = FONDO  # importada con filtro Nearest (pixel art)
+	ilustracion.centered = false
+	_lienzo.add_child(ilustracion)
+
+	# Textura de luz circular suave que comparten las luces
 	var degradado := Gradient.new()
-	degradado.offsets = PackedFloat32Array([0.0, 0.7, 1.0])
-	degradado.colors = PackedColorArray([Color("120c2a"), Color("5b3a8c"), Color("f08c50")])
-	var textura := GradientTexture2D.new()
-	textura.gradient = degradado
-	textura.fill_from = Vector2(0.5, 0.0)
-	textura.fill_to = Vector2(0.5, 1.0)
-	textura.width = 8
-	textura.height = 256
-	var cielo := TextureRect.new()
-	cielo.texture = textura
-	cielo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR  # sin bandas
-	cielo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	cielo.stretch_mode = TextureRect.STRETCH_SCALE
-	cielo.size = PANTALLA
-	mundo.add_child(cielo)
-
-	# Estrellas en dos capas (lejanas y cercanas) que titilan
-	for datos in [[70, 1.0, 3.0], [26, 2.0, 5.0]]:
-		var capa := Node2D.new()
-		mundo.add_child(capa)
-		for i in int(datos[0]):
-			var estrella := ColorRect.new()
-			estrella.size = Vector2(datos[1], datos[1])
-			estrella.position = Vector2(randf_range(0, PANTALLA.x), randf_range(0, PANTALLA.y * 0.65))
-			estrella.color = Color(1.0, 0.95, 0.8, randf_range(0.4, 1.0))
-			capa.add_child(estrella)
-			var t := create_tween().set_loops()
-			var pausa := randf_range(0.8, 2.4)
-			t.tween_interval(randf_range(0.0, 2.0))
-			t.tween_property(estrella, "modulate:a", randf_range(0.1, 0.35), pausa)
-			t.tween_property(estrella, "modulate:a", 1.0, pausa)
-		_capas_parallax.append([capa, datos[2], capa.position])
-
-	# Niebla suave que se desplaza lento
-	for datos in [[200.0, 0.22, 14.0], [260.0, 0.16, 8.0]]:
-		var niebla := _crear_niebla(Vector2(-60, datos[0]), Vector2(PANTALLA.x + 120, 130), datos[1])
-		mundo.add_child(niebla)
-		_capas_parallax.append([niebla, datos[2], niebla.position])
-
-	# Tinte dividido: Pasado cálido (izquierda), Presente frío (derecha), con transición que ondula
-	var tinte := ColorRect.new()
-	tinte.name = "TinteDivision"
-	tinte.size = PANTALLA
-	tinte.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var material := ShaderMaterial.new()
-	material.shader = load("res://Shaders/tinte_division.gdshader")
-	tinte.material = material
-	mundo.add_child(tinte)
-
-	# El cielo aparece al irse el negro: ver _iniciar_intro()
+	degradado.set_color(0, Color.WHITE)
+	degradado.set_color(1, Color(1, 1, 1, 0))
+	_textura_luz = GradientTexture2D.new()
+	_textura_luz.gradient = degradado
+	_textura_luz.fill = GradientTexture2D.FILL_RADIAL
+	_textura_luz.fill_from = Vector2(0.5, 0.5)
+	_textura_luz.fill_to = Vector2(1.0, 0.5)
+	_textura_luz.width = 128
+	_textura_luz.height = 128
 
 
-## Una franja de niebla: ruido suave con transparencia.
+## "Respiración": zoom lento entre 1.0 y 1.03 (unos 12 s por ciclo). Nunca baja de 1.0, así no se ven bordes.
+func _iniciar_respiracion() -> void:
+	var t := create_tween().set_loops()
+	t.tween_property(mundo, "scale", Vector2(1.03, 1.03), 6.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(mundo, "scale", Vector2.ONE, 6.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+## Niebla suave que se desplaza lento, solo sobre la mitad derecha (el Presente).
+func _crear_niebla_derecha() -> void:
+	for datos in [[Vector2(290, 215), Vector2(400, 120), 0.34, 10.0], [Vector2(300, 255), Vector2(380, 100), 0.26, 6.0]]:
+		var niebla := _crear_niebla(datos[0], datos[1], datos[2])
+		_lienzo.add_child(niebla)
+		_capas_parallax.append([niebla, datos[3], niebla.position])
+
+
+## Una franja de niebla: ruido suave con transparencia y bordes que se desvanecen.
 func _crear_niebla(posicion: Vector2, tamano: Vector2, opacidad: float) -> TextureRect:
 	var ruido := FastNoiseLite.new()
 	ruido.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
@@ -156,7 +161,7 @@ func _crear_niebla(posicion: Vector2, tamano: Vector2, opacidad: float) -> Textu
 	ruido.seed = randi()
 	var rampa := Gradient.new()
 	rampa.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
-	rampa.colors = PackedColorArray([Color(0.8, 0.85, 1.0, 0.0), Color(0.8, 0.85, 1.0, 0.5), Color(0.9, 0.92, 1.0, 1.0)])
+	rampa.colors = PackedColorArray([Color(0.8, 0.88, 1.0, 0.0), Color(0.8, 0.88, 1.0, 0.5), Color(0.9, 0.95, 1.0, 1.0)])
 	var textura := NoiseTexture2D.new()
 	textura.noise = ruido
 	textura.width = 256
@@ -173,33 +178,118 @@ func _crear_niebla(posicion: Vector2, tamano: Vector2, opacidad: float) -> Textu
 	rect.modulate.a = opacidad
 	var material := ShaderMaterial.new()
 	material.shader = load("res://Shaders/niebla.gdshader")
+	material.set_shader_parameter("desvanecer_x", 0.28)
 	rect.material = material
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return rect
 
 
+# --- Luces de las linternas ---
+
+## Luces cálidas sobre las linternas de los árboles de la izquierda, que parpadean suavemente.
+func _crear_luces_faroles() -> void:
+	for posicion in FAROLES:
+		var luz := PointLight2D.new()
+		luz.texture = _textura_luz
+		luz.texture_scale = 0.75
+		luz.color = Color(1.0, 0.7, 0.35)
+		luz.energy = 0.8
+		luz.position = posicion
+		_lienzo.add_child(luz)
+		_luces_faroles.append(luz)
+		# Cada linterna parpadea a su ritmo
+		var t := create_tween().set_loops()
+		t.tween_interval(randf_range(0.0, 1.5))
+		t.tween_property(luz, "energy", randf_range(0.45, 0.6), randf_range(0.7, 1.3)).set_trans(Tween.TRANS_SINE)
+		t.tween_property(luz, "energy", randf_range(0.85, 1.1), randf_range(0.7, 1.3)).set_trans(Tween.TRANS_SINE)
+
+
+# --- Portal ---
+
+## Partículas en espiral dentro del aro y una luz tenue que alterna entre dorado y azul.
+func _crear_portal() -> void:
+	_luz_portal = PointLight2D.new()
+	_luz_portal.texture = _textura_luz
+	_luz_portal.texture_scale = 0.8
+	_luz_portal.color = COLOR_PORTAL_DORADO
+	_luz_portal.energy = 0.45
+	_luz_portal.position = CENTRO_PORTAL
+	_lienzo.add_child(_luz_portal)
+	var alternar := create_tween().set_loops()
+	alternar.tween_property(_luz_portal, "color", COLOR_PORTAL_AZUL, 2.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	alternar.tween_property(_luz_portal, "color", COLOR_PORTAL_DORADO, 2.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+	var rampa := Gradient.new()
+	rampa.offsets = PackedFloat32Array([0.0, 0.2, 0.7, 1.0])
+	rampa.colors = PackedColorArray([Color(1.0, 0.9, 0.55, 0.0), Color(1.0, 0.88, 0.5, 1.0), Color(0.6, 0.78, 1.0, 0.9), Color(0.6, 0.78, 1.0, 0.0)])
+	_particulas_portal = CPUParticles2D.new()
+	_particulas_portal.name = "ParticulasPortal"
+	_particulas_portal.texture = _textura_luz
+	_particulas_portal.position = CENTRO_PORTAL
+	_particulas_portal.amount = 36
+	_particulas_portal.lifetime = 2.6
+	_particulas_portal.preprocess = 2.6
+	# Nacen en un anillo dentro del aro, giran y se acercan al centro
+	_particulas_portal.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE_SURFACE
+	_particulas_portal.emission_sphere_radius = RADIO_PORTAL - 8.0
+	_particulas_portal.direction = Vector2.ZERO
+	_particulas_portal.spread = 0.0
+	_particulas_portal.gravity = Vector2.ZERO
+	_particulas_portal.initial_velocity_min = 0.0
+	_particulas_portal.initial_velocity_max = 0.0
+	_particulas_portal.orbit_velocity_min = 0.25
+	_particulas_portal.orbit_velocity_max = 0.45
+	_particulas_portal.radial_accel_min = -9.0
+	_particulas_portal.radial_accel_max = -5.0
+	_particulas_portal.scale_amount_min = 0.03
+	_particulas_portal.scale_amount_max = 0.06
+	_particulas_portal.color_ramp = rampa
+	_lienzo.add_child(_particulas_portal)
+
+
+## Al elegir "Comenzar": el portal se ilumina con fuerza (sube la luz y las partículas).
+func _encender_portal() -> void:
+	var t := create_tween().set_parallel(true)
+	t.tween_property(_luz_portal, "energy", 3.2, 0.6).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
+	t.tween_property(_luz_portal, "texture_scale", 2.2, 0.6).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
+	t.tween_property(_particulas_portal, "speed_scale", 3.0, 0.6)
+	# Ráfaga de chispas desde el aro
+	var chispas := CPUParticles2D.new()
+	chispas.texture = _textura_luz
+	chispas.position = CENTRO_PORTAL
+	chispas.amount = 70
+	chispas.lifetime = 1.0
+	chispas.one_shot = true
+	chispas.explosiveness = 0.85
+	chispas.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE_SURFACE
+	chispas.emission_sphere_radius = RADIO_PORTAL - 6.0
+	chispas.direction = Vector2.UP
+	chispas.spread = 180.0
+	chispas.gravity = Vector2.ZERO
+	chispas.initial_velocity_min = 20.0
+	chispas.initial_velocity_max = 90.0
+	chispas.scale_amount_min = 0.03
+	chispas.scale_amount_max = 0.07
+	chispas.color = Color(1.0, 0.92, 0.65)
+	var desvanecer := Gradient.new()
+	desvanecer.set_color(0, Color(1, 1, 1, 1))
+	desvanecer.set_color(1, Color(1, 1, 1, 0))
+	chispas.color_ramp = desvanecer
+	_lienzo.add_child(chispas)
+	chispas.emitting = true
+
+
 # --- Luciérnagas doradas ---
 
 func _crear_luciernagas() -> void:
-	var punto := Gradient.new()
-	punto.set_color(0, Color.WHITE)
-	punto.set_color(1, Color(1, 1, 1, 0))
-	var textura := GradientTexture2D.new()
-	textura.gradient = punto
-	textura.fill = GradientTexture2D.FILL_RADIAL
-	textura.fill_from = Vector2(0.5, 0.5)
-	textura.fill_to = Vector2(1.0, 0.5)
-	textura.width = 12
-	textura.height = 12
-
 	var rampa_alfa := Gradient.new()
 	rampa_alfa.offsets = PackedFloat32Array([0.0, 0.25, 0.75, 1.0])
 	rampa_alfa.colors = PackedColorArray([Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)])
 
 	var p := CPUParticles2D.new()
 	p.name = "Luciernagas"
-	p.texture = textura
-	p.amount = 46
+	p.texture = _textura_luz
+	p.amount = 40
 	p.lifetime = 9.0
 	p.preprocess = 9.0  # ya hay luciérnagas flotando desde el primer cuadro
 	p.position = PANTALLA / 2.0
@@ -210,14 +300,14 @@ func _crear_luciernagas() -> void:
 	p.gravity = Vector2.ZERO
 	p.initial_velocity_min = 3.0
 	p.initial_velocity_max = 11.0
-	p.scale_amount_min = 0.5
-	p.scale_amount_max = 1.1
+	p.scale_amount_min = 0.045
+	p.scale_amount_max = 0.1
 	p.color = Color(1.0, 0.82, 0.4, 0.95)
 	p.color_ramp = rampa_alfa
-	mundo.add_child(p)
+	_lienzo.add_child(p)
 
 
-# --- Título y subtítulo ---
+# --- Título y subtítulo (van en el cielo, entre y = 20 e y = 110) ---
 
 func _crear_titulo() -> void:
 	_material_brillo = ShaderMaterial.new()
@@ -253,9 +343,9 @@ func _crear_titulo() -> void:
 
 func _iniciar_intro() -> void:
 	_tween_intro = create_tween()
-	# Un instante de negro absoluto -> aparece el cielo
+	# Un instante de negro absoluto -> aparece la ilustración
 	_tween_intro.tween_interval(0.4)
-	_tween_intro.tween_property(negro, "color:a", 0.0, SEGUNDOS_CIELO)
+	_tween_intro.tween_property(negro, "color:a", 0.0, SEGUNDOS_APARICION)
 	_tween_intro.tween_interval(0.3)
 	# Letra por letra, con fundido y una pequeña subida
 	for i in _letras.size():
@@ -345,8 +435,8 @@ func _aplicar_estilo_menu() -> void:
 	tema.set_stylebox("pressed", "Button", _crear_caja(Color("4a4170"), DORADO, 2, 4))
 	tema.set_stylebox("focus", "Button", _crear_caja(Color("3a3358"), DORADO, 2, 4))
 	menu.theme = tema
-	# Caja del menú: morado oscuro semitransparente con borde dorado
-	menu.add_theme_stylebox_override("panel", _crear_caja(Color("1e1b2e", 0.88), DORADO, 2, 8))
+	# Caja del menú: morado oscuro semitransparente con borde dorado (se lee sobre la ilustración)
+	menu.add_theme_stylebox_override("panel", _crear_caja(Color("1e1b2e", 0.82), DORADO, 2, 8))
 
 
 func _crear_caja(fondo: Color, borde: Color, grosor: int, margen: int) -> StyleBoxFlat:
@@ -368,7 +458,9 @@ func _comenzar() -> void:
 	GameState.nueva_partida()
 	var t := create_tween()
 	t.tween_property(menu, "modulate:a", 0.0, 0.3)
-	t.tween_callback(_disolver_titulo)
+	t.tween_callback(_encender_portal)  # el portal se ilumina con fuerza...
+	t.tween_interval(0.7)
+	t.tween_callback(_disolver_titulo)  # ...y entonces se disuelve el título y pasa la ola de luz
 	t.tween_interval(1.6)
 	t.tween_property(negro, "color:a", 1.0, 0.7)
 	t.tween_callback(get_tree().change_scene_to_file.bind(ESCENA_ONBOARDING))
