@@ -1,0 +1,80 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Intro/Onboarding.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://Assets/UI/fondo_titulo.png" id="2_fondo"]
+[ext_resource type="Shader" path="res://Shaders/desenfoque_oscuro.gdshader" id="3_shader"]
+[ext_resource type="SpriteFrames" path="res://Resources/Personajes/frames_guia.tres" id="4_guia"]
+[ext_resource type="SpriteFrames" path="res://Resources/Mundo/frames_portal.tres" id="5_portal"]
+
+[sub_resource type="Environment" id="Environment_onboarding"]
+background_mode = 3
+glow_enabled = true
+glow_intensity = 0.7
+glow_strength = 1.0
+glow_bloom = 0.1
+glow_blend_mode = 1
+glow_hdr_threshold = 0.75
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fondo"]
+shader = ExtResource("3_shader")
+shader_parameter/radio = 2.5
+shader_parameter/oscuridad = 0.3
+shader_parameter/tinte = Color(0.38, 0.45, 0.7, 1)
+
+[node name="Onboarding" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_onboarding")
+
+[node name="Tinte" type="CanvasModulate" parent="."]
+color = Color(0.62, 0.68, 0.92, 1)
+
+[node name="Camara" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+
+[node name="Mundo" type="Node2D" parent="."]
+
+[node name="Fondo" type="Sprite2D" parent="Mundo"]
+z_index = -10
+material = SubResource("ShaderMaterial_fondo")
+texture = ExtResource("2_fondo")
+centered = false
+
+[node name="Emociones" type="Node2D" parent="Mundo"]
+
+[node name="Guia" type="Node2D" parent="Mundo"]
+position = Vector2(320, 150)
+
+[node name="Sprite" type="AnimatedSprite2D" parent="Mundo/Guia"]
+sprite_frames = ExtResource("4_guia")
+animation = &"idle"
+
+[node name="Linterna" type="PointLight2D" parent="Mundo/Guia"]
+position = Vector2(20, 13)
+color = Color(1, 0.75, 0.4, 1)
+energy = 1.0
+texture_scale = 0.9
+
+[node name="Portal" type="AnimatedSprite2D" parent="Mundo"]
+position = Vector2(320, 178)
+sprite_frames = ExtResource("5_portal")
+animation = &"dormido"
+
+[node name="Luz" type="PointLight2D" parent="Mundo/Portal"]
+color = Color(0.75, 0.85, 1, 1)
+energy = 0.0
+texture_scale = 1.2
+
+[node name="Blanco" type="CanvasLayer" parent="."]
+layer = 40
+
+[node name="LuzBlanca" type="ColorRect" parent="Blanco"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0)

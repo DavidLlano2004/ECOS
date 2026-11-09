@@ -3,13 +3,24 @@ extends Node
 ##
 ##   await Dialogo.mostrar(load("res://Dialogos/rabia.dialogue"), "start")
 ##   var elegida: int = await Dialogo.preguntar("¿Qué haces?", ["Opción A", "Opción B"])
+##
+## Una escena puede pasarse a sí misma como estado extra para que el .dialogue llame a sus funciones:
+##   await Dialogo.mostrar(recurso, "start", [self])   # y en el .dialogue:  $> mostrar_emocion("rabia")
 
 ## Se emite cuando se abre el primer diálogo (el jugador se bloquea).
 signal dialogo_abierto
 ## Se emite cuando se cierra el último diálogo abierto (el jugador se libera).
 signal dialogo_cerrado
+## Un personaje empieza a "hablar": se está escribiendo su línea ("" si es el narrador).
+signal linea_escribiendo(personaje: String)
+## Terminó de escribirse la línea (ahora se espera al jugador).
+signal linea_terminada
 
 const BALLOON := preload("res://Scenes/UI/DialogoBalloon.tscn")
+
+## Retratos opcionales por nombre de personaje, para que el balloon los muestre a la izquierda.
+## Ejemplo: Dialogo.retratos["Guía"] = textura. (Quien lo registre debe quitarlo al terminar.)
+var retratos: Dictionary = {}
 
 ## Cuántos diálogos hay abiertos ahora mismo.
 var _abiertos := 0
@@ -21,8 +32,9 @@ func hay_dialogo() -> bool:
 
 
 ## Abre un archivo .dialogue con el balloon propio y espera a que termine.
+## estados_extra: objetos cuyas funciones y propiedades puede usar el .dialogue.
 ## Devuelve la posición (0, 1, 2...) de la última respuesta elegida, o -1 si no hubo.
-func mostrar(recurso_dialogo: DialogueResource, titulo: String = "start") -> int:
+func mostrar(recurso_dialogo: DialogueResource, titulo: String = "start", estados_extra: Array = []) -> int:
 	if recurso_dialogo == null:
 		push_error("Dialogo.mostrar: el recurso de diálogo es nulo.")
 		return -1
@@ -32,10 +44,12 @@ func mostrar(recurso_dialogo: DialogueResource, titulo: String = "start") -> int
 		return -1
 	var balloon: DialogoBalloon = BALLOON.instantiate()
 	add_child(balloon)
+	balloon.escribiendo_iniciado.connect(linea_escribiendo.emit)
+	balloon.escribiendo_terminado.connect(linea_terminada.emit)
 	_abiertos += 1
 	if _abiertos == 1:
 		dialogo_abierto.emit()
-	balloon.start(recurso_dialogo, titulo)
+	balloon.start(recurso_dialogo, titulo, estados_extra)
 	var elegida: int = await balloon.terminado
 	_abiertos -= 1
 	if _abiertos == 0:

@@ -6,11 +6,15 @@ extends CanvasLayer
 ##
 ## Retrato (opcional): en el .dialogue, agrega una etiqueta a la línea:
 ##   Guía: [#retrato=res://Assets/Personajes/guia.png] Hola.
-## Si la línea no trae etiqueta "retrato", el espacio se oculta.
+## También se puede registrar un retrato por personaje en Dialogo.retratos["Nombre"].
+## Si no hay ni etiqueta ni retrato registrado, el espacio se oculta.
 
 ## Se emite al terminar el diálogo (ya con el fundido de salida hecho).
 ## indice_respuesta es la posición (0, 1, 2...) de la última respuesta elegida, o -1 si no hubo.
 signal terminado(indice_respuesta: int)
+## Empieza a escribirse una línea (personaje vacío si es el narrador) y cuando termina de escribirse.
+signal escribiendo_iniciado(personaje: String)
+signal escribiendo_terminado()
 
 const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
 const TAM_FUENTE := 16
@@ -134,8 +138,10 @@ func _aplicar_linea() -> void:
 	_mostrar_balloon()
 	texto.show()
 	if not linea.text.is_empty():
+		escribiendo_iniciado.emit(linea.character)
 		texto.type_out()
 		await texto.finished_typing
+		escribiendo_terminado.emit()
 		if esta_linea != linea:
 			return  # ya cambió la línea mientras se escribía
 
@@ -154,12 +160,13 @@ func _aplicar_linea() -> void:
 
 func _actualizar_retrato() -> void:
 	var ruta := linea.get_tag_value("retrato")
+	var textura: Texture2D = null
 	if ruta != "" and ResourceLoader.exists(ruta):
-		retrato.texture = load(ruta)
-		retrato.show()
-	else:
-		retrato.texture = null
-		retrato.hide()
+		textura = load(ruta)
+	elif Dialogo.retratos.has(linea.character):
+		textura = Dialogo.retratos[linea.character]  # registrado por la escena (ver Dialogo.retratos)
+	retrato.texture = textura
+	retrato.visible = textura != null
 
 
 ## Hace visible la caja, con fundido si estaba escondida.

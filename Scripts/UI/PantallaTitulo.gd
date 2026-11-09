@@ -6,7 +6,7 @@ extends Node2D
 ## "Comenzar": el portal se ilumina con fuerza, el título se disuelve hacia arriba, pasa una ola de luz,
 ## fundido a negro y onboarding. "Continuar": carga la partida guardada y va al juego.
 
-const ESCENA_ONBOARDING := "res://Scenes/Main.tscn"
+const ESCENA_ONBOARDING := "res://Scenes/Intro/Onboarding.tscn"
 const ESCENA_JUEGO := "res://Scenes/Mundo/PruebaEmociones.tscn"
 const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
 const FONDO := preload("res://Assets/UI/fondo_titulo.png")
@@ -148,40 +148,9 @@ func _iniciar_respiracion() -> void:
 ## Niebla suave que se desplaza lento, solo sobre la mitad derecha (el Presente).
 func _crear_niebla_derecha() -> void:
 	for datos in [[Vector2(290, 215), Vector2(400, 120), 0.34, 10.0], [Vector2(300, 255), Vector2(380, 100), 0.26, 6.0]]:
-		var niebla := _crear_niebla(datos[0], datos[1], datos[2])
+		var niebla := Atmosfera.crear_niebla(datos[0], datos[1], datos[2])
 		_lienzo.add_child(niebla)
 		_capas_parallax.append([niebla, datos[3], niebla.position])
-
-
-## Una franja de niebla: ruido suave con transparencia y bordes que se desvanecen.
-func _crear_niebla(posicion: Vector2, tamano: Vector2, opacidad: float) -> TextureRect:
-	var ruido := FastNoiseLite.new()
-	ruido.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	ruido.frequency = 0.012
-	ruido.seed = randi()
-	var rampa := Gradient.new()
-	rampa.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
-	rampa.colors = PackedColorArray([Color(0.8, 0.88, 1.0, 0.0), Color(0.8, 0.88, 1.0, 0.5), Color(0.9, 0.95, 1.0, 1.0)])
-	var textura := NoiseTexture2D.new()
-	textura.noise = ruido
-	textura.width = 256
-	textura.height = 96
-	textura.seamless = true
-	textura.color_ramp = rampa
-	var rect := TextureRect.new()
-	rect.texture = textura
-	rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	rect.stretch_mode = TextureRect.STRETCH_SCALE
-	rect.position = posicion
-	rect.size = tamano
-	rect.modulate.a = opacidad
-	var material := ShaderMaterial.new()
-	material.shader = load("res://Shaders/niebla.gdshader")
-	material.set_shader_parameter("desvanecer_x", 0.28)
-	rect.material = material
-	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return rect
 
 
 # --- Luces de las linternas ---
