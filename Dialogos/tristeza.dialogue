@@ -1,0 +1,21 @@
+# Pasado: encuentro con Tristeza.
+# Atacar o ignorar -> mensaje_fallo. Escuchar -> mensaje_integracion (de Resources/Emociones/tristeza.tres).
+
+~ start
+Tristeza: ...
+Tristeza: No sé cuánto llevo aquí. Todo pesa un poco más cada día.
+- Atacarla
+	Tristeza: Déjame...
+	$> GameState.resolver("tristeza", "atacada")
+	{{GameState.obtener_datos("tristeza").mensaje_fallo}}
+	=> END
+- Ignorarla
+	Tristeza: Está bien. Ya me acostumbré.
+	$> GameState.resolver("tristeza", "ignorada")
+	{{GameState.obtener_datos("tristeza").mensaje_fallo}}
+	=> END
+- Escucharla
+	Tristeza: No tienes que decir nada. Solo quédate un ratito.
+	$> GameState.resolver("tristeza", "integrada")
+	{{GameState.obtener_datos("tristeza").mensaje_integracion}}
+	=> END

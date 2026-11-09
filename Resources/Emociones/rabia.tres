@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EmocionData" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+
+[resource]
+script = ExtResource("1_emocion")
+id = "rabia"
+nombre = "Rabia"
+descripcion_corta = "Una criatura ardiente que te sigue de cerca. Está enojada porque algo importante fue herido."
+color = Color(0.898, 0.325, 0.176, 1)
+habilidad_id = "impulso"
+habilidad_nombre = "Impulso"
+habilidad_descripcion = "Un dash que rompe obstáculos."
+comportamiento = 0
+velocidad = 60.0
+mensaje_integracion = "La rabia protege lo que te importa. Si la escuchas, se convierte en fuerza."
+mensaje_fallo = "La rabia se encoge y se esconde. No se fue: sigue ahí, esperando que alguien la escuche."
+mensaje_presente_aliada = "Ahora la rabia te empuja hacia adelante. Sabe cuándo romper lo que estorba."
+mensaje_presente_bloqueo = "Un muro de rabia sin atender te cierra el paso. Vuelve al Pasado y escúchala."

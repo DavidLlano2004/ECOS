@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://bdv2hu58si2g3"
+path="res://.godot/imported/miedo.dialogue-bb0365ff413c0271b0a4dd6d99f4a81b.tres"
+
+[deps]
+
+source_file="res://Dialogos/miedo.dialogue"
+dest_files=["res://.godot/imported/miedo.dialogue-bb0365ff413c0271b0a4dd6d99f4a81b.tres"]
+
+[params]
+
+defaults=true

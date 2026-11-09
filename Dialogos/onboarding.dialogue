@@ -1,0 +1,51 @@
+# Onboarding: el guía explica el mundo y hace 5 preguntas.
+# Cada respuesta se guarda en GameState.respuestas_inicio como 0, 1 o 2
+# (en el mismo orden en que aparecen las opciones). No hay respuestas correctas.
+
+~ start
+Guía: Este mundo existe en dos tiempos: el Pasado y el Presente.
+Guía: Lo que no se atiende en el Pasado se convierte en el Presente, el mundo en que vives hoy.
+Guía: Antes de empezar, quiero conocerte. No hay respuestas correctas.
+
+Guía: Cuando sientes rabia, ¿qué sueles hacer?
+- La aguanto
+	$> GameState.respuestas_inicio.append(0)
+- Exploto
+	$> GameState.respuestas_inicio.append(1)
+- Intento entender qué pasó
+	$> GameState.respuestas_inicio.append(2)
+
+Guía: Cuando algo te da miedo, ¿qué haces?
+- Lo evito
+	$> GameState.respuestas_inicio.append(0)
+- Me obligo a seguir sin pensar
+	$> GameState.respuestas_inicio.append(1)
+- Busco apoyo
+	$> GameState.respuestas_inicio.append(2)
+
+Guía: Cuando estás triste, ¿qué haces?
+- Me aíslo
+	$> GameState.respuestas_inicio.append(0)
+- Hago como si nada
+	$> GameState.respuestas_inicio.append(1)
+- Me permito sentirlo o lo hablo
+	$> GameState.respuestas_inicio.append(2)
+
+Guía: Cuando te sientes solo, ¿qué haces?
+- Me quedo callado y espero a que pase
+	$> GameState.respuestas_inicio.append(0)
+- Me distraigo con cualquier cosa
+	$> GameState.respuestas_inicio.append(1)
+- Busco a alguien y le cuento cómo me siento
+	$> GameState.respuestas_inicio.append(2)
+
+Guía: Cuando sientes que te equivocaste, ¿qué haces?
+- Me castigo pensando en ello una y otra vez
+	$> GameState.respuestas_inicio.append(0)
+- Pienso en otra cosa y hago como si nada
+	$> GameState.respuestas_inicio.append(1)
+- Reconozco el error e intento repararlo
+	$> GameState.respuestas_inicio.append(2)
+
+Guía: Gracias. Ahora sí, vamos a empezar.
+=> END

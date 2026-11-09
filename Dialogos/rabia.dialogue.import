@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://dxt6mbmypbeg"
+path="res://.godot/imported/rabia.dialogue-19f3f0a20fb823a0557ac2189aca4035.tres"
+
+[deps]
+
+source_file="res://Dialogos/rabia.dialogue"
+dest_files=["res://.godot/imported/rabia.dialogue-19f3f0a20fb823a0557ac2189aca4035.tres"]
+
+[params]
+
+defaults=true

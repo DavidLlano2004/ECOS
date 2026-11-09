@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://2djdl6c3i3tf"
+path="res://.godot/imported/culpa.dialogue-f3c8862cf202f4c56e8a9127eb628be6.tres"
+
+[deps]
+
+source_file="res://Dialogos/culpa.dialogue"
+dest_files=["res://.godot/imported/culpa.dialogue-f3c8862cf202f4c56e8a9127eb628be6.tres"]
+
+[params]
+
+defaults=true

@@ -1,0 +1,21 @@
+# Pasado: encuentro con Culpa.
+# Atacar o ignorar -> mensaje_fallo. Escuchar -> mensaje_integracion (de Resources/Emociones/culpa.tres).
+
+~ start
+Culpa: Fue mi culpa. Siempre es mi culpa.
+Culpa: Lo repito en mi cabeza todas las noches, por si acaso.
+- Atacarla
+	Culpa: Sí, ataca. Me lo merezco.
+	$> GameState.resolver("culpa", "atacada")
+	{{GameState.obtener_datos("culpa").mensaje_fallo}}
+	=> END
+- Ignorarla
+	Culpa: Tienes razón. Mejor no hablemos de eso.
+	$> GameState.resolver("culpa", "ignorada")
+	{{GameState.obtener_datos("culpa").mensaje_fallo}}
+	=> END
+- Hacerme cargo sin castigarme
+	Culpa: ¿Y si... pudiera arreglarlo? ¿Aunque sea un poco?
+	$> GameState.resolver("culpa", "integrada")
+	{{GameState.obtener_datos("culpa").mensaje_integracion}}
+	=> END

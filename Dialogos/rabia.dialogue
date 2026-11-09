@@ -1,0 +1,21 @@
+# Pasado: encuentro con Rabia.
+# Atacar o ignorar -> mensaje_fallo. Escuchar -> mensaje_integracion (de Resources/Emociones/rabia.tres).
+
+~ start
+Rabia: ¡¿Qué haces aquí?! ¡Esto es mío!
+Rabia: Alguien me hizo daño y nadie hizo nada. Nadie.
+- Atacarla
+	Rabia: ¡Vete! ¡No quiero verte!
+	$> GameState.resolver("rabia", "atacada")
+	{{GameState.obtener_datos("rabia").mensaje_fallo}}
+	=> END
+- Ignorarla
+	Rabia: ...
+	$> GameState.resolver("rabia", "ignorada")
+	{{GameState.obtener_datos("rabia").mensaje_fallo}}
+	=> END
+- Escucharla
+	Rabia: ¿De verdad me vas a escuchar? Nadie lo había hecho.
+	$> GameState.resolver("rabia", "integrada")
+	{{GameState.obtener_datos("rabia").mensaje_integracion}}
+	=> END

@@ -1,13 +1,8 @@
 extends Node2D
 
-const PREGUNTAS := [
-	{"t": "Cuando sientes rabia, ¿qué sueles hacer?",
-	 "o": ["La aguanto", "Exploto", "Intento entender qué pasó"]},
-	{"t": "Cuando algo te da miedo, ¿qué haces?",
-	 "o": ["Lo evito", "Me obligo a seguir sin pensar", "Busco apoyo"]},
-	{"t": "Cuando estás triste, ¿qué haces?",
-	 "o": ["Me aíslo", "Hago como si nada", "Me permito sentirlo o lo hablo"]},
-]
+## Diálogo del inicio (el guía y las 5 preguntas). Las respuestas se guardan
+## solas en GameState.respuestas_inicio desde el propio .dialogue.
+const ONBOARDING := preload("res://Dialogos/onboarding.dialogue")
 
 func _crear_fondo() -> void:
 	var capa := CanvasLayer.new()
@@ -39,14 +34,7 @@ func _ready() -> void:
 		
 
 
-	await Dialogo.preguntar("Este mundo existe en dos tiempos: el Pasado y el Presente. Lo que no se atiende en el pasado se convierte en el mundo en que vives hoy.", ["Continuar"])
-	await Dialogo.preguntar("Antes de empezar, quiero conocerte. No hay respuestas correctas.", ["Entiendo"])
-	
-	
-
-	for p in PREGUNTAS:
-		var r: int = await Dialogo.preguntar(p["t"], p["o"])
-		GameState.respuestas_inicio.append(r)
+	await Dialogo.mostrar(ONBOARDING, "start")
 
 	if player:
 		player.can_move = true

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EmocionData" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+
+[resource]
+script = ExtResource("1_emocion")
+id = "tristeza"
+nombre = "Tristeza"
+descripcion_corta = "Una criatura lenta que camina sin rumbo. Carga algo pesado que no ha podido soltar."
+color = Color(0.31, 0.525, 0.776, 1)
+habilidad_id = "calma"
+habilidad_nombre = "Calma"
+habilidad_descripcion = "Devuelve el agua y la vida."
+comportamiento = 2
+velocidad = 25.0
+mensaje_integracion = "Llorar también es sanar. Lo que se siente, se suelta."
+mensaje_fallo = "La tristeza sigue su camino, sola. En el Presente, el agua se aleja un poco más."
+mensaje_presente_aliada = "La tristeza ahora te enseña a soltar. Donde pasa, vuelve el agua y crece la vida."
+mensaje_presente_bloqueo = "Todo está seco y quieto. La tristeza necesita que alguien se quede a escucharla."

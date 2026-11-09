@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://jf0v7sm7h08j"
+path="res://.godot/imported/tristeza.dialogue-be70e3dd05715070ded234643d9b47e1.tres"
+
+[deps]
+
+source_file="res://Dialogos/tristeza.dialogue"
+dest_files=["res://.godot/imported/tristeza.dialogue-be70e3dd05715070ded234643d9b47e1.tres"]
+
+[params]
+
+defaults=true

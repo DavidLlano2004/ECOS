@@ -1,0 +1,21 @@
+# Pasado: encuentro con Miedo.
+# Atacar o ignorar -> mensaje_fallo. Escuchar -> mensaje_integracion (de Resources/Emociones/miedo.tres).
+
+~ start
+Miedo: Shh... no hagas ruido. ¿Escuchaste eso?
+Miedo: Hay algo allá afuera. Siempre hay algo.
+- Atacarla
+	Miedo: ¡No te me acerques!
+	$> GameState.resolver("miedo", "atacada")
+	{{GameState.obtener_datos("miedo").mensaje_fallo}}
+	=> END
+- Ignorarla
+	Miedo: ...
+	$> GameState.resolver("miedo", "ignorada")
+	{{GameState.obtener_datos("miedo").mensaje_fallo}}
+	=> END
+- Escucharlo
+	Miedo: Gracias por quedarte. Contigo cerca, tiemblo menos.
+	$> GameState.resolver("miedo", "integrada")
+	{{GameState.obtener_datos("miedo").mensaje_integracion}}
+	=> END

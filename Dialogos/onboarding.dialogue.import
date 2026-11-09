@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://b7cuuaogxlbkj"
+path="res://.godot/imported/onboarding.dialogue-b3d397980609d3952c2ae0493b1ec7d4.tres"
+
+[deps]
+
+source_file="res://Dialogos/onboarding.dialogue"
+dest_files=["res://.godot/imported/onboarding.dialogue-b3d397980609d3952c2ae0493b1ec7d4.tres"]
+
+[params]
+
+defaults=true

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EmocionData" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+
+[resource]
+script = ExtResource("1_emocion")
+id = "culpa"
+nombre = "Culpa"
+descripcion_corta = "Una sombra que te sigue siempre a la misma distancia. Recuerda cada error, aunque ya haya pasado."
+color = Color(0.31, 0.353, 0.137, 1)
+habilidad_id = "reparacion"
+habilidad_nombre = "Reparar"
+habilidad_descripcion = "Arregla puentes, puertas y objetos rotos."
+comportamiento = 4
+velocidad = 45.0
+mensaje_integracion = "Equivocarte te enseña. Repara y sigue, sin castigarte para siempre."
+mensaje_fallo = "La culpa se pega más a ti. Lo roto del Presente sigue roto, y ella lo recuerda."
+mensaje_presente_aliada = "Ahora la culpa te ayuda a arreglar lo roto. Aprender de un error no es cargarlo para siempre."
+mensaje_presente_bloqueo = "Puentes y puertas rotas te cierran el paso. La culpa sigue esperando que alguien repare con ella."

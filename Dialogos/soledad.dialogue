@@ -1,0 +1,21 @@
+# Pasado: encuentro con Soledad.
+# Atacar o ignorar -> mensaje_fallo. Escuchar -> mensaje_integracion (de Resources/Emociones/soledad.tres).
+
+~ start
+Soledad: Ah... hola. No pensé que alguien se acercaría.
+Soledad: Está bien si te vas. Todos se van.
+- Atacarla
+	Soledad: Lo sabía.
+	$> GameState.resolver("soledad", "atacada")
+	{{GameState.obtener_datos("soledad").mensaje_fallo}}
+	=> END
+- Ignorarla
+	Soledad: Claro. Como siempre.
+	$> GameState.resolver("soledad", "ignorada")
+	{{GameState.obtener_datos("soledad").mensaje_fallo}}
+	=> END
+- Quedarme a su lado
+	Soledad: ¿Te quedas? ¿De verdad?
+	$> GameState.resolver("soledad", "integrada")
+	{{GameState.obtener_datos("soledad").mensaje_integracion}}
+	=> END
