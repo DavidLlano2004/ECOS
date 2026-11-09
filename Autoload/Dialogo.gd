@@ -57,6 +57,19 @@ func mostrar(recurso_dialogo: DialogueResource, titulo: String = "start", estado
 	return elegida
 
 
+## Muestra unas líneas de texto sin archivo .dialogue y espera a que el jugador las lea.
+## personaje: quién habla ("" = narrador). Evita ":" en las líneas del narrador y [ ], {{ }} en cualquiera.
+func mostrar_texto(personaje: String, lineas: Array) -> void:
+	var guion := "~ start\n"
+	for linea in lineas:
+		guion += ("%s: %s\n" % [personaje, linea]) if personaje != "" else "%s\n" % linea
+	var recurso: DialogueResource = DialogueManager.create_resource_from_text(guion)
+	if recurso == null:
+		push_error("Dialogo.mostrar_texto: no se pudo crear el diálogo con ese texto.")
+		return
+	await mostrar(recurso, "start")
+
+
 ## Pregunta rápida sin archivo .dialogue: muestra un texto y botones.
 ## Devuelve el índice de la opción elegida (0, 1, 2...).
 ## Evita usar [ ], {{ }} o empezar con "-" o "=>" en los textos (son sintaxis de Dialogue Manager).

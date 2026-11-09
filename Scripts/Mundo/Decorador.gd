@@ -14,7 +14,7 @@ const SUELOS := "fdrvbua."
 const PROHIBIDAS := "wPqQRCMXT"
 ## Distancia mínima (px) entre objetos y a las entradas de las zonas (donde irán portal y bloqueos).
 const SEPARACION := 44.0
-const LIBRE_ZONA := 150.0
+const LIBRE_ZONA := 215.0
 const LIBRE_HUB := 110.0
 ## Entre dos faroles debe haber al menos este espacio (si no, quedan amontonados).
 const SEPARACION_FAROLES := 190.0

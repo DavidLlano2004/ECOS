@@ -20,3 +20,5 @@ mensaje_integracion = "Pedir compañía no es debilidad. Los vínculos te sostie
 mensaje_fallo = "La soledad se queda a lo lejos. Nadie se acercó, y ella tampoco se atrevió."
 mensaje_presente_aliada = "Ahora no vas solo. Tu compañero te ayuda donde hacen falta dos manos."
 mensaje_presente_bloqueo = "Hay mecanismos que no se mueven con una sola persona. La soledad sigue esperando que alguien se acerque."
+mensaje_presente_atacada = "Las puertas están marcadas con arañazos. La soledad se cerró todavía más al ser apartada."
+mensaje_presente_ignorada = "Las puertas llevan mucho tiempo cerradas y el polvo cubre a las luciérnagas. Nadie llamó."

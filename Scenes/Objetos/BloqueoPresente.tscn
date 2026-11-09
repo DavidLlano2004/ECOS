@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Objetos/BloqueoPresente.gd" id="1_bloqueo"]
+
+[node name="BloqueoPresente" type="StaticBody2D"]
+y_sort_enabled = true
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_bloqueo")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="."]
+
+[node name="Zona" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="Forma" type="CollisionShape2D" parent="Zona"]
+
+[node name="Particulas" type="CPUParticles2D" parent="."]
+amount = 8
+lifetime = 1.4
+emission_shape = 3
+
+[node name="Niebla" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 14
+lifetime = 4.0
+emission_shape = 3

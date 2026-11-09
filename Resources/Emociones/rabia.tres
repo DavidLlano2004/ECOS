@@ -20,3 +20,5 @@ mensaje_integracion = "La rabia protege lo que te importa. Si la escuchas, se co
 mensaje_fallo = "La rabia se encoge y se esconde. No se fue: sigue ahí, esperando que alguien la escuche."
 mensaje_presente_aliada = "Ahora la rabia te empuja hacia adelante. Sabe cuándo romper lo que estorba."
 mensaje_presente_bloqueo = "Un muro de rabia sin atender te cierra el paso. Vuelve al Pasado y escúchala."
+mensaje_presente_atacada = "Los restos de tu golpe todavía arden aquí. El muro de rabia es más duro que antes."
+mensaje_presente_ignorada = "Nadie la escuchó y la rabia creció en silencio. El muro es enorme y está helado."

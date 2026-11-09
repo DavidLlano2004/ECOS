@@ -20,3 +20,5 @@ mensaje_integracion = "El miedo no te detiene, te avisa. Con compañía, se vuel
 mensaje_fallo = "El miedo huye más lejos. La oscuridad del Presente se siente un poco más densa."
 mensaje_presente_aliada = "El miedo ahora te alumbra el camino. Ya no te paraliza: te cuida."
 mensaje_presente_bloqueo = "La oscuridad no te deja pasar. El miedo sigue esperando que alguien lo acompañe."
+mensaje_presente_atacada = "La oscuridad se encoge y muestra los dientes. Lo que se ataca se esconde mejor."
+mensaje_presente_ignorada = "Nadie encendió una luz y la oscuridad se llenó de ruidos. Aquí casi no se ve nada."

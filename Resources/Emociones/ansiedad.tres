@@ -20,3 +20,5 @@ mensaje_integracion = "La ansiedad quiere adelantarse a lo que viene. Con respir
 mensaje_fallo = "La ansiedad se aceleró más. Presionarla solo la acelera, y ahora el Presente corre un poco más rápido."
 mensaje_presente_aliada = "Un reloj tranquilo marca el ritmo. La ansiedad ahora te regala una pausa cuando todo se mueve demasiado rápido."
 mensaje_presente_bloqueo = "Un torbellino de relojes y engranajes gira sin parar y no te deja pasar. Vuelve al Pasado y respira con ella."
+mensaje_presente_atacada = "Los engranajes chirrían y sueltan chispas. La ansiedad gira más rápido cada vez que la empujan."
+mensaje_presente_ignorada = "Los relojes corren sin freno y el torbellino casi tapa el camino. Nadie le pidió ir más despacio."

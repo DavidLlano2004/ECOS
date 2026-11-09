@@ -35,6 +35,10 @@ enum Comportamiento {
 @export_multiline var mensaje_fallo: String = ""
 @export_multiline var mensaje_presente_aliada: String = ""
 @export_multiline var mensaje_presente_bloqueo: String = ""
+## Lo que dice el bloqueo del Presente si atacaste a la emoción (refleja el daño causado).
+@export_multiline var mensaje_presente_atacada: String = ""
+## Lo que dice el bloqueo del Presente si la ignoraste (refleja el abandono).
+@export_multiline var mensaje_presente_ignorada: String = ""
 
 @export_group("Sprite")
 ## Animaciones de la criatura ("idle" y "calma"). Ver Resources/Emociones/frames_*.tres.

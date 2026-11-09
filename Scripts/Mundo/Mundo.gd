@@ -37,6 +37,8 @@ const TRANSICION := preload("res://Shaders/transicion_epoca.gdshader")
 const SATURACION := preload("res://Shaders/saturacion.gdshader")
 const PORTAL := preload("res://Scenes/Objetos/Portal.tscn")
 const GUIA := preload("res://Scenes/Personajes/Guia.tscn")
+const BLOQUEO := preload("res://Scenes/Objetos/BloqueoPresente.tscn")
+const PUERTA_REFLEJO := preload("res://Scenes/Objetos/PuertaReflejo.tscn")
 ## Zonas con emoción: en la entrada de cada una hay una grieta, y su criatura vive en el Pasado.
 const ZONAS_EMOCION := ["Rabia", "Miedo", "Tristeza", "Soledad", "Culpa", "Ansiedad", "Verguenza"]
 ## Saturación del Presente: 0.25 sin ninguna emoción integrada, 1.0 con todas.
@@ -628,18 +630,9 @@ func _crear_ambiente() -> void:
 		var nodo := get_node_or_null(epoca)
 		if nodo == null:
 			continue
-		for nombre_luz in ["Luz_Reflejo"]:
-			var luz := nodo.get_node_or_null(nombre_luz) as PointLight2D
-			if luz == null:
-				luz = PointLight2D.new()
-				luz.name = nombre_luz
-				luz.texture = TEXTURA_LUZ
-				nodo.add_child(luz)
-			var es_pasado: bool = epoca == "Pasado"
-			luz.global_position = posicion_zona("Final") + Vector2(0, -24)
-			luz.color = Color(1.0, 0.8, 0.45) if es_pasado else Color(0.62, 0.76, 1.0)
-			luz.energy = 0.85 if es_pasado else 0.6
-			luz.texture_scale = 2.4
+		var vieja := nodo.get_node_or_null("Luz_Reflejo")  # versión antigua (ahora la luz la pone la puerta)
+		if vieja != null:
+			vieja.free()
 	# Viñeta suave y capa de la transición entre épocas (solo en el juego, no en el editor)
 	if Engine.is_editor_hint() or get_node_or_null("Vineta") != null:
 		return
@@ -734,6 +727,18 @@ func colocar_entidades() -> void:
 		# Una grieta en la entrada de cada zona
 		for zona in ZONAS_EMOCION:
 			_poner_portal(objetos, "Grieta_%s" % zona, _entrada_de_zona(zona, filas), true)
+		# La Puerta del Reflejo, arriba del mapa, en las dos épocas
+		_poner_entidad(objetos, PUERTA_REFLEJO.instantiate() as Node2D, "PuertaReflejo", posicion_zona("Final"))
+		# Los bloqueos del Presente: uno por zona, sobre el camino hacia su centro
+		if epoca == "Presente":
+			for id in GameState.ids_emociones():
+				var zona := id.capitalize()
+				var centro := posicion_zona(zona)
+				var pos_bloqueo := _posicion_bloqueo(zona, filas)
+				var bloqueo := BLOQUEO.instantiate() as BloqueoPresente
+				bloqueo.datos = GameState.obtener_datos(id)
+				bloqueo.direccion = (centro - pos_bloqueo).normalized()
+				_poner_entidad(objetos, bloqueo, "Bloqueo_%s" % zona, pos_bloqueo)
 		# La Guía, cerca del portal
 		var guia := GUIA.instantiate() as Node2D
 		_poner_entidad(objetos, guia, "Guia", posicion_zona("Hub") + Vector2(-72, -8))
@@ -767,7 +772,8 @@ func _poner_entidad(objetos: Node, nodo: Node2D, nombre: String, pos: Vector2) -
 func _entrada_de_zona(zona: String, filas: PackedStringArray) -> Vector2:
 	var centro := posicion_zona(zona)
 	var direccion := (posicion_zona("Hub") - centro).normalized()
-	for distancia in [110.0, 130.0, 90.0, 150.0, 70.0]:
+	# La grieta queda antes (más lejos del centro) que el bloqueo del Presente, para no saltárselo
+	for distancia in [170.0, 190.0, 150.0, 210.0, 130.0, 110.0, 90.0]:
 		for lado in [0.0, 24.0, -24.0]:
 			var pos: Vector2 = centro + direccion * distancia + direccion.orthogonal() * lado
 			var celda := Vector2i((pos / TAMANO_TILE).floor())
@@ -775,7 +781,31 @@ func _entrada_de_zona(zona: String, filas: PackedStringArray) -> Vector2:
 				continue
 			if not OCUPADAS.contains(filas[celda.y][celda.x]) and not _toca(filas, celda.x, celda.y, "CMRXTwPqQ"):
 				return pos
-	return centro + direccion * 110.0
+	return centro + direccion * 170.0
+
+
+## Dónde va el bloqueo del Presente de una zona: sobre una casilla de camino a unos 110 px del
+## centro, del lado del hub (así queda entre la entrada y el centro).
+func _posicion_bloqueo(zona: String, filas: PackedStringArray) -> Vector2:
+	var centro := posicion_zona(zona)
+	var hacia_hub := (posicion_zona("Hub") - centro).normalized()
+	var mejor := centro + hacia_hub * 110.0
+	var mejor_puntos := INF
+	var celda_centro := Vector2i((centro / TAMANO_TILE).floor())
+	for dy in range(-6, 7):
+		for dx in range(-6, 7):
+			var celda := celda_centro + Vector2i(dx, dy)
+			if celda.x < 0 or celda.y < 0 or celda.x >= TILES.x or celda.y >= TILES.y or filas[celda.y][celda.x] != "c":
+				continue
+			var pos := (Vector2(celda) + Vector2(0.5, 0.5)) * TAMANO_TILE
+			var distancia := pos.distance_to(centro)
+			if distancia < 80.0 or distancia > 150.0:
+				continue
+			var puntos := absf(distancia - 110.0) + (60.0 if (pos - centro).normalized().dot(hacia_hub) < 0.0 else 0.0)
+			if puntos < mejor_puntos:
+				mejor_puntos = puntos
+				mejor = pos
+	return mejor
 
 
 # --- Color y partículas de cada época ---
