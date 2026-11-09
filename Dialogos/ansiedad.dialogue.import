@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://b8rq0a3o05dsy"
+path="res://.godot/imported/ansiedad.dialogue-d000c7451f75e3421a96e1eede21eb73.tres"
+
+[deps]
+
+source_file="res://Dialogos/ansiedad.dialogue"
+dest_files=["res://.godot/imported/ansiedad.dialogue-d000c7451f75e3421a96e1eede21eb73.tres"]
+
+[params]
+
+defaults=true

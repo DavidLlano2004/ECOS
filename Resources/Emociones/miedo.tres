@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_emocion")
 id = "miedo"
+orden = 2
 nombre = "Miedo"
 descripcion_corta = "Una criatura temblorosa que se aleja cuando te acercas. Solo quiere sentirse a salvo."
 color = Color(0.557, 0.357, 0.82, 1)

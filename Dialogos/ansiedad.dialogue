@@ -1,0 +1,21 @@
+# Pasado: encuentro con Ansiedad.
+# Atacar o ignorar -> mensaje_fallo. Escuchar -> mensaje_integracion (de Resources/Emociones/ansiedad.tres).
+
+~ start
+Ansiedad: ¡Ay, llegaste! ¿Y si llegas tarde? ¿Y si algo sale mal? ¿Y si...?
+Ansiedad: Tengo mil cosas en la cabeza y no alcanzo con ninguna.
+- Atacarla
+	Ansiedad: ¡No, no, no! ¡Más rápido, tengo que ir más rápido!
+	$> GameState.resolver("ansiedad", "atacada")
+	{{GameState.obtener_datos("ansiedad").mensaje_fallo}}
+	=> END
+- Ignorarla
+	Ansiedad: ¿Te vas? ¿Y si pasa algo cuando no estés mirando?
+	$> GameState.resolver("ansiedad", "ignorada")
+	{{GameState.obtener_datos("ansiedad").mensaje_fallo}}
+	=> END
+- Respirar a tu lado, un paso a la vez
+	Ansiedad: Inhalar... exhalar... ¿Así? Es raro. Pero creo que me está sirviendo.
+	$> GameState.resolver("ansiedad", "integrada")
+	{{GameState.obtener_datos("ansiedad").mensaje_integracion}}
+	=> END

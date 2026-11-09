@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_emocion")
 id = "tristeza"
+orden = 3
 nombre = "Tristeza"
 descripcion_corta = "Una criatura lenta que camina sin rumbo. Carga algo pesado que no ha podido soltar."
 color = Color(0.31, 0.525, 0.776, 1)

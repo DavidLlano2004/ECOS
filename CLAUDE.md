@@ -9,7 +9,7 @@ El mundo existe en dos épocas:
 - **Pasado**: cálido, lleno de recuerdos.
 - **Presente**: gris, roto.
 
-En el Pasado viven 5 criaturas-emoción: **Rabia, Miedo, Tristeza, Soledad y Culpa**.
+En el Pasado viven 6 criaturas-emoción: **Rabia, Miedo, Tristeza, Soledad, Culpa y Ansiedad**.
 En un diálogo, el jugador decide cómo tratarlas. Solo "escucharlas" las **integra**.
 Una emoción integrada da una habilidad y, en el Presente, pasa de ser un bloqueo a ser una aliada.
 
@@ -20,6 +20,7 @@ Una emoción integrada da una habilidad y, en el Presente, pasa de ser un bloque
 | Tristeza | Calma     | Devolver el agua y la vida                        |
 | Soledad  | Vínculo   | Un compañero que ayuda con mecanismos dobles      |
 | Culpa    | Reparar   | Arreglar lo roto                                  |
+| Ansiedad | Pausa     | Ralentiza el tiempo unos segundos para cruzar mecanismos y plataformas móviles |
 
 **Mensaje central:** "Lo que atiendes hoy define el mundo de mañana."
 
@@ -29,10 +30,10 @@ Una emoción integrada da una habilidad y, en el Presente, pasa de ser un bloque
 - Atacar o ignorar una emoción empeora el Presente, pero se puede reparar volviendo al Pasado.
 - Cada decisión tiene una consecuencia visible en la otra época.
 - 3 finales:
-  - **Bueno**: las 5 emociones integradas.
-  - **Neutro**: cualquier caso intermedio.
-  - **Difícil**: la mayoría atacadas o ignoradas.
-- Onboarding: 3 preguntas al inicio que se repiten al final para comparar el antes y el después.
+  - **Bueno**: las 6 emociones integradas.
+  - **Difícil**: 4 o más emociones atacadas o ignoradas.
+  - **Neutro**: el resto.
+- Onboarding: una pregunta por emoción (6) al inicio, que se repiten al final para comparar el antes y el después.
 
 ### Estados de cada emoción
 

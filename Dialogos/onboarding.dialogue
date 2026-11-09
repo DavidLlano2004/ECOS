@@ -47,5 +47,13 @@ Guía: Cuando sientes que te equivocaste, ¿qué haces?
 - Reconozco el error e intento repararlo
 	$> GameState.respuestas_inicio.append(2)
 
+Guía: Cuando sientes que todo se te junta y no alcanzas, ¿qué haces?
+- Me acelero y hago todo a la vez
+	$> GameState.respuestas_inicio.append(0)
+- Lo dejo para después
+	$> GameState.respuestas_inicio.append(1)
+- Respiro y hago una cosa a la vez
+	$> GameState.respuestas_inicio.append(2)
+
 Guía: Gracias. Ahora sí, vamos a empezar.
 => END

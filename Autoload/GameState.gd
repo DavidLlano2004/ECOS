@@ -11,7 +11,7 @@ const CARPETA_EMOCIONES := "res://Resources/Emociones"
 const RUTA_GUARDADO := "user://ecos_save.json"
 const RESULTADOS := ["pendiente", "atacada", "ignorada", "integrada"]
 ## Con cuántas emociones atacadas o ignoradas el final es "difícil".
-const MINIMO_FINAL_DIFICIL := 3
+const MINIMO_FINAL_DIFICIL := 4
 
 ## "pasado" o "presente"
 var epoca: String = "pasado"
@@ -36,6 +36,7 @@ func _ready() -> void:
 ## Lee todos los .tres de la carpeta de emociones.
 func _cargar_emociones() -> void:
 	_datos.clear()
+	var cargadas: Array[EmocionData] = []
 	var archivos := DirAccess.get_files_at(CARPETA_EMOCIONES)
 	archivos.sort()
 	for archivo in archivos:
@@ -45,9 +46,14 @@ func _cargar_emociones() -> void:
 			continue
 		var recurso := load(CARPETA_EMOCIONES.path_join(nombre))
 		if recurso is EmocionData and recurso.id != "":
-			_datos[recurso.id] = recurso
+			cargadas.append(recurso)
 		else:
 			push_warning("GameState: '%s' no es una EmocionData válida." % nombre)
+	# Se guardan ordenadas por el campo "orden" (y por id si empatan)
+	cargadas.sort_custom(func(a: EmocionData, b: EmocionData) -> bool:
+		return a.orden < b.orden if a.orden != b.orden else a.id < b.id)
+	for recurso in cargadas:
+		_datos[recurso.id] = recurso
 
 
 ## Devuelve los datos de una emoción, o null si no existe.

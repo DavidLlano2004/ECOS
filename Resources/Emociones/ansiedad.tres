@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EmocionData" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+
+[resource]
+script = ExtResource("1_emocion")
+id = "ansiedad"
+orden = 6
+nombre = "Ansiedad"
+descripcion_corta = "Una criatura inquieta que se mueve a ráfagas y vibra cuando te acercas. Siempre va un paso adelante de lo que todavía no pasó."
+color = Color(1, 0.18, 0.55, 1)
+habilidad_id = "pausa"
+habilidad_nombre = "Pausa"
+habilidad_descripcion = "Ralentiza el tiempo unos segundos para cruzar mecanismos y plataformas que se mueven"
+comportamiento = 5
+velocidad = 85.0
+mensaje_integracion = "La ansiedad quiere adelantarse a lo que viene. Con respiración y un paso a la vez, se vuelve preparación."
+mensaje_fallo = "La ansiedad se aceleró más. Presionarla solo la acelera, y ahora el Presente corre un poco más rápido."
+mensaje_presente_aliada = "Un reloj tranquilo marca el ritmo. La ansiedad ahora te regala una pausa cuando todo se mueve demasiado rápido."
+mensaje_presente_bloqueo = "Un torbellino de relojes y engranajes gira sin parar y no te deja pasar. Vuelve al Pasado y respira con ella."

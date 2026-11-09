@@ -10,9 +10,12 @@ enum Comportamiento {
 	ERRAR,                # camina sin rumbo
 	ACERCARSE_SI_QUIETO,  # solo se acerca si el jugador espera en calma
 	SEGUIR_SOMBRA,        # sigue al jugador a la misma distancia
+	ERRATICO,             # ráfagas cortas y rápidas en zigzag, con pausas de ~0.4 s; vibra si el jugador está cerca
 }
 
 @export var id: String = ""
+## Posición de la emoción en listas y menús (1 = primera). Se ordena de menor a mayor.
+@export var orden: int = 0
 @export var nombre: String = ""
 @export_multiline var descripcion_corta: String = ""
 @export var color: Color = Color.WHITE

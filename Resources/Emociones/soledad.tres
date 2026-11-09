@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_emocion")
 id = "soledad"
+orden = 4
 nombre = "Soledad"
 descripcion_corta = "Una criatura tímida que solo se acerca si esperas en calma. Quiere compañía, pero no sabe pedirla."
 color = Color(0.373, 0.541, 0.545, 1)
