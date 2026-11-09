@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="EmocionData" format=3]
 
 [ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+[ext_resource type="SpriteFrames" path="res://Resources/Emociones/frames_ansiedad.tres" id="2_frames"]
 
 [resource]
 script = ExtResource("1_emocion")
@@ -14,6 +15,7 @@ habilidad_nombre = "Pausa"
 habilidad_descripcion = "Ralentiza el tiempo unos segundos para cruzar mecanismos y plataformas que se mueven"
 comportamiento = 5
 velocidad = 85.0
+frames = ExtResource("2_frames")
 mensaje_integracion = "La ansiedad quiere adelantarse a lo que viene. Con respiración y un paso a la vez, se vuelve preparación."
 mensaje_fallo = "La ansiedad se aceleró más. Presionarla solo la acelera, y ahora el Presente corre un poco más rápido."
 mensaje_presente_aliada = "Un reloj tranquilo marca el ritmo. La ansiedad ahora te regala una pausa cuando todo se mueve demasiado rápido."
