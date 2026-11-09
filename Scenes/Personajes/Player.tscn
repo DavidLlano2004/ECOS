@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dtxwhsbyp2ndj"]
 
-[ext_resource type="Script" uid="uid://bip2hkln85pwu" path="res://Scripts/Player.gd" id="1_rpqav"]
+[ext_resource type="Script" uid="uid://bip2hkln85pwu" path="res://Scripts/Personajes/Player.gd" id="1_rpqav"]
 [ext_resource type="Texture2D" uid="uid://c5mhh7t1ij0rs" path="res://Assets/player.png" id="2_player"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f00"]
@@ -138,31 +138,47 @@ animations = [{
 "speed": 8.0
 }]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_gntrk"]
-radius = 14.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pies"]
+size = Vector2(14, 8)
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_dewec"]
-radius = 18.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_interaccion"]
+radius = 34.0
 
-[node name="CharacterBody2D" type="CharacterBody2D" unique_id=166973816]
+[node name="Player" type="CharacterBody2D"]
+y_sort_enabled = true
 script = ExtResource("1_rpqav")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1087729020]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -29)
 sprite_frames = SubResource("SpriteFrames_player")
 animation = &"walk_down"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1871061015]
-shape = SubResource("CircleShape2D_gntrk")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_pies")
 
-[node name="ZonaInteraccion" type="Area2D" parent="." unique_id=1713478329]
+[node name="ZonaInteraccion" type="Area2D" parent="."]
+collision_layer = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaInteraccion" unique_id=1358698725]
-shape = SubResource("CircleShape2D_dewec")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaInteraccion"]
+position = Vector2(0, -8)
+shape = SubResource("CircleShape2D_interaccion")
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1928374650]
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(0, -24)
 zoom = Vector2(1, 1)
 position_smoothing_enabled = true
 position_smoothing_speed = 6.0
 
-[connection signal="area_entered" from="ZonaInteraccion" to="." method="_on_zona_interaccion_area_entered"]
-[connection signal="area_exited" from="ZonaInteraccion" to="." method="_on_zona_interaccion_area_exited"]
+[node name="BurbujaAyuda" type="Node2D" parent="."]
+visible = false
+top_level = true
+z_index = 100
+
+[node name="Panel" type="PanelContainer" parent="BurbujaAyuda"]
+mouse_filter = 2
+
+[node name="Etiqueta" type="Label" parent="BurbujaAyuda/Panel"]
+layout_mode = 2
+text = "E"
+horizontal_alignment = 1

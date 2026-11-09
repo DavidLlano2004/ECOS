@@ -4,7 +4,20 @@ extends Node
 ##   await Dialogo.mostrar(load("res://Dialogos/rabia.dialogue"), "start")
 ##   var elegida: int = await Dialogo.preguntar("¿Qué haces?", ["Opción A", "Opción B"])
 
+## Se emite cuando se abre el primer diálogo (el jugador se bloquea).
+signal dialogo_abierto
+## Se emite cuando se cierra el último diálogo abierto (el jugador se libera).
+signal dialogo_cerrado
+
 const BALLOON := preload("res://Scenes/UI/DialogoBalloon.tscn")
+
+## Cuántos diálogos hay abiertos ahora mismo.
+var _abiertos := 0
+
+
+## true mientras haya algún diálogo en pantalla.
+func hay_dialogo() -> bool:
+	return _abiertos > 0
 
 
 ## Abre un archivo .dialogue con el balloon propio y espera a que termine.
@@ -19,8 +32,14 @@ func mostrar(recurso_dialogo: DialogueResource, titulo: String = "start") -> int
 		return -1
 	var balloon: DialogoBalloon = BALLOON.instantiate()
 	add_child(balloon)
+	_abiertos += 1
+	if _abiertos == 1:
+		dialogo_abierto.emit()
 	balloon.start(recurso_dialogo, titulo)
 	var elegida: int = await balloon.terminado
+	_abiertos -= 1
+	if _abiertos == 0:
+		dialogo_cerrado.emit()
 	return elegida
 
 
