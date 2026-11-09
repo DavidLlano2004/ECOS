@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://k61glchytoe"
+path="res://.godot/imported/verguenza.dialogue-ddfe3c3d8b5739e7872fd88f68cd452e.tres"
+
+[deps]
+
+source_file="res://Dialogos/verguenza.dialogue"
+dest_files=["res://.godot/imported/verguenza.dialogue-ddfe3c3d8b5739e7872fd88f68cd452e.tres"]
+
+[params]
+
+defaults=true

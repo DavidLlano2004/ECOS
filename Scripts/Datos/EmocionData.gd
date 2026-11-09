@@ -11,6 +11,7 @@ enum Comportamiento {
 	ACERCARSE_SI_QUIETO,  # solo se acerca si el jugador espera en calma
 	SEGUIR_SOMBRA,        # sigue al jugador a la misma distancia
 	ERRATICO,             # ráfagas cortas y rápidas en zigzag, con pausas de ~0.4 s; vibra si el jugador está cerca
+	ESCONDERSE,           # deambula lento; se vuelve semitransparente y se aleja si el jugador la mira de frente a menos de 90 px
 }
 
 @export var id: String = ""

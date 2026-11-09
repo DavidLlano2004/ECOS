@@ -9,7 +9,7 @@ El mundo existe en dos épocas:
 - **Pasado**: cálido, lleno de recuerdos.
 - **Presente**: gris, roto.
 
-En el Pasado viven 6 criaturas-emoción: **Rabia, Miedo, Tristeza, Soledad, Culpa y Ansiedad**.
+En el Pasado viven 7 criaturas-emoción: **Rabia, Miedo, Tristeza, Soledad, Culpa, Ansiedad y Vergüenza**.
 En un diálogo, el jugador decide cómo tratarlas. Solo "escucharlas" las **integra**.
 Una emoción integrada da una habilidad y, en el Presente, pasa de ser un bloqueo a ser una aliada.
 
@@ -21,6 +21,7 @@ Una emoción integrada da una habilidad y, en el Presente, pasa de ser un bloque
 | Soledad  | Vínculo   | Un compañero que ayuda con mecanismos dobles      |
 | Culpa    | Reparar   | Arreglar lo roto                                  |
 | Ansiedad | Pausa     | Ralentiza el tiempo unos segundos para cruzar mecanismos y plataformas móviles |
+| Vergüenza | Revelar  | Muestra caminos, puentes y puertas ocultos en el Presente |
 
 **Mensaje central:** "Lo que atiendes hoy define el mundo de mañana."
 
@@ -30,14 +31,23 @@ Una emoción integrada da una habilidad y, en el Presente, pasa de ser un bloque
 - Atacar o ignorar una emoción empeora el Presente, pero se puede reparar volviendo al Pasado.
 - Cada decisión tiene una consecuencia visible en la otra época.
 - 3 finales:
-  - **Bueno**: las 6 emociones integradas.
+  - **Bueno**: las 7 emociones integradas.
   - **Difícil**: 4 o más emociones atacadas o ignoradas.
   - **Neutro**: el resto.
-- Onboarding: una pregunta por emoción (6) al inicio, que se repiten al final para comparar el antes y el después.
+- Onboarding: una pregunta por emoción (7) al inicio, que se repiten al final para comparar el antes y el después.
 
 ### Estados de cada emoción
 
 `pendiente`, `atacada`, `ignorada`, `integrada`.
+
+### Vergüenza: la mecánica "no la mires fijamente"
+
+Comportamiento `ESCONDERSE`. Deambula lento. En cada momento se revisa:
+
+- Si el jugador está a **menos de 90 px** y su dirección de mirada (propiedad `facing` del `Player`) apunta hacia ella (**producto punto mayor a 0.5**), la Vergüenza se vuelve semitransparente (**alpha 0.35**), se aleja despacio y **no se puede interactuar** con ella.
+- Si el jugador se acerca de lado o sin mirarla de frente, se queda visible (**alpha 1**) y **se puede hablar** con ella.
+
+Nota: `Player.gd` todavía no tiene la propiedad `facing`; hay que añadirla cuando se implemente esta criatura.
 
 ## Arte
 

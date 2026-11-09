@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EmocionData" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+
+[resource]
+script = ExtResource("1_emocion")
+id = "verguenza"
+orden = 7
+nombre = "Vergüenza"
+descripcion_corta = "Una criatura tímida cubierta con una tela. Se esconde si la miras fijamente, pero se queda si te acercas de lado."
+color = Color(0.788, 0.467, 0.42, 1)
+habilidad_id = "revelar"
+habilidad_nombre = "Revelar"
+habilidad_descripcion = "Muestra caminos, puentes y puertas ocultos"
+comportamiento = 6
+velocidad = 30.0
+mensaje_integracion = "La vergüenza dice que te importa lo que otros piensan. Si la miras con cariño, te deja ser tú."
+mensaje_fallo = "La vergüenza se tapó la cara y se escondió todavía más. No se fue: solo se hizo más pequeña."
+mensaje_presente_aliada = "Una pequeña guía encapuchada camina a tu lado y te muestra lo que estaba oculto: un puente, una puerta, un camino."
+mensaje_presente_bloqueo = "Un muro de espejos cubiertos con telas te esconde el camino. Vuelve al Pasado y mírala con cariño."

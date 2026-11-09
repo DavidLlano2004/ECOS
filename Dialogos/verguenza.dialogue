@@ -1,0 +1,21 @@
+# Pasado: encuentro con Vergüenza.
+# Atacar o ignorar -> mensaje_fallo. Escuchar -> mensaje_integracion (de Resources/Emociones/verguenza.tres).
+
+~ start
+Vergüenza: ¡No me mires! Mejor que nadie se entere.
+Vergüenza: Ya sé que fue una tontería. Por favor, no lo recuerdes.
+- Reírte de ella
+	Vergüenza: ¡Lo sabía! ¡Sabía que se iban a reír!
+	$> GameState.resolver("verguenza", "atacada")
+	{{GameState.obtener_datos("verguenza").mensaje_fallo}}
+	=> END
+- Fingir que no la viste
+	Vergüenza: Ah... gracias, supongo. O eso creo.
+	$> GameState.resolver("verguenza", "ignorada")
+	{{GameState.obtener_datos("verguenza").mensaje_fallo}}
+	=> END
+- Mirarla con cariño y decirle que a ti también te pasa
+	Vergüenza: ¿A ti también? ¿De verdad? Entonces... no soy tan rara.
+	$> GameState.resolver("verguenza", "integrada")
+	{{GameState.obtener_datos("verguenza").mensaje_integracion}}
+	=> END

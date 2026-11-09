@@ -55,5 +55,13 @@ Guía: Cuando sientes que todo se te junta y no alcanzas, ¿qué haces?
 - Respiro y hago una cosa a la vez
 	$> GameState.respuestas_inicio.append(2)
 
+Guía: Cuando sientes vergüenza por algo que hiciste o dijiste, ¿qué haces?
+- Me escondo y evito que me vean
+	$> GameState.respuestas_inicio.append(0)
+- Lo tapo con una broma o hago como si nada
+	$> GameState.respuestas_inicio.append(1)
+- Lo reconozco y dejo que pase
+	$> GameState.respuestas_inicio.append(2)
+
 Guía: Gracias. Ahora sí, vamos a empezar.
 => END
