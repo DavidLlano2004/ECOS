@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Emociones/Emocion.tscn" id="1_base"]
+[ext_resource type="Resource" path="res://Resources/Emociones/rabia.tres" id="2_datos"]
+
+[node name="Rabia" instance=ExtResource("1_base")]
+datos = ExtResource("2_datos")

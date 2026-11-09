@@ -159,6 +159,7 @@ shape = SubResource("RectangleShape2D_pies")
 
 [node name="ZonaInteraccion" type="Area2D" parent="."]
 collision_layer = 0
+collision_mask = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaInteraccion"]
 position = Vector2(0, -8)
