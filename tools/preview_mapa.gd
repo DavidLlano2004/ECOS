@@ -27,6 +27,10 @@ func _sacar_foto(epoca: String) -> void:
 		jugador.free()  # sin jugador ni cámara
 	vista.add_child(mundo)
 	mundo.mostrar_epoca(epoca)
+	for epoca_nodo in ["Pasado", "Presente"]:
+		var particulas := mundo.get_node_or_null("%s/Particulas" % epoca_nodo)
+		if particulas != null:
+			particulas.free()  # sin luciérnagas ni ceniza
 	var vineta := mundo.get_node_or_null("Vineta")
 	if vineta != null:
 		vineta.queue_free()

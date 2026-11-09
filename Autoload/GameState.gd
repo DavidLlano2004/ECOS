@@ -23,6 +23,8 @@ var respuestas_inicio: Array[int] = []
 var respuestas_final: Array[int] = []
 ## Mensajes capturados: [{"id": "rabia", "texto": "..."}]
 var diario: Array[Dictionary] = []
+## true cuando la Guía ya explicó lo básico en el mundo (así solo lo hace la primera vez).
+var guia_conocida: bool = false
 
 ## id de emoción -> EmocionData
 var _datos: Dictionary = {}
@@ -109,6 +111,23 @@ func tiene_habilidad(habilidad_id: String) -> bool:
 	return habilidades.has(habilidad_id)
 
 
+## true si ya se resolvió cada emoción (integrada, atacada o ignorada; ninguna pendiente).
+func todas_resueltas() -> bool:
+	return not _datos.is_empty() and cantidad_pendientes() == 0
+
+
+func cantidad_pendientes() -> int:
+	var total := 0
+	for id in _datos:
+		if estado.get(id, "pendiente") == "pendiente":
+			total += 1
+	return total
+
+
+func marcar_guia_conocida() -> void:
+	guia_conocida = true
+
+
 func cantidad_integradas() -> int:
 	var total := 0
 	for id in estado:
@@ -140,6 +159,7 @@ func nueva_partida() -> void:
 	respuestas_inicio.clear()
 	respuestas_final.clear()
 	diario.clear()
+	guia_conocida = false
 
 
 func guardar() -> void:
@@ -150,6 +170,7 @@ func guardar() -> void:
 		"respuestas_inicio": respuestas_inicio,
 		"respuestas_final": respuestas_final,
 		"diario": diario,
+		"guia_conocida": guia_conocida,
 	}
 	var archivo := FileAccess.open(RUTA_GUARDADO, FileAccess.WRITE)
 	if archivo == null:
@@ -191,6 +212,8 @@ func cargar() -> bool:
 	for entrada in lectura.get("diario", []):
 		if typeof(entrada) == TYPE_DICTIONARY and entrada.has("id") and entrada.has("texto"):
 			diario.append({"id": str(entrada["id"]), "texto": str(entrada["texto"])})
+
+	guia_conocida = bool(lectura.get("guia_conocida", false))
 
 	epoca_cambiada.emit(epoca)
 	return true

@@ -7,7 +7,7 @@ extends Node2D
 ## fundido a negro y onboarding. "Continuar": carga la partida guardada y va al juego.
 
 const ESCENA_ONBOARDING := "res://Scenes/Intro/Onboarding.tscn"
-const ESCENA_JUEGO := "res://Scenes/Mundo/PruebaEmociones.tscn"
+const ESCENA_JUEGO := "res://Scenes/Mundo/Mundo.tscn"
 const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
 const FONDO := preload("res://Assets/UI/fondo_titulo.png")
 

@@ -102,6 +102,13 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if evento.is_action_pressed("INTERACTUAR") and activo != null:
 		get_viewport().set_input_as_handled()
 		activo.interactuar()
+	elif evento.is_action_pressed("VIAJAR"):
+		# Solo viaja si está dentro de la zona de un portal o de una grieta
+		for nodo in interactuables:
+			if is_instance_valid(nodo) and nodo.is_in_group("portales"):
+				get_viewport().set_input_as_handled()
+				nodo.interactuar()
+				break
 	elif evento.is_action_pressed("HABILIDAD"):
 		usar_habilidad()
 

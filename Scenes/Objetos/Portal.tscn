@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Objetos/Portal.gd" id="1_portal"]
+[ext_resource type="SpriteFrames" path="res://Resources/Mundo/frames_portal.tres" id="2_frames"]
+[ext_resource type="Texture2D" path="res://Resources/Mundo/luz_calida.tres" id="3_luz"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_suma"]
+blend_mode = 1
+
+[node name="Portal" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_portal")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("2_frames")
+animation = &"dormido"
+
+[node name="Zona" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="Forma" type="CollisionShape2D" parent="Zona"]
+
+[node name="Luz" type="PointLight2D" parent="."]
+color = Color(1, 0.78, 0.4, 1)
+texture = ExtResource("3_luz")
+
+[node name="Espiral" type="CPUParticles2D" parent="."]
+material = SubResource("CanvasItemMaterial_suma")
+amount = 26
+lifetime = 2.0
+local_coords = true
+emission_shape = 1
+emission_sphere_radius = 38.0
+direction = Vector2(0, 0)
+spread = 180.0
+gravity = Vector2(0, 0)
+orbit_velocity_min = 0.45
+orbit_velocity_max = 0.6
+radial_accel_min = -22.0
+radial_accel_max = -16.0

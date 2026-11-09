@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Personajes/Guia.gd" id="1_guia"]
+[ext_resource type="SpriteFrames" path="res://Resources/Personajes/frames_guia.tres" id="2_frames"]
+[ext_resource type="Texture2D" path="res://Resources/Mundo/luz_calida.tres" id="3_luz"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_zona"]
+radius = 22.0
+
+[node name="Guia" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_guia")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("2_frames")
+animation = &"idle"
+
+[node name="Zona" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="Forma" type="CollisionShape2D" parent="Zona"]
+position = Vector2(0, -22)
+shape = SubResource("CircleShape2D_zona")
+
+[node name="Luz" type="PointLight2D" parent="."]
+position = Vector2(14, -34)
+color = Color(1, 0.82, 0.5, 1)
+energy = 0.9
+texture = ExtResource("3_luz")
+texture_scale = 0.55

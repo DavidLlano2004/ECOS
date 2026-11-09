@@ -1,0 +1,26 @@
+# La Guía en el mundo. Los textos cambian según el progreso:
+#   1) la primera vez explica lo básico;
+#   2) si ya se resolvieron todas las emociones, anima a ir a la Puerta del Reflejo;
+#   3) si hay emociones integradas, comenta que el mundo recupera color;
+#   4) si no, un recordatorio corto.
+
+~ start
+if not GameState.guia_conocida
+	Guía: Ya estás en el Pasado. Qué bueno verte.
+	Guía: Te mueves con las flechas o con W, A, S y D.
+	Guía: Cuando alguien o algo esté cerca, pulsa E para hablar.
+	Guía: Los portales y las grietas pequeñas te llevan al Presente. Párate junto a uno y pulsa Q.
+	Guía: Cada emoción que encuentres solo quiere una cosa: que la escuches. No hace falta vencerla.
+	Guía: Ve a tu ritmo. Aquí estaré.
+	$> GameState.marcar_guia_conocida()
+elif GameState.todas_resueltas()
+	Guía: Ya hablaste con todas. Se nota en el aire.
+	Guía: Cuando quieras, ve a la Puerta del Reflejo, al norte de la plaza. Te está esperando.
+elif GameState.cantidad_integradas() > 0
+	Guía: ¿Viste el Presente? Tiene más color que antes.
+	Guía: Cada emoción que escuchas le devuelve un poco de vida.
+	Guía: Aún quedan {{GameState.cantidad_pendientes()}} por encontrar.
+else
+	Guía: Si no sabes por dónde seguir, sal de la plaza por cualquier camino.
+	Guía: Recuerda: ellas no vienen a pelear. Solo quieren que alguien las escuche.
+=> END

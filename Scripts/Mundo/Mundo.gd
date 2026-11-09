@@ -31,9 +31,19 @@ const DETALLES := {
 }
 const TEXTURA_LUZ := preload("res://Resources/Mundo/luz_calida.tres")
 const VINETA := preload("res://Shaders/vineta.gdshader")
+const TRANSICION := preload("res://Shaders/transicion_epoca.gdshader")
+const SATURACION := preload("res://Shaders/saturacion.gdshader")
+const PORTAL := preload("res://Scenes/Objetos/Portal.tscn")
+const GUIA := preload("res://Scenes/Personajes/Guia.tscn")
+## Zonas con emoción: en la entrada de cada una hay una grieta, y su criatura vive en el Pasado.
+const ZONAS_EMOCION := ["Rabia", "Miedo", "Tristeza", "Soledad", "Culpa", "Ansiedad", "Verguenza"]
+## Saturación del Presente: 0.25 sin ninguna emoción integrada, 1.0 con todas.
+const SATURACION_MINIMA := 0.25
 ## Color del ambiente: atardecer cálido en el Pasado y frío en el Presente (CanvasModulate).
 const COLOR_PASADO := Color(1.0, 0.87, 0.72)
 const COLOR_PRESENTE := Color(0.74, 0.83, 1.0)
+## A este color tiende el ambiente del Presente cuando se integran todas las emociones.
+const COLOR_PRESENTE_VIVO := Color(0.9, 0.93, 1.0)
 ## Casillas que no son suelo libre: no llevan sombra debajo y no se les pone decoración encima.
 const OCUPADAS := "CMRXTwPqQ"
 
@@ -46,6 +56,11 @@ var _epoca_actual := "pasado"
 var _puestos: Array[Dictionary] = []   # props colocados (los usa la decoración suelta)
 var _ruido_hierba := FastNoiseLite.new()
 var _modulador: CanvasModulate
+var _viajando := false
+var _rect_transicion: ColorRect
+var _material_presente := ShaderMaterial.new()
+var _saturacion := SATURACION_MINIMA
+var _tween_saturacion: Tween
 
 
 func _ready() -> void:
@@ -55,18 +70,26 @@ func _ready() -> void:
 	GameState.epoca_cambiada.connect(mostrar_epoca)
 	var jugador := _jugador()
 	if jugador != null:
-		jugador.global_position = posicion_zona("Hub")
+		jugador.global_position = posicion_zona("Hub") + Vector2(0, 56)  # delante del portal
 		jugador.establecer_limites(LIMITES)  # el mundo es quien define hasta dónde puede ver la cámara
+	GameState.emocion_resuelta.connect(func(_id: String, _resultado: String) -> void: _actualizar_saturacion(true))
+	_actualizar_saturacion(false)
 	mostrar_epoca(GameState.epoca)
 
 
-## Reconstruye todo lo que se genera por código: mapa, props, decoración suelta y ambiente.
+## Reconstruye todo lo que se genera por código: mapa, props, decoración suelta, ambiente,
+## portales, Guía y criaturas.
 func reconstruir_todo() -> void:
 	construir_mapa()
 	colocar_props()
 	construir_detalles()
+	colocar_entidades()
 	_crear_ambiente()
+	_crear_particulas()
+	_preparar_saturacion()
 	_aplicar_ambiente(_epoca_actual == "pasado", false)
+	if not Engine.is_editor_hint():
+		mostrar_epoca(_epoca_actual)  # deja cada época con su visibilidad, proceso y física
 
 
 func _unhandled_input(evento: InputEvent) -> void:
@@ -74,7 +97,17 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if Engine.is_editor_hint() or not OS.is_debug_build():
 		return
 	if evento is InputEventKey and evento.pressed and not evento.echo and evento.keycode == KEY_F2:
-		GameState.cambiar_epoca()
+		viajar()
+
+
+func _process(_delta: float) -> void:
+	# Las partículas del ambiente siguen al jugador (la lluvia de luciérnagas o ceniza llena la pantalla)
+	var jugador := _jugador()
+	if jugador == null:
+		return
+	var particulas := get_node_or_null("%s/Particulas" % ("Pasado" if _epoca_actual == "pasado" else "Presente")) as CPUParticles2D
+	if particulas != null:
+		particulas.global_position = jugador.global_position + (Vector2(0, -30) if _epoca_actual == "pasado" else Vector2(0, -230))
 
 
 func _notification(que: int) -> void:
@@ -99,23 +132,29 @@ func posicion_zona(nombre: String) -> Vector2:
 	return marcador.global_position
 
 
-## Muestra una época ("pasado" o "presente"). Las dos tienen la misma forma y la misma posición,
-## así que el jugador solo se pasa a la capa de objetos de la época activa.
+## Muestra una época ("pasado" o "presente"). Las dos tienen la misma forma y la misma posición.
+## La época contraria se oculta y se desactiva del todo (visible = false, proceso apagado, colisiones
+## apagadas); el jugador se pasa a la época activa conservando su posición.
 func mostrar_epoca(epoca: String) -> void:
 	_epoca_actual = epoca
 	var es_pasado := epoca == "pasado"
 	var pasado := $Pasado as Node2D
 	var presente := $Presente as Node2D
-	pasado.visible = es_pasado
-	presente.visible = not es_pasado
-	_activar_colisiones(pasado, es_pasado)
-	_activar_colisiones(presente, not es_pasado)
-	_aplicar_ambiente(es_pasado, true)
 	var jugador := _jugador()
 	if jugador != null:
 		var destino: Node = (pasado if es_pasado else presente).get_node("Objetos")
 		if jugador.get_parent() != destino:
 			jugador.reparent(destino, true)  # conserva su posición
+	_activar_epoca(pasado, es_pasado)
+	_activar_epoca(presente, not es_pasado)
+	_aplicar_ambiente(es_pasado, true)
+
+
+func _activar_epoca(nodo: Node2D, activa: bool) -> void:
+	nodo.visible = activa
+	nodo.process_mode = Node.PROCESS_MODE_INHERIT if activa else Node.PROCESS_MODE_DISABLED
+	_activar_colisiones(nodo, activa)
+	_activar_fisica(nodo, activa)
 
 
 func _activar_colisiones(nodo: Node, activo: bool) -> void:
@@ -123,6 +162,19 @@ func _activar_colisiones(nodo: Node, activo: bool) -> void:
 		if hijo is TileMapLayer:
 			hijo.collision_enabled = activo
 		_activar_colisiones(hijo, activo)
+
+
+## Enciende o apaga las formas de colisión de props, portales, criaturas... (menos las del jugador).
+## Así nada de la época oculta se puede tocar ni interactuar. Recuerda si la forma ya estaba apagada.
+func _activar_fisica(nodo: Node, activo: bool) -> void:
+	for hijo in nodo.get_children():
+		if hijo.is_in_group("player"):
+			continue
+		if hijo is CollisionShape2D or hijo is CollisionPolygon2D:
+			if not hijo.has_meta("ecos_apagada"):
+				hijo.set_meta("ecos_apagada", hijo.disabled)
+			hijo.set_deferred("disabled", (not activo) or hijo.get_meta("ecos_apagada"))
+		_activar_fisica(hijo, activo)
 
 
 func _jugador() -> Node2D:
@@ -565,7 +617,7 @@ func _crear_ambiente() -> void:
 		var nodo := get_node_or_null(epoca)
 		if nodo == null:
 			continue
-		for nombre_luz in ["Luz_Portal", "Luz_Reflejo"]:
+		for nombre_luz in ["Luz_Reflejo"]:
 			var luz := nodo.get_node_or_null(nombre_luz) as PointLight2D
 			if luz == null:
 				luz = PointLight2D.new()
@@ -573,13 +625,25 @@ func _crear_ambiente() -> void:
 				luz.texture = TEXTURA_LUZ
 				nodo.add_child(luz)
 			var es_pasado: bool = epoca == "Pasado"
-			luz.global_position = posicion_zona("Hub" if nombre_luz == "Luz_Portal" else "Final") + Vector2(0, -24)
+			luz.global_position = posicion_zona("Final") + Vector2(0, -24)
 			luz.color = Color(1.0, 0.8, 0.45) if es_pasado else Color(0.62, 0.76, 1.0)
 			luz.energy = 0.85 if es_pasado else 0.6
 			luz.texture_scale = 2.4
-	# Viñeta suave en los bordes de la pantalla (solo en el juego, no en el editor)
+	# Viñeta suave y capa de la transición entre épocas (solo en el juego, no en el editor)
 	if Engine.is_editor_hint() or get_node_or_null("Vineta") != null:
 		return
+	var capa_transicion := CanvasLayer.new()
+	capa_transicion.name = "Transicion"
+	capa_transicion.layer = 6  # sobre la viñeta y bajo los diálogos
+	_rect_transicion = ColorRect.new()
+	_rect_transicion.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_rect_transicion.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var material_transicion := ShaderMaterial.new()
+	material_transicion.shader = TRANSICION
+	_rect_transicion.material = material_transicion
+	_rect_transicion.visible = false
+	capa_transicion.add_child(_rect_transicion)
+	add_child(capa_transicion)
 	var capa := CanvasLayer.new()
 	capa.name = "Vineta"
 	capa.layer = 4  # por debajo de los diálogos y los menús
@@ -597,8 +661,215 @@ func _crear_ambiente() -> void:
 func _aplicar_ambiente(es_pasado: bool, con_fundido: bool) -> void:
 	if _modulador == null or not is_instance_valid(_modulador):
 		return
-	var color := COLOR_PASADO if es_pasado else COLOR_PRESENTE
+	var progreso := clampf((_saturacion - SATURACION_MINIMA) / (1.0 - SATURACION_MINIMA), 0.0, 1.0)
+	var color := COLOR_PASADO if es_pasado else COLOR_PRESENTE.lerp(COLOR_PRESENTE_VIVO, progreso)
 	if con_fundido and not Engine.is_editor_hint() and is_inside_tree():
 		create_tween().tween_property(_modulador, "color", color, 0.5)
 	else:
 		_modulador.color = color
+
+
+# --- Viaje entre épocas ---
+
+## Viaja a la otra época: bloquea al jugador, ondas y destello de luz, cambia de época (conserva la
+## posición) y lo libera. Lo piden los portales y las grietas con su señal `viaje_pedido`.
+func viajar() -> void:
+	if _viajando or Engine.is_editor_hint() or _rect_transicion == null:
+		return
+	_viajando = true
+	var jugador := _jugador()
+	if jugador != null and jugador.has_method("bloquear"):
+		jugador.bloquear()
+	var material := _rect_transicion.material as ShaderMaterial
+	_rect_transicion.visible = true
+	await _animar_transicion(material, 0.0, 1.0, 0.6)
+	GameState.cambiar_epoca()  # Mundo.mostrar_epoca está conectado a esta señal
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await _animar_transicion(material, 1.0, 0.0, 0.75)
+	_rect_transicion.visible = false
+	if jugador != null and jugador.has_method("liberar"):
+		jugador.liberar()
+	_viajando = false
+
+
+func _animar_transicion(material: ShaderMaterial, desde: float, hasta: float, segundos: float) -> void:
+	var t := create_tween().set_parallel(true)
+	t.tween_method(func(v: float) -> void: material.set_shader_parameter("fuerza", v), desde, hasta, segundos)
+	# el destello sube más rápido y baja con suavidad
+	t.tween_method(func(v: float) -> void: material.set_shader_parameter("destello", v * v), desde, hasta, segundos)
+	await t.finished
+
+
+# --- Portales, Guía y criaturas ---
+
+## Crea (solo en el juego, no en el editor) el portal del hub y las grietas de cada zona en las dos
+## épocas, la Guía junto al portal en las dos épocas, y las 7 criaturas en el Pasado.
+func colocar_entidades() -> void:
+	if Engine.is_editor_hint():
+		return
+	var filas := _leer_mapa()
+	if filas.is_empty():
+		return
+	for epoca in ["Pasado", "Presente"]:
+		var objetos := get_node_or_null("%s/Objetos" % epoca)
+		if objetos == null:
+			continue
+		for viejo in objetos.get_children():
+			if viejo.is_in_group("entidades_mundo"):
+				viejo.free()
+		# Portal principal en el hub
+		_poner_portal(objetos, "Portal_Hub", posicion_zona("Hub"), false)
+		# Una grieta en la entrada de cada zona
+		for zona in ZONAS_EMOCION:
+			_poner_portal(objetos, "Grieta_%s" % zona, _entrada_de_zona(zona, filas), true)
+		# La Guía, cerca del portal
+		var guia := GUIA.instantiate() as Node2D
+		_poner_entidad(objetos, guia, "Guia", posicion_zona("Hub") + Vector2(-72, -8))
+		# Las criaturas viven en el Pasado
+		if epoca == "Pasado":
+			for id in GameState.ids_emociones():
+				var ruta := "res://Scenes/Emociones/%s.tscn" % id.capitalize()
+				if not ResourceLoader.exists(ruta):
+					push_warning("Mundo: no existe la escena de la emoción '%s'." % id)
+					continue
+				var criatura := (load(ruta) as PackedScene).instantiate() as Node2D
+				_poner_entidad(objetos, criatura, id.capitalize(), posicion_zona(id.capitalize()))
+
+
+func _poner_portal(objetos: Node, nombre: String, pos: Vector2, es_grieta: bool) -> void:
+	var portal := PORTAL.instantiate() as Portal
+	portal.es_grieta = es_grieta
+	portal.escala = 0.5 if es_grieta else 1.0
+	portal.viaje_pedido.connect(viajar)
+	_poner_entidad(objetos, portal, nombre, pos)
+
+
+func _poner_entidad(objetos: Node, nodo: Node2D, nombre: String, pos: Vector2) -> void:
+	nodo.name = nombre
+	nodo.position = pos
+	nodo.add_to_group("entidades_mundo")
+	objetos.add_child(nodo)
+
+
+## Punto de la entrada de una zona: a unos 110 px de su centro, en dirección al hub, sobre suelo libre.
+func _entrada_de_zona(zona: String, filas: PackedStringArray) -> Vector2:
+	var centro := posicion_zona(zona)
+	var direccion := (posicion_zona("Hub") - centro).normalized()
+	for distancia in [110.0, 130.0, 90.0, 150.0, 70.0]:
+		for lado in [0.0, 24.0, -24.0]:
+			var pos: Vector2 = centro + direccion * distancia + direccion.orthogonal() * lado
+			var celda := Vector2i((pos / TAMANO_TILE).floor())
+			if celda.x < 0 or celda.y < 0 or celda.x >= TILES.x or celda.y >= TILES.y:
+				continue
+			if not OCUPADAS.contains(filas[celda.y][celda.x]) and not _toca(filas, celda.x, celda.y, "CMRXTwPqQ"):
+				return pos
+	return centro + direccion * 110.0
+
+
+# --- Color y partículas de cada época ---
+
+## Luciérnagas doradas en el Pasado y ceniza gris que cae en el Presente (siguen al jugador, ver _process).
+func _crear_particulas() -> void:
+	if Engine.is_editor_hint():
+		return
+	var punto := Image.create(2, 2, false, Image.FORMAT_RGBA8)
+	punto.fill(Color.WHITE)
+	var textura := ImageTexture.create_from_image(punto)
+	for epoca in ["Pasado", "Presente"]:
+		var nodo := get_node_or_null(epoca)
+		if nodo == null:
+			continue
+		var viejas := nodo.get_node_or_null("Particulas")
+		if viejas != null:
+			viejas.free()
+		var p := CPUParticles2D.new()
+		p.name = "Particulas"
+		p.texture = textura
+		p.z_index = 40
+		p.local_coords = false
+		p.position = posicion_zona("Hub")
+		var degradado := Gradient.new()
+		if epoca == "Pasado":
+			# Luciérnagas: aparecen, brillan y se apagan flotando despacio
+			p.amount = 60
+			p.lifetime = 6.0
+			p.preprocess = 6.0
+			p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+			p.emission_rect_extents = Vector2(330, 190)
+			p.direction = Vector2(0, -1)
+			p.spread = 180.0
+			p.gravity = Vector2(0, -2)
+			p.initial_velocity_min = 3.0
+			p.initial_velocity_max = 9.0
+			p.scale_amount_min = 1.0
+			p.scale_amount_max = 2.0
+			degradado.offsets = PackedFloat32Array([0.0, 0.2, 0.5, 0.75, 1.0])
+			degradado.colors = PackedColorArray([
+				Color(1.0, 0.88, 0.45, 0.0), Color(1.0, 0.88, 0.45, 0.95), Color(1.0, 0.8, 0.35, 0.25),
+				Color(1.0, 0.9, 0.5, 0.9), Color(1.0, 0.88, 0.45, 0.0)])
+			var suma := CanvasItemMaterial.new()
+			suma.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+			p.material = suma
+		else:
+			# Ceniza y polvo gris que cae despacio desde arriba de la pantalla
+			p.amount = 90
+			p.lifetime = 9.0
+			p.preprocess = 9.0
+			p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+			p.emission_rect_extents = Vector2(340, 8)
+			p.direction = Vector2(0.25, 1)
+			p.spread = 18.0
+			p.gravity = Vector2(3, 8)
+			p.initial_velocity_min = 8.0
+			p.initial_velocity_max = 18.0
+			p.scale_amount_min = 1.0
+			p.scale_amount_max = 2.0
+			degradado.offsets = PackedFloat32Array([0.0, 0.15, 0.85, 1.0])
+			degradado.colors = PackedColorArray([
+				Color(0.74, 0.76, 0.84, 0.0), Color(0.74, 0.76, 0.84, 0.55), Color(0.62, 0.64, 0.74, 0.45),
+				Color(0.62, 0.64, 0.74, 0.0)])
+		p.color_ramp = degradado
+		nodo.add_child(p)
+
+
+# --- Color del Presente según lo que integres ---
+
+## Pone el shader de saturación al Presente (y a todo lo que cuelga de él).
+func _preparar_saturacion() -> void:
+	var presente := get_node_or_null("Presente") as CanvasItem
+	if presente == null:
+		return
+	_material_presente.shader = SATURACION
+	_material_presente.set_shader_parameter("saturacion", _saturacion)
+	presente.material = _material_presente
+	_heredar_material(presente)
+
+
+## Los hijos usan el material del padre. Se salta al jugador y a lo que ya tiene material propio (partículas).
+func _heredar_material(nodo: Node) -> void:
+	for hijo in nodo.get_children():
+		if hijo.is_in_group("player"):
+			continue
+		if hijo is CanvasItem and hijo.material == null:
+			hijo.use_parent_material = true
+		_heredar_material(hijo)
+
+
+## Calcula la saturación (0.25 sin integradas, 1.0 con todas) y la anima suavemente.
+func _actualizar_saturacion(con_animacion: bool) -> void:
+	var total := float(maxi(1, GameState.ids_emociones().size()))
+	var destino := SATURACION_MINIMA + (1.0 - SATURACION_MINIMA) * float(GameState.cantidad_integradas()) / total
+	if _tween_saturacion != null and _tween_saturacion.is_valid():
+		_tween_saturacion.kill()
+	if not con_animacion:
+		_poner_saturacion(destino)
+		return
+	_tween_saturacion = create_tween()
+	_tween_saturacion.tween_method(_poner_saturacion, _saturacion, destino, 1.6).set_trans(Tween.TRANS_SINE)
+
+
+func _poner_saturacion(valor: float) -> void:
+	_saturacion = valor
+	_material_presente.set_shader_parameter("saturacion", valor)
+	_aplicar_ambiente(_epoca_actual == "pasado", false)

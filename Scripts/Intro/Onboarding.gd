@@ -6,7 +6,7 @@ extends Node2D
 ## El .dialogue llama a mostrar_emocion() y ocultar_emocion() de esta escena (se pasa como estado extra).
 
 ## TEMPORAL: a donde se va al terminar. Cambiar por el mapa real en el Paso 3.
-const ESCENA_SIGUIENTE := "res://Scenes/Mundo/PruebaEmociones.tscn"
+const ESCENA_SIGUIENTE := "res://Scenes/Mundo/Mundo.tscn"
 
 const DIALOGO := preload("res://Dialogos/onboarding.dialogue")
 const FRAMES_GUIA := preload("res://Resources/Personajes/frames_guia.tres")
