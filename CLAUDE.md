@@ -164,3 +164,7 @@ Reglas de cada bloqueo (para la tarea 3.3):
 ## Atribución en git
 
 Los mensajes de commit nunca llevan líneas `Co-Authored-By`, `Claude-Session` ni "Generated with Claude Code", y los pull requests tampoco llevan texto de atribución. Solo debe aparecer el perfil del usuario como autor.
+
+## Estado del proyecto
+
+Al empezar una sesión lee también `ESTADO.md`: resume lo ya hecho, lo que falta y cómo ejecutar las herramientas.
