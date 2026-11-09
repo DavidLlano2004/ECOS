@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="EmocionData" format=3]
 
 [ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+[ext_resource type="SpriteFrames" path="res://Resources/Emociones/frames_tristeza.tres" id="2_frames"]
 
 [resource]
 script = ExtResource("1_emocion")
@@ -14,6 +15,7 @@ habilidad_nombre = "Calma"
 habilidad_descripcion = "Devuelve el agua y la vida."
 comportamiento = 2
 velocidad = 25.0
+frames = ExtResource("2_frames")
 mensaje_integracion = "Llorar también es sanar. Lo que se siente, se suelta."
 mensaje_fallo = "La tristeza sigue su camino, sola. En el Presente, el agua se aleja un poco más."
 mensaje_presente_aliada = "La tristeza ahora te enseña a soltar. Donde pasa, vuelve el agua y crece la vida."

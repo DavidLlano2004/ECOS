@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="EmocionData" format=3]
 
 [ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+[ext_resource type="SpriteFrames" path="res://Resources/Emociones/frames_rabia.tres" id="2_frames"]
 
 [resource]
 script = ExtResource("1_emocion")
@@ -14,6 +15,7 @@ habilidad_nombre = "Impulso"
 habilidad_descripcion = "Un dash que rompe obstáculos."
 comportamiento = 0
 velocidad = 60.0
+frames = ExtResource("2_frames")
 mensaje_integracion = "La rabia protege lo que te importa. Si la escuchas, se convierte en fuerza."
 mensaje_fallo = "La rabia se encoge y se esconde. No se fue: sigue ahí, esperando que alguien la escuche."
 mensaje_presente_aliada = "Ahora la rabia te empuja hacia adelante. Sabe cuándo romper lo que estorba."

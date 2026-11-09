@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="EmocionData" format=3]
 
 [ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+[ext_resource type="SpriteFrames" path="res://Resources/Emociones/frames_miedo.tres" id="2_frames"]
 
 [resource]
 script = ExtResource("1_emocion")
@@ -14,6 +15,7 @@ habilidad_nombre = "Visión"
 habilidad_descripcion = "Permite ver y cruzar zonas oscuras."
 comportamiento = 1
 velocidad = 55.0
+frames = ExtResource("2_frames")
 mensaje_integracion = "El miedo no te detiene, te avisa. Con compañía, se vuelve cuidado."
 mensaje_fallo = "El miedo huye más lejos. La oscuridad del Presente se siente un poco más densa."
 mensaje_presente_aliada = "El miedo ahora te alumbra el camino. Ya no te paraliza: te cuida."
