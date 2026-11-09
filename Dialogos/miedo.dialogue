@@ -19,3 +19,30 @@ Miedo: Hay algo allá afuera. Siempre hay algo.
 	$> GameState.resolver("miedo", "integrada")
 	{{GameState.obtener_datos("miedo").mensaje_integracion}}
 	=> END
+
+# Charla de después (la emoción ya fue integrada). No concede nada: solo compañía.
+# La escena elige cuál de las 4 frases (frase_despues), al azar y sin repetir la anterior.
+
+~ despues
+if frase_despues == 0
+	Miedo: Ya casi no tiemblo. Contigo cerca todo se ve menos oscuro.
+elif frase_despues == 1
+	Miedo: Puedo ayudarte a ver en la oscuridad cuando lo necesites.
+elif frase_despues == 2
+	Miedo: Hoy dejé una lamparita encendida. Se está calentito.
+elif frase_despues == 3
+	Miedo: Si algo da miedo, lo miramos juntos. Despacito.
+=> END
+
+# Lo mismo para la forma aliada del Presente (sus propias frases).
+
+~ aliada_despues
+if frase_despues == 0
+	Miedo: Mi luz es pequeña, pero alcanza para el siguiente paso.
+elif frase_despues == 1
+	Miedo: Ya no me escondo. Camino a tu lado.
+elif frase_despues == 2
+	Miedo: La oscuridad también descansa. Escucha, no hace ruido.
+elif frase_despues == 3
+	Miedo: Cuidarte es mi trabajo favorito.
+=> END

@@ -15,6 +15,14 @@ const RUTA_DIALOGO := "res://Dialogos/%s.dialogue"
 
 const ACELERACION := 400.0
 
+# Emoción integrada: vive tranquila en su zona (nunca empuja al jugador ni le estorba el paso)
+const VELOCIDAD_CALMA := 14.0
+const DIST_ACERCAR_CALMA := 130.0   # si el jugador se queda a menos de esto, se acerca un poco
+const DIST_MINIMA_CALMA := 56.0     # pero nunca más cerca de esto
+const DIST_APARTARSE_CALMA := 40.0  # y si el jugador está encima, se aparta
+const TITULO_DESPUES := "despues"
+const FRASES_DESPUES := 4
+
 # Distancias de cada comportamiento (en píxeles)
 const DIST_PERSEGUIR := 28.0
 const DIST_HUIR := 100.0
@@ -59,6 +67,11 @@ var _direccion := Vector2.ZERO # dirección actual al deambular
 var _caminando := false        # fase actual de los comportamientos con pausas
 var _tween_alpha: Tween
 var _tween_flotar: Tween
+var _calma_caminando := false
+var _calma_tiempo := 0.0
+## Frase que dirá el diálogo "despues" (la elige _elegir_frase_despues; el .dialogue la lee).
+var frase_despues := 0
+var _ultima_frase_despues := -1
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var temporizador: Timer = $Temporizador
@@ -66,7 +79,7 @@ var _tween_flotar: Tween
 
 func _ready() -> void:
 	add_to_group("emociones")
-	y_sort_enabled = true
+	y_sort_enabled = false  # solo Objetos ordena en Y; la criatura se ordena como un todo por sus pies
 	punto_origen = global_position
 	temporizador.one_shot = true
 	temporizador.timeout.connect(_on_temporizador)
@@ -89,12 +102,20 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_temblor = 0.0
-	if _ocupada or _integrada:
+	if _ocupada:
 		velocity = Vector2.ZERO
 		_aplicar_vibracion(delta)
 		return
 
 	_actualizar_jugador(delta)
+
+	if _integrada:
+		# Ya fue escuchada: deambula despacio y flota con su animación "calma"
+		_mover_calma(delta)
+		_limitar_a_la_zona(delta)
+		move_and_slide()
+		_aplicar_vibracion(delta)
+		return
 
 	if _huyendo > 0.0:
 		_huyendo -= delta
@@ -219,6 +240,24 @@ func _elegir_direccion() -> Vector2:
 
 
 ## Los comportamientos con pausas cambian de fase con el Timer.
+## Integrada: pasea despacio dentro de su zona, se acerca un poco al jugador si este se queda cerca
+## y se aparta si le estorba. Su cuerpo no choca con el del jugador, así que nunca lo empuja.
+func _mover_calma(delta: float) -> void:
+	_calma_tiempo -= delta
+	if _calma_tiempo <= 0.0:
+		_calma_caminando = not _calma_caminando
+		_calma_tiempo = randf_range(2.0, 4.0) if _calma_caminando else randf_range(1.5, 3.5)
+		_direccion = _elegir_direccion() if _calma_caminando else Vector2.ZERO
+	var objetivo := Vector2.ZERO
+	if jugador != null and _distancia_jugador <= DIST_APARTARSE_CALMA:
+		objetivo = _direccion_de_huida() * VELOCIDAD_CALMA * 0.8
+	elif jugador != null and _distancia_jugador < DIST_ACERCAR_CALMA and _distancia_jugador > DIST_MINIMA_CALMA:
+		objetivo = (jugador.global_position - global_position).normalized() * VELOCIDAD_CALMA * 0.8
+	elif _calma_caminando:
+		objetivo = _direccion * VELOCIDAD_CALMA
+	velocity = velocity.move_toward(objetivo, ACELERACION * 0.3 * delta)
+
+
 func _on_temporizador() -> void:
 	if datos == null or _integrada:
 		return
@@ -389,8 +428,9 @@ func _draw() -> void:
 # --- Interacción ---
 
 ## El jugador puede hablar con ella si no está integrada, ocupada ni escondida.
+## Una emoción integrada se puede volver a hablar siempre (con frases cortas); solo se oculta la Vergüenza cuando la miran.
 func puede_interactuar() -> bool:
-	return datos != null and not _integrada and not _ocupada and not _oculta
+	return datos != null and not _ocupada and not _oculta
 
 
 ## Abre el diálogo, reacciona al resultado y devuelve el control al jugador.
@@ -404,7 +444,11 @@ func interactuar() -> void:
 
 	var estado_antes: String = GameState.estado.get(datos.id, "pendiente")
 	var resultado := await _abrir_dialogo()
-	if resultado == Dialogo.CANCELADO and GameState.estado.get(datos.id, "pendiente") == estado_antes:
+	if estado_antes == "integrada":
+		# Charla de después: no se vuelve a conceder la habilidad ni a repetir el efecto de integración
+		if resultado == Dialogo.CANCELADO:
+			GloboCierre.mostrar(self, datos.frase_cierre, -72.0)
+	elif resultado == Dialogo.CANCELADO and GameState.estado.get(datos.id, "pendiente") == estado_antes:
 		# "Ahora no": no es una decisión. Nada cambia, reanuda su vida y se despide con una frase breve
 		GloboCierre.mostrar(self, datos.frase_cierre, -72.0)
 	else:
@@ -417,9 +461,24 @@ func interactuar() -> void:
 
 func _abrir_dialogo() -> int:
 	var ruta := ruta_dialogo if ruta_dialogo != "" else RUTA_DIALOGO % datos.id
+	if GameState.estado.get(datos.id, "pendiente") == "integrada":
+		# El diálogo de decisión solo se abre con emociones pendientes, atacadas o ignoradas
+		if not ResourceLoader.exists(ruta):
+			return -1
+		_elegir_frase_despues()
+		return await Dialogo.mostrar(load(ruta), TITULO_DESPUES, [self])
 	if ResourceLoader.exists(ruta):
 		return await Dialogo.mostrar(load(ruta), CUE_DIALOGO)
 	return await _dialogo_provisional()
+
+
+## Elige la frase de la charla de después al azar, sin repetir la anterior.
+func _elegir_frase_despues() -> void:
+	var nueva := randi() % FRASES_DESPUES
+	while nueva == _ultima_frase_despues:
+		nueva = randi() % FRASES_DESPUES
+	_ultima_frase_despues = nueva
+	frase_despues = nueva
 
 
 ## Diálogo de emergencia si todavía no existe el .dialogue de esta emoción.
@@ -458,9 +517,12 @@ func _integrar() -> void:
 ## Quieta, con la animación "calma" y un leve flotar.
 func _entrar_en_calma() -> void:
 	_integrada = true
+	_oculta = false
 	temporizador.stop()
 	velocity = Vector2.ZERO
 	_huyendo = 0.0
+	_calma_caminando = false
+	_calma_tiempo = randf_range(0.5, 2.0)
 	sprite.modulate = Color.WHITE
 	if _tween_alpha != null:
 		_tween_alpha.kill()

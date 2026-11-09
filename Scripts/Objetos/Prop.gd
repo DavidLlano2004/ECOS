@@ -15,25 +15,26 @@ const HOJAS := {
 	"presente": preload("res://Assets/Mundo/props_presente.png"),
 }
 
-## Cada tipo: "cuadro" (columna, fila en la hoja), "colision" (Rect2 relativo a la base; vacío = sin
-## colisión) y "luces" (posiciones de las luces relativas a la base, solo en el Pasado).
+## Cada tipo: "cuadro" (columna, fila en la hoja), "escala" (el jugador mide unos 56 px: lo grande son
+## los árboles y los postes; roca, tocón, banco y arbusto son pequeños), "colision" (Rect2 relativo a la
+## base, a escala 1; vacío = sin colisión) y "luces" (posiciones de las luces, solo en el Pasado).
 const DATOS := {
 	"arbol_dorado": {
-		"cuadro": Vector2i(0, 0),
+		"cuadro": Vector2i(0, 0), "escala": 1.3,
 		"colision": Rect2(-13, -8, 26, 8),
 		"luces": [Vector2(-27, -39), Vector2(27, -38)],
 	},
-	"cerezo": {"cuadro": Vector2i(1, 0), "colision": Rect2(-10, -8, 20, 8), "luces": []},
-	"arbol_redondo": {"cuadro": Vector2i(2, 0), "colision": Rect2(-6, -8, 12, 8), "luces": []},
-	"arbusto_flores": {"cuadro": Vector2i(3, 0), "colision": Rect2(), "luces": []},
-	"roca": {"cuadro": Vector2i(0, 1), "colision": Rect2(-30, -14, 68, 14), "luces": []},
+	"cerezo": {"cuadro": Vector2i(1, 0), "escala": 1.2, "colision": Rect2(-10, -8, 20, 8), "luces": []},
+	"arbol_redondo": {"cuadro": Vector2i(2, 0), "escala": 1.1, "colision": Rect2(-6, -8, 12, 8), "luces": []},
+	"arbusto_flores": {"cuadro": Vector2i(3, 0), "escala": 0.55, "colision": Rect2(), "luces": []},
+	"roca": {"cuadro": Vector2i(0, 1), "escala": 0.5, "colision": Rect2(-30, -14, 68, 14), "luces": []},
 	"farol_poste": {
-		"cuadro": Vector2i(1, 1),
+		"cuadro": Vector2i(1, 1), "escala": 1.1,
 		"colision": Rect2(-20, -4, 8, 4),
 		"luces": [Vector2(15, -60)],
 	},
-	"tocon": {"cuadro": Vector2i(2, 1), "colision": Rect2(-24, -10, 50, 10), "luces": []},
-	"banco": {"cuadro": Vector2i(3, 1), "colision": Rect2(-34, -10, 68, 10), "luces": []},
+	"tocon": {"cuadro": Vector2i(2, 1), "escala": 0.45, "colision": Rect2(-24, -10, 50, 10), "luces": []},
+	"banco": {"cuadro": Vector2i(3, 1), "escala": 0.5, "colision": Rect2(-34, -10, 68, 10), "luces": []},
 }
 
 ## Tipos disponibles (para usarlos desde otros scripts).
@@ -43,6 +44,8 @@ const TIPOS: Array[String] = [
 
 @export_enum("arbol_dorado", "cerezo", "arbol_redondo", "arbusto_flores", "roca", "farol_poste", "tocon", "banco")
 var tipo: String = "arbol_redondo"
+## Escala del dibujo (y de su colisión y luces). 0 = la escala por defecto del tipo (ver DATOS).
+@export var escala: float = 0.0
 ## Falso en los árboles de la franja del borde: ahí la casilla ya es sólida y no hace falta otra colisión.
 @export var con_colision: bool = true
 
@@ -58,6 +61,12 @@ func _ready() -> void:
 	var datos: Dictionary = DATOS[tipo]
 	var epoca := _epoca()
 
+	# Escala: la del tipo (o la exportada) con una variación de ±8 % que depende de la posición, así que
+	# el mismo objeto sale igual de grande en el Pasado y en el Presente
+	var base_escala: float = escala if escala > 0.0 else float(datos["escala"])
+	var azar := float(int(absf(position.x * 73.0 + position.y * 151.0)) % 1000) / 999.0
+	var factor := base_escala * (1.0 + (azar - 0.5) * 0.16)
+
 	# Dibujo: un recorte de la hoja, con la base del objeto sobre la posición del nodo
 	var cuadro: Vector2i = datos["cuadro"]
 	var textura := AtlasTexture.new()
@@ -66,14 +75,15 @@ func _ready() -> void:
 	_sprite.texture = textura
 	_sprite.centered = false
 	_sprite.offset = -APOYO
+	_sprite.scale = Vector2(factor, factor)
 
 	# Colisión pequeña, solo en la base (capa 1 = mundo)
 	var rect: Rect2 = datos["colision"]
 	if rect.has_area() and con_colision:
 		var cuadrado := RectangleShape2D.new()
-		cuadrado.size = rect.size
+		cuadrado.size = rect.size * factor
 		_forma.shape = cuadrado
-		_forma.position = rect.get_center()
+		_forma.position = rect.get_center() * factor
 	else:
 		$Cuerpo.queue_free()
 
@@ -84,7 +94,8 @@ func _ready() -> void:
 		return
 	for i in luces.size():
 		var luz := _luz if i == 0 else _luz.duplicate() as PointLight2D
-		luz.position = luces[i]
+		luz.position = luces[i] * factor
+		luz.texture_scale = 0.5 * minf(factor, 1.3)
 		if i > 0:
 			add_child(luz)
 

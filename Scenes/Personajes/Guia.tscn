@@ -8,7 +8,6 @@
 radius = 22.0
 
 [node name="Guia" type="Node2D"]
-y_sort_enabled = true
 script = ExtResource("1_guia")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]

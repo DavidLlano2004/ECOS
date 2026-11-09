@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" path="res://Resources/Mundo/luz_calida.tres" id="2_luz"]
 
 [node name="Prop" type="Node2D"]
-y_sort_enabled = true
 script = ExtResource("1_prop")
 
 [node name="Sprite" type="Sprite2D" parent="."]

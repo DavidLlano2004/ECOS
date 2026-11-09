@@ -19,3 +19,30 @@ Soledad: Está bien si te vas. Todos se van.
 	$> GameState.resolver("soledad", "integrada")
 	{{GameState.obtener_datos("soledad").mensaje_integracion}}
 	=> END
+
+# Charla de después (la emoción ya fue integrada). No concede nada: solo compañía.
+# La escena elige cuál de las 4 frases (frase_despues), al azar y sin repetir la anterior.
+
+~ despues
+if frase_despues == 0
+	Soledad: Ya no me siento tan sola. Tus pasos se oyen desde lejos.
+elif frase_despues == 1
+	Soledad: Puedo acompañarte y ayudarte con lo que pide dos manos.
+elif frase_despues == 2
+	Soledad: Hoy compartí una merienda imaginaria. Estaba muy rica.
+elif frase_despues == 3
+	Soledad: Qué lindo cuando alguien vuelve. Gracias por volver.
+=> END
+
+# Lo mismo para la forma aliada del Presente (sus propias frases).
+
+~ aliada_despues
+if frase_despues == 0
+	Soledad: Voy contigo, aunque no me veas todo el tiempo.
+elif frase_despues == 1
+	Soledad: Entre dos se empuja mejor una puerta.
+elif frase_despues == 2
+	Soledad: A veces basta con saber que alguien está cerca.
+elif frase_despues == 3
+	Soledad: Hoy hay luciérnagas. Ven, te las enseño.
+=> END

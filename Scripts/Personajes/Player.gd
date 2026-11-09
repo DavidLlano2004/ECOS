@@ -58,7 +58,9 @@ var _tiempo_rebote := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
-	y_sort_enabled = true
+	# Solo el nodo Objetos de cada época ordena en Y: el jugador es un elemento más (sus hijos, como
+	# el sprite que está 29 px más arriba de los pies, no deben ordenarse por su cuenta).
+	y_sort_enabled = false
 	_aplicar_estilo_burbuja()
 	burbuja.hide()
 

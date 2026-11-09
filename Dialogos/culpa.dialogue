@@ -19,3 +19,30 @@ Culpa: Lo repito en mi cabeza todas las noches, por si acaso.
 	$> GameState.resolver("culpa", "integrada")
 	{{GameState.obtener_datos("culpa").mensaje_integracion}}
 	=> END
+
+# Charla de después (la emoción ya fue integrada). No concede nada: solo compañía.
+# La escena elige cuál de las 4 frases (frase_despues), al azar y sin repetir la anterior.
+
+~ despues
+if frase_despues == 0
+	Culpa: Ya no cargo tantas cosas. Aprendí a dejar algunas en el suelo.
+elif frase_despues == 1
+	Culpa: Si algo se rompe, podemos intentar arreglarlo juntos.
+elif frase_despues == 2
+	Culpa: Hoy ordené un cajón y me sentí más ligera.
+elif frase_despues == 3
+	Culpa: Equivocarme no me hace mala. Me lo estoy creyendo despacito.
+=> END
+
+# Lo mismo para la forma aliada del Presente (sus propias frases).
+
+~ aliada_despues
+if frase_despues == 0
+	Culpa: Reparar es mi forma de decir lo siento.
+elif frase_despues == 1
+	Culpa: Mira el puente. Se ve mejor así, con cuidado.
+elif frase_despues == 2
+	Culpa: No hace falta arreglarlo todo hoy.
+elif frase_despues == 3
+	Culpa: Un error, una lección y a seguir.
+=> END

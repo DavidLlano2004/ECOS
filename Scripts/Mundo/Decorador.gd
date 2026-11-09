@@ -13,15 +13,15 @@ const SUELOS := "fdrvbua."
 ## Casillas que un objeto grande no puede tocar ni de lado (agua, puentes, muros, rocas, bloqueos).
 const PROHIBIDAS := "wPqQRCMXT"
 ## Distancia mínima (px) entre objetos y a las entradas de las zonas (donde irán portal y bloqueos).
-const SEPARACION := 44.0
+const SEPARACION := 34.0
 const LIBRE_ZONA := 215.0
 const LIBRE_HUB := 110.0
 ## Entre dos faroles debe haber al menos este espacio (si no, quedan amontonados).
 const SEPARACION_FAROLES := 190.0
 ## Medio ancho aproximado (px) de cada objeto, para que los anchos (rocas, bancos) no se pisen con otros.
 const MEDIO_ANCHO := {
-	"arbol_dorado": 30.0, "cerezo": 26.0, "arbol_redondo": 22.0, "arbusto_flores": 28.0,
-	"roca": 40.0, "farol_poste": 14.0, "tocon": 26.0, "banco": 36.0,
+	"arbol_dorado": 34.0, "cerezo": 30.0, "arbol_redondo": 24.0, "arbusto_flores": 14.0,
+	"roca": 22.0, "farol_poste": 10.0, "tocon": 14.0, "banco": 22.0,
 }
 
 ## Tema de cada zona: tipo -> cuántos extra se reparten, en un anillo [mínimo, máximo] px alrededor del centro.

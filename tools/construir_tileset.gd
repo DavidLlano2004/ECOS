@@ -34,8 +34,6 @@ const TERRENOS := {
 	"camino": {"conjunto": 0, "color": Color("c5945f")},
 	"arena": {"conjunto": 1, "color": Color("ead6a8")},
 	"agua": {"conjunto": 2, "color": Color("5a80b3")},
-	"tono_oscuro": {"conjunto": 3, "color": Color("2f3a18")},
-	"tono_claro": {"conjunto": 4, "color": Color("e8d98c")},
 }
 
 const VECINOS := {

@@ -22,8 +22,6 @@ const LIMITES := Rect2(Vector2.ZERO, Vector2(TILES.x * TAMANO_TILE, TILES.y * TA
 const TERRENO_CAMINO := 0
 const TERRENO_ARENA := 1
 const TERRENO_AGUA := 2
-const TERRENO_TONO_OSCURO := 3
-const TERRENO_TONO_CLARO := 4
 
 const PROP := preload("res://Scenes/Objetos/Prop.tscn")
 ## Decoración suelta de 16x16 (matas, flores, piedritas y hojas) de cada época.
@@ -32,6 +30,7 @@ const DETALLES := {
 	"Presente": preload("res://Resources/Mundo/detalles_presente.tres"),
 }
 const TEXTURA_LUZ := preload("res://Resources/Mundo/luz_calida.tres")
+const TONO_HIERBA := preload("res://Shaders/tono_hierba.gdshader")
 const VINETA := preload("res://Shaders/vineta.gdshader")
 const TRANSICION := preload("res://Shaders/transicion_epoca.gdshader")
 const SATURACION := preload("res://Shaders/saturacion.gdshader")
@@ -292,6 +291,11 @@ func construir_mapa() -> void:
 	# El Presente copia los terrenos ya elegidos del Pasado: misma forma, mismos tiles, otra paleta
 	if presente != null:
 		_construir_epoca(presente, filas, pasado)
+	_construir_tono_hierba(filas)
+	# Solo el nodo Objetos ordena en Y (así el jugador, los props y las criaturas se ordenan entre sí)
+	for epoca in [pasado, presente]:
+		if epoca != null:
+			epoca.y_sort_enabled = false
 
 
 func _leer_mapa() -> PackedStringArray:
@@ -325,7 +329,7 @@ func _vaciar_capas() -> void:
 
 func _capas_de(epoca: Node) -> Array[TileMapLayer]:
 	var capas: Array[TileMapLayer] = []
-	for ruta in ["Suelo", "TonoOscuro", "TonoClaro", "Orilla", "Camino", "Agua", "Sombras", "Colision", "Objetos/Detalles"]:
+	for ruta in ["Suelo", "Orilla", "Camino", "Agua", "Sombras", "Colision", "Objetos/Detalles"]:
 		var capa := epoca.get_node_or_null(ruta) as TileMapLayer
 		if capa != null:
 			capas.append(capa)
@@ -341,11 +345,7 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 	var detalles := epoca.get_node("Objetos/Detalles") as TileMapLayer
 	var tiles := _buscar_tiles(suelo.tile_set)
 	var sombras := _capa_extra(epoca, "Sombras", suelo.tile_set, "Colision")
-	# Manchas de hierba más oscura y más clara: capas translúcidas con bordes tramados (justo sobre el suelo)
-	var tono_oscuro := _capa_extra(epoca, "TonoOscuro", suelo.tile_set, "Orilla")
-	var tono_claro := _capa_extra(epoca, "TonoClaro", suelo.tile_set, "Orilla")
-	var celdas_oscuras: Array[Vector2i] = []
-	var celdas_claras: Array[Vector2i] = []
+
 	for capa in _capas_de(epoca):
 		capa.clear()
 
@@ -359,12 +359,7 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 			var ch := filas[y][x]
 			var suelo_aqui := _suelo_de(filas, x, y)
 			suelo.set_cell(c, 0, tiles[_nombre_suelo(suelo_aqui, x, y)])
-			if suelo_aqui == "." or suelo_aqui == "f":
-				var tono := _ruido_hierba.get_noise_2d(x, y)
-				if tono < -0.2:
-					celdas_oscuras.append(c)
-				elif tono > 0.28:
-					celdas_claras.append(c)
+
 			if ch == "c":
 				celdas_camino.append(c)
 			if AGUA.contains(ch):
@@ -393,8 +388,8 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 				"X", "T":
 					colision.set_cell(c, 0, tiles["colision"])
 				"w":
-					if _es_agua_profunda(filas, x, y):
-						colision.set_cell(c, 0, tiles["colision_agua_profunda"])
+					# Todo el agua es sólida (orilla y estanques incluidos): solo se cruza por los puentes
+					colision.set_cell(c, 0, tiles["colision_agua_profunda"])
 
 	# Un anillo de bloques invisibles fuera del mapa: el jugador nunca puede salir
 	for x in range(-1, TILES.x + 1):
@@ -406,31 +401,15 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 
 	# Terrenos: Godot elige solo las piezas de transición según los vecinos (o se copian de la época de referencia)
 	if referencia != null:
-		for nombre_capa in ["TonoOscuro", "TonoClaro", "Orilla", "Camino", "Agua"]:
+		for nombre_capa in ["Orilla", "Camino", "Agua"]:
 			var origen := referencia.get_node(nombre_capa) as TileMapLayer
 			var destino := epoca.get_node(nombre_capa) as TileMapLayer
 			for c in origen.get_used_cells():
 				destino.set_cell(c, 0, origen.get_cell_atlas_coords(c))
 		return
-	tono_oscuro.set_cells_terrain_connect(celdas_oscuras, TERRENO_TONO_OSCURO, 0)
-	tono_claro.set_cells_terrain_connect(celdas_claras, TERRENO_TONO_CLARO, 0)
 	orilla.set_cells_terrain_connect(celdas_arena, TERRENO_ARENA, 0)
 	camino.set_cells_terrain_connect(celdas_camino, TERRENO_CAMINO, 0)
 	agua.set_cells_terrain_connect(celdas_agua, TERRENO_AGUA, 0)
-
-
-## Agua profunda: una celda de agua con las 8 vecinas también de agua (ahí hay colisión).
-## Los bordes quedan poco profundos y se pueden pisar; así los ríos se cruzan por el vado.
-func _es_agua_profunda(filas: PackedStringArray, x: int, y: int) -> bool:
-	for dy in range(-1, 2):
-		for dx in range(-1, 2):
-			var nx := x + dx
-			var ny := y + dy
-			if nx < 0 or ny < 0 or nx >= TILES.x or ny >= TILES.y:
-				continue
-			if not AGUA.contains(filas[ny][nx]):
-				return false
-	return true
 
 
 func _nombre_suelo(ch: String, x: int, y: int) -> String:
@@ -914,3 +893,38 @@ func _poner_saturacion(valor: float) -> void:
 	_saturacion = valor
 	_material_presente.set_shader_parameter("saturacion", valor)
 	_aplicar_ambiente(_epoca_actual == "pasado", false)
+
+
+# --- Variación de la hierba (clara y oscura) ---
+
+## Manchas de hierba más clara y más oscura con ruido en el mundo (no por casillas): un ColorRect con un
+## shader que usa ruido, bordes irregulares y trama ordenada. Una textura pequeña (una casilla = un píxel)
+## dice dónde hay hierba. Va entre el suelo y las capas de arena, camino y agua.
+func _construir_tono_hierba(filas: PackedStringArray) -> void:
+	var imagen := Image.create(TILES.x, TILES.y, false, Image.FORMAT_R8)
+	for y in TILES.y:
+		for x in TILES.x:
+			var suelo_aqui := _suelo_de(filas, x, y)
+			imagen.set_pixel(x, y, Color(1, 1, 1) if (suelo_aqui == "." or suelo_aqui == "f") else Color(0, 0, 0))
+	var mascara := ImageTexture.create_from_image(imagen)
+	for epoca in ["Pasado", "Presente"]:
+		var nodo := get_node_or_null(epoca)
+		if nodo == null:
+			continue
+		var rect := nodo.get_node_or_null("Tono") as ColorRect
+		if rect == null:
+			rect = ColorRect.new()
+			rect.name = "Tono"
+			rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			nodo.add_child(rect)
+			nodo.move_child(rect, nodo.get_node("Suelo").get_index() + 1)
+		rect.position = Vector2.ZERO
+		rect.size = LIMITES.size
+		var material := ShaderMaterial.new()
+		material.shader = TONO_HIERBA
+		material.set_shader_parameter("mascara", mascara)
+		material.set_shader_parameter("tamano_mundo", LIMITES.size)
+		if epoca == "Presente":
+			material.set_shader_parameter("color_oscuro", Color(0.06, 0.08, 0.14, 0.34))
+			material.set_shader_parameter("color_claro", Color(0.75, 0.82, 0.95, 0.2))
+		rect.material = material

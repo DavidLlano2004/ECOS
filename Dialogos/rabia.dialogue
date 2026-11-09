@@ -19,3 +19,30 @@ Rabia: Alguien me hizo daño y nadie hizo nada. Nadie.
 	$> GameState.resolver("rabia", "integrada")
 	{{GameState.obtener_datos("rabia").mensaje_integracion}}
 	=> END
+
+# Charla de después (la emoción ya fue integrada). No concede nada: solo compañía.
+# La escena elige cuál de las 4 frases (frase_despues), al azar y sin repetir la anterior.
+
+~ despues
+if frase_despues == 0
+	Rabia: Ya no me hierve tanto la sangre. Gracias por quedarte.
+elif frase_despues == 1
+	Rabia: Si algo se atasca, puedo darte un buen empujón. Solo dímelo.
+elif frase_despues == 2
+	Rabia: Hoy me quedé mirando las nubes un buen rato. Sienta bien.
+elif frase_despues == 3
+	Rabia: A veces solo necesitaba que alguien me escuchara. Y llegaste tú.
+=> END
+
+# Lo mismo para la forma aliada del Presente (sus propias frases).
+
+~ aliada_despues
+if frase_despues == 0
+	Rabia: Aquí estoy, con la misma fuerza pero sin los gritos.
+elif frase_despues == 1
+	Rabia: Si ves algo que estorba, avísame. Yo me encargo.
+elif frase_despues == 2
+	Rabia: El Presente se ve más claro desde que hablamos.
+elif frase_despues == 3
+	Rabia: Respira hondo. Yo ya lo hice.
+=> END

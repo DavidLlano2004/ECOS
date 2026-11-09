@@ -19,3 +19,30 @@ Ansiedad: Tengo mil cosas en la cabeza y no alcanzo con ninguna.
 	$> GameState.resolver("ansiedad", "integrada")
 	{{GameState.obtener_datos("ansiedad").mensaje_integracion}}
 	=> END
+
+# Charla de después (la emoción ya fue integrada). No concede nada: solo compañía.
+# La escena elige cuál de las 4 frases (frase_despues), al azar y sin repetir la anterior.
+
+~ despues
+if frase_despues == 0
+	Ansiedad: Estoy bajando el ritmo. Mira, ya casi no me muevo tanto.
+elif frase_despues == 1
+	Ansiedad: Puedo frenar un poquito el tiempo cuando todo corre demasiado.
+elif frase_despues == 2
+	Ansiedad: Hoy bebí agua despacio y conté hasta cuatro. Funciona.
+elif frase_despues == 3
+	Ansiedad: Una cosa a la vez. Esa es mi nueva regla.
+=> END
+
+# Lo mismo para la forma aliada del Presente (sus propias frases).
+
+~ aliada_despues
+if frase_despues == 0
+	Ansiedad: Mi reloj va tranquilo. Tic, tac, tic, tac.
+elif frase_despues == 1
+	Ansiedad: Si todo corre, yo pongo una pausa.
+elif frase_despues == 2
+	Ansiedad: Respira conmigo. Uno, dos, tres.
+elif frase_despues == 3
+	Ansiedad: En este rincón no hay prisa.
+=> END

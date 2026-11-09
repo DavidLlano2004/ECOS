@@ -19,3 +19,30 @@ Tristeza: No sé cuánto llevo aquí. Todo pesa un poco más cada día.
 	$> GameState.resolver("tristeza", "integrada")
 	{{GameState.obtener_datos("tristeza").mensaje_integracion}}
 	=> END
+
+# Charla de después (la emoción ya fue integrada). No concede nada: solo compañía.
+# La escena elige cuál de las 4 frases (frase_despues), al azar y sin repetir la anterior.
+
+~ despues
+if frase_despues == 0
+	Tristeza: Hoy llovió un poquito y estuvo bien. Después salió el sol.
+elif frase_despues == 1
+	Tristeza: Puedo devolver el agua y la vida donde hace falta.
+elif frase_despues == 2
+	Tristeza: Llorar un rato también es una forma de descansar.
+elif frase_despues == 3
+	Tristeza: Gracias por sentarte conmigo. No hacía falta decir nada.
+=> END
+
+# Lo mismo para la forma aliada del Presente (sus propias frases).
+
+~ aliada_despues
+if frase_despues == 0
+	Tristeza: Por donde paso vuelve el agua. Mira el estanque.
+elif frase_despues == 1
+	Tristeza: Soltar no es olvidar. Es hacer sitio.
+elif frase_despues == 2
+	Tristeza: Hoy sí tengo ganas de mirar las flores.
+elif frase_despues == 3
+	Tristeza: Quédate un ratito. El agua está tranquila.
+=> END

@@ -646,40 +646,6 @@ def componer_autotile(textura, b, margen, color_borde, color_interior, semilla, 
     return img
 
 
-def componer_tono(b, color, semilla):
-    """Mancha de tono (hierba más oscura o más clara) como autotile: un color translúcido con los
-    bordes tramados (2 a 3 px de puntitos ordenados) para que no se vea la cuadrícula de tiles."""
-    m = mascara(b, 4, semilla, radio=14)
-
-    def adentro(x, y):
-        if 0 <= x < T and 0 <= y < T:
-            return m[y][x]
-        if x < 0 and 0 <= y < T:
-            return b["O"]
-        if x >= T and 0 <= y < T:
-            return b["E"]
-        if y < 0 and 0 <= x < T:
-            return b["N"]
-        if y >= T and 0 <= x < T:
-            return b["S"]
-        return True
-
-    img = nuevo()
-    for y in range(T):
-        for x in range(T):
-            if not m[y][x]:
-                continue
-            k = 5
-            for d in range(1, 5):
-                if any(not adentro(x + dx, y + dy) for dx, dy in ((d, 0), (-d, 0), (0, d), (0, -d))):
-                    k = d
-                    break
-            densidad = {1: 0.2, 2: 0.45, 3: 0.7, 4: 0.9}.get(k, 1.0)
-            if BAYER[y % 4][x % 4] / 16.0 < densidad:
-                img.putpixel((x, y), tuple(color))
-    return img
-
-
 # ----------------------------------------------------------------------------
 # Presente: la misma imagen con otra paleta (azul grisáceo apagado, menos contraste)
 # ----------------------------------------------------------------------------
@@ -904,16 +870,7 @@ def construir():
     for i, (nombre, img) in enumerate(extra):
         poner_tile(nombre, i, 23, img)
 
-    # filas 24-29: manchas de tono de la hierba (oscura y clara) como autotiles de 47 piezas
-    for nombre, color, fila0, sem in (("tono_oscuro", (24, 28, 10, 78), 24, 400), ("tono_claro", (246, 232, 150, 66), 27, 500)):
-        tiles = []
-        for j, b in enumerate(pats):
-            col, fila = j % COLUMNAS, fila0 + j // COLUMNAS
-            piezas.append((col, fila, componer_tono(b, color, sem)))
-            tiles.append({"coords": [col, fila], "bits": bits_json(b)})
-        info_auto[nombre] = {"tiles": tiles, "cuadros": 1}
-
-    filas_total = 30
+    filas_total = 24
     atlas = Image.new("RGBA", (COLUMNAS * T, filas_total * T), (0, 0, 0, 0))
     for (col, fila, img) in piezas:
         atlas.paste(img, (col * T, fila * T))

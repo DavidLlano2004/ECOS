@@ -102,6 +102,11 @@ class Mapa:
         return celdas
 
 
+def base_plaza(m, x, y):
+    """¿Había una plaza de adoquines debajo? (para devolver ese suelo al borrar un muro suelto)."""
+    return sum(1 for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dentro(x + dx, y + dy) and m.g[y + dy][x + dx] == "a") >= 3
+
+
 def fbm(r1, r2, x, y):
     """Ruido de dos escalas (formas orgánicas): valores entre 0 y 1."""
     return 0.65 * r1(x, y) + 0.35 * r2(x, y)
@@ -269,6 +274,12 @@ def construir():
     trazar([(48, 27), (42, 20), (32, 14), (22, 12), (16, 12)], 2.4, semilla=10)         # Vergüenza
     trazar([(48, 27), (48, 20), (48, 14), (48, 9), (48, 6)], 1.6, semilla=11)           # Reflejo
 
+    # Paso de tierra sobre el río (antes era un vado de agua poco profunda): dos filas de camino de lado a lado
+    for y in (31, 32):
+        for x in range(80, 88):
+            if m.g[y][x] in "wsc.fd":
+                m.g[y][x] = "c"
+
     # suavizado: filtro de mayoría en un círculo de radio 2 (redondea los escalones de los bordes)
     disco = [(dx, dy) for dy in range(-2, 3) for dx in range(-2, 3) if math.hypot(dx, dy) <= 2.1]
     for _ in range(3):
@@ -372,23 +383,47 @@ def construir():
     for (x, y) in cand[:7]:
         m.g[y][x] = "R"
     # Culpa: muros de ruinas rotos (segmentos con huecos)
-    for (x0, y0, dx, dy, largo) in ((90, 22, 1, 0, 5), (94, 23, 0, 1, 3), (88, 31, 1, 0, 6), (92, 29, 0, 1, 3), (86, 24, 0, 1, 2), (90, 33, 0, 1, 2)):
+    for (x0, y0, dx, dy, largo) in ((90, 22, 1, 0, 5), (94, 23, 0, 1, 3), (88, 34, 1, 0, 5), (92, 29, 0, 1, 3)):
         for k in range(largo):
             x, y = x0 + dx * k, y0 + dy * k
-            if dentro(x, y) and m.g[y][x] in "ud" and libre(x, y, 2.6) and m.rnd.random() < 0.8:
+            if dentro(x, y) and m.g[y][x] in "ud" and libre(x, y, 2.6):
                 m.g[y][x] = "M"
-    # Ansiedad: pilares repartidos por el borde de la plaza (en círculo, no en rejilla)
-    for k in range(7):
-        a = k * math.tau / 7 + 0.4
-        x, y = round(78 + 8.6 * math.cos(a)), round(44 + 5.6 * math.sin(a))
-        if dentro(x, y) and m.g[y][x] in "a.fdusb" and (x, y) not in cerca:
-            m.g[y][x] = "M"
-    # Vergüenza: pilares en un círculo alrededor de la plaza redonda
-    for k in range(8):
-        a = k * math.tau / 8 + 0.2
-        x, y = round(16 + 7.4 * math.cos(a)), round(12 + 5.6 * math.sin(a))
-        if dentro(x, y) and m.g[y][x] in ".fda" and (x, y) not in cerca:
-            m.g[y][x] = "M"
+    # Muros bajos con sentido: arcos en el borde de la plaza del hub y a los lados de la plataforma
+    # de la Puerta del Reflejo (nunca sobre los caminos). Los trozos aislados se borran más abajo.
+    def muro_en_arco(cx, cy, angulos, ancho):
+        for y in range(H):
+            for x in range(W):
+                if m.g[y][x] != "a":
+                    continue
+                borde_plaza = any(dentro(x + dx, y + dy) and m.g[y + dy][x + dx] not in "aM" for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                if not borde_plaza or (x, y) in cerca:
+                    continue
+                ang = math.degrees(math.atan2(y - cy, x - cx))
+                if any(abs((ang - a + 180) % 360 - 180) <= ancho for a in angulos):
+                    m.g[y][x] = "M"
+
+    muro_en_arco(48, 27, (45, 135, 225, 315), 20)      # hub
+    muro_en_arco(48, 6.5, (0, 180), 38)                # plataforma del Reflejo
+
+    # Se quitan todos los muros aislados (restos sueltos): un muro tiene que ser un tramo de 3 casillas o más
+    visto = set()
+    for y in range(H):
+        for x in range(W):
+            if m.g[y][x] == "M" and (x, y) not in visto:
+                pila, comp = [(x, y)], []
+                visto.add((x, y))
+                while pila:
+                    a, b = pila.pop()
+                    comp.append((a, b))
+                    for dx in (-1, 0, 1):
+                        for dy in (-1, 0, 1):
+                            n = (a + dx, b + dy)
+                            if dentro(*n) and m.g[n[1]][n[0]] == "M" and n not in visto:
+                                visto.add(n)
+                                pila.append(n)
+                if len(comp) < 3:
+                    for (a, b) in comp:
+                        m.g[b][a] = "a" if base_plaza(m, a, b) else "."
 
     # 10. los centros de zona y el hub deben ser transitables
     for (cx, cy) in centros:
@@ -406,14 +441,11 @@ def profunda(m, x, y):
 
 
 def transitable(m, x, y):
+    """Todo el agua es sólida (solo los tramos de puente 'P', 'q' y 'Q' se pisan)."""
     if not dentro(x, y):
         return False
     ch = m.g[y][x]
-    if ch in BLOQUEA:
-        return False
-    if ch == "w" and profunda(m, x, y):
-        return False
-    return True
+    return ch not in BLOQUEA and ch != "w"
 
 
 def alcanzables(m, origen):
