@@ -1,7 +1,7 @@
 {
  "tamano": 32,
  "columnas": 16,
- "filas": 23,
+ "filas": 24,
  "base": {
   "hierba_0": [
    0,
@@ -130,6 +130,26 @@
   "colision_agua_profunda": [
    15,
    1
+  ],
+  "hierba_oscura_0": [
+   0,
+   23
+  ],
+  "hierba_oscura_1": [
+   1,
+   23
+  ],
+  "hierba_clara_0": [
+   2,
+   23
+  ],
+  "hierba_clara_1": [
+   3,
+   23
+  ],
+  "sombra_s": [
+   4,
+   23
   ]
  },
  "autotiles": {

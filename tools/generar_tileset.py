@@ -43,7 +43,7 @@ P = {
     "hierba_oscura": c("545c30"),
     "flor_rosa": c("ec93b4"), "flor_lila": c("ab8ddb"), "flor_crema": c("f8e8b4"), "flor_oro": c("f4c24c"),
     # pasto seco
-    "seco": [c("a38446"), c("bd9d57"), c("d3b56c"), c("e5cd8c")],
+    "seco": [c("8c7d3f"), c("a58f48"), c("bba65c"), c("d0bd78")],
     "seco_oscuro": c("826535"), "seco_claro": c("f0dba0"),
     # camino de tierra
     "tierra": [c("93633f"), c("ae7b4b"), c("c5945f"), c("d9ae7a")],
@@ -157,90 +157,143 @@ def linea(img, x0, y0, x1, y1, color):
 
 
 # ----------------------------------------------------------------------------
-# Texturas de suelo (opacas, sin costuras)
+# Texturas de suelo (opacas, sin costuras): mucho color plano, manchas grandes y detalles AGRUPADOS
 # ----------------------------------------------------------------------------
-def tex_hierba(semilla, flores=0):
+def limpiar(img):
+    """Quita los píxeles sueltos: un píxel distinto a sus 4 vecinos (que son iguales entre sí) se funde con ellos."""
+    px = img.load()
+    out = img.copy()
+    po = out.load()
+    for y in range(T):
+        for x in range(T):
+            vec = [px[(x + 1) % T, y], px[(x - 1) % T, y], px[x, (y + 1) % T], px[x, (y - 1) % T]]
+            if px[x, y] not in vec:
+                for v in vec:
+                    if vec.count(v) >= 3:
+                        po[x, y] = v
+                        break
+    return out
+
+
+def base_manchas(semilla, rampa, escalas=(3, 6), umbral=(0.40, 0.60)):
+    """Fondo plano con dos o tres manchas grandes de los tonos vecinos (sin trama ni ruido fino).
+    rampa: [oscuro, medio, claro]."""
+    n1 = RuidoPeriodico(semilla, escalas[0])
+    n2 = RuidoPeriodico(semilla + 101, escalas[1])
+    img = nuevo()
+    for y in range(T):
+        for x in range(T):
+            v = 0.65 * n1(x, y) + 0.35 * n2(x, y)
+            idx = 0 if v < umbral[0] else 2 if v > umbral[1] else 1
+            poner(img, x, y, rampa[idx])
+    return limpiar(img)
+
+
+def mata(img, x, y, claro, oscuro):
+    """Mata de hierba de 3 px de ancho: una 'V' clara con la base más oscura."""
+    poner(img, x - 1, y - 2, claro)
+    poner(img, x - 1, y - 1, claro)
+    poner(img, x, y - 1, claro)
+    poner(img, x + 1, y - 2, claro)
+    poner(img, x + 1, y - 1, claro)
+    poner(img, x, y, oscuro)
+
+
+def racimo_flores(img, r, x, y, colores, centro, cantidad):
+    """Un racimo de 3 a 5 florecitas muy juntas."""
+    for i in range(cantidad):
+        fx = x + r.randint(-4, 4)
+        fy = y + r.randint(-3, 3)
+        flor(img, fx, fy, r.choice(colores), centro)
+
+
+def tex_hierba(semilla, tono=1, flores=0, matas=3, piedras=0):
+    """tono 0 = oscura, 1 = media, 2 = clara. La variación grande se reparte en Mundo.gd con ruido."""
     r = random.Random(semilla)
-    img = base_ruidosa(semilla, P["hierba"], contraste=1.0, escalas=(8, 16))
-    for _ in range(15):  # mechones: dos píxeles verticales claros
-        x, y = r.randrange(T), r.randrange(T)
-        poner(img, x, y, P["hierba_clara"])
-        poner(img, x, y - 1, P["hierba_oro"] if r.random() < 0.3 else P["hierba_clara"])
-    puntos(img, r, 9, [P["hierba_oscura"]])
-    puntos(img, r, 3, [P["hierba_oro"]])  # puntitos dorados
-    for _ in range(flores):
-        x, y = r.randrange(2, T - 2), r.randrange(2, T - 2)
-        flor(img, x, y, r.choice([P["flor_rosa"], P["flor_lila"], P["flor_crema"]]), P["flor_oro"])
+    h = P["hierba"]
+    rampas = {0: [h[0], h[1], h[1]], 1: [h[1], h[1], h[2]], 2: [h[1], h[2], h[2]]}
+    img = base_manchas(semilla, [P["hierba_oscura"], h[0], h[1]] if tono == 0 else [h[0], h[1], h[2]] if tono == 1
+                       else [h[1], h[2], P["hierba"][3]])
+    claro = [h[2], h[3], P["hierba"][3]][tono]
+    oscuro = [P["hierba_oscura"], h[0], h[1]][tono]
+    for _ in range(matas):
+        mata(img, r.randrange(3, T - 3), r.randrange(4, T - 2), claro, oscuro)
+    for _ in range(piedras):
+        piedrita(img, r.randrange(2, T - 3), r.randrange(2, T - 3), P["roca"][3], P["roca"][1])
+    if flores:
+        racimo_flores(img, r, r.randrange(6, T - 6), r.randrange(6, T - 6),
+                      [P["flor_rosa"], P["flor_lila"], P["flor_crema"]], P["flor_oro"], flores)
     return img
 
 
 def tex_seco(semilla):
     r = random.Random(semilla)
-    img = base_ruidosa(semilla, P["seco"], contraste=1.0, escalas=(8, 16))
-    for _ in range(14):
-        x, y = r.randrange(T), r.randrange(T)
-        poner(img, x, y, P["seco_claro"])
-        poner(img, x + 1, y - 1, P["seco_claro"])
-    puntos(img, r, 10, [P["seco_oscuro"]])
+    s = P["seco"]
+    img = base_manchas(semilla, [s[0], s[1], s[2]])
+    for _ in range(3):
+        mata(img, r.randrange(3, T - 3), r.randrange(4, T - 2), s[3], P["seco_oscuro"])
     return img
 
 
 def tex_camino(semilla):
     r = random.Random(semilla)
-    img = base_ruidosa(semilla, P["tierra"], contraste=1.15)
-    for _ in range(5):
-        piedrita(img, r.randrange(T), r.randrange(T), P["tierra_clara"], P["tierra_oscura"])
-    puntos(img, r, 12, [P["tierra_oscura"], P["tierra_clara"]])
+    t = P["tierra"]
+    img = base_manchas(semilla, [t[0], t[1], t[2]], escalas=(3, 5), umbral=(0.38, 0.64))
+    for _ in range(2):
+        piedrita(img, r.randrange(2, T - 3), r.randrange(2, T - 3), P["tierra_clara"], P["tierra_oscura"])
+    for _ in range(2):  # arañazos cortos agrupados (2 px)
+        x, y = r.randrange(2, T - 4), r.randrange(2, T - 3)
+        poner(img, x, y, P["tierra_oscura"])
+        poner(img, x + 1, y, P["tierra_oscura"])
     return img
 
 
 def tex_arena(semilla):
     r = random.Random(semilla)
-    img = base_ruidosa(semilla, P["arena"], contraste=1.0, dither=0.2)
-    for _ in range(6):  # pequeñas ondas de viento
-        x, y = r.randrange(T), r.randrange(T)
+    a = P["arena"]
+    img = base_manchas(semilla, [a[0], a[1], a[2]], escalas=(3, 5), umbral=(0.38, 0.64))
+    for _ in range(3):  # ondas de viento de 3 px
+        x, y = r.randrange(2, T - 5), r.randrange(2, T - 2)
         linea(img, x, y, x + 3, y, P["arena_oscura"])
-        linea(img, x + 1, y + 1, x + 4, y + 1, P["arena_clara"])
-    puntos(img, r, 8, [P["arena_oscura"], P["arena_clara"]])
+    for _ in range(2):
+        piedrita(img, r.randrange(2, T - 3), r.randrange(2, T - 3), P["arena_clara"], P["arena_oscura"])
     return img
 
 
 def tex_roja(semilla):
     r = random.Random(semilla)
-    img = base_ruidosa(semilla, P["roja"], contraste=1.05, escalas=(8, 16))
-    for _ in range(4):
-        x, y = r.randrange(T), r.randrange(T)
-        linea(img, x, y, x + r.randint(3, 6), y + r.randint(-2, 2), P["roja_oscura"])  # grietas
-    for _ in range(5):
-        piedrita(img, r.randrange(T), r.randrange(T), P["roja_clara"], P["roja_oscura"])
+    ro = P["roja"]
+    img = base_manchas(semilla, [ro[0], ro[1], ro[2]], escalas=(3, 6))
+    for _ in range(2):
+        x, y = r.randrange(2, T - 8), r.randrange(4, T - 4)
+        linea(img, x, y, x + r.randint(4, 6), y + r.randint(-1, 1), P["roja_oscura"])  # grieta
+    piedrita(img, r.randrange(2, T - 3), r.randrange(2, T - 3), P["roja_clara"], P["roja_oscura"])
     return img
 
 
 def tex_volcanico(semilla):
     r = random.Random(semilla)
-    img = base_ruidosa(semilla, P["volcan"], contraste=1.05, escalas=(8, 16))
-    for _ in range(3):  # grietas de lava con brillo
-        x, y = r.randrange(T), r.randrange(T)
-        for _ in range(r.randint(4, 7)):
-            nx, ny = x + r.choice([-1, 0, 1, 2]), y + r.choice([-1, 0, 1])
+    v = P["volcan"]
+    img = base_manchas(semilla, [v[0], v[1], v[2]], escalas=(3, 6))
+    for _ in range(2):  # grietas de lava agrupadas, con brillo
+        x, y = r.randrange(4, T - 8), r.randrange(4, T - 4)
+        for _ in range(r.randint(4, 6)):
+            nx, ny = x + r.choice([1, 1, 2]), y + r.choice([-1, 0, 1])
             linea(img, x, y, nx, ny, P["lava"])
-            if r.random() < 0.5:
-                poner(img, x, y, P["lava_clara"])
+            poner(img, x, y - 1, P["lava_clara"]) if r.random() < 0.4 else None
             x, y = nx, ny
-    puntos(img, r, 3, [P["brasa"]])
-    puntos(img, r, 8, [P["roca_oscura"]])
     return img
 
 
 def tex_bosque(semilla):
     r = random.Random(semilla)
-    img = base_ruidosa(semilla, P["bosque"], contraste=1.0, escalas=(8, 16))
-    for _ in range(14):  # hojarasca
-        x, y = r.randrange(T), r.randrange(T)
+    b = P["bosque"]
+    img = base_manchas(semilla, [b[0], b[1], b[2]], escalas=(3, 6))
+    for _ in range(3):  # hojarasca en parejas
+        x, y = r.randrange(2, T - 3), r.randrange(2, T - 3)
         col = r.choice(P["bosque_hoja"])
         poner(img, x, y, col)
         poner(img, x + 1, y, col)
-    puntos(img, r, 10, [P["bosque_oscuro"]], largo=2)
     return img
 
 
@@ -322,40 +375,38 @@ def tex_roca():
 
 
 def tex_acantilado_cara(semilla):
+    """Cara del acantilado: bandas verticales planas de 3 tonos, borde superior iluminado y
+    una sombra de 2 px más oscura al pie."""
     r = random.Random(semilla)
-    cols = RuidoPeriodico(semilla, 8)
-    ruido = RuidoPeriodico(semilla + 3, 4)
+    cols = RuidoPeriodico(semilla, 6)
     img = nuevo()
+    ro = P["roca"]
     for y in range(T):
         for x in range(T):
-            v = 0.55 * cols(x, 3) + 0.25 * ruido(x, y) + 0.2 * (1 - y / T)
-            v += (BAYER[y % 4][x % 4] / 16.0 - 0.5) * 0.15
-            idx = max(0, min(3, int(v * 4)))
-            poner(img, x, y, P["roca"][idx])
+            v = cols(x * 0.7 + (y // 9) * 3, 3)
+            poner(img, x, y, ro[0] if v < 0.40 else ro[2] if v > 0.62 else ro[1])
+    img = limpiar(img)
     for x in range(T):  # borde superior iluminado
         poner(img, x, 0, P["roca_clara"])
-        poner(img, x, 1, P["roca"][3])
-    for _ in range(5):  # grietas verticales
-        x, y = r.randrange(T), r.randrange(4, 22)
-        linea(img, x, y, x, y + r.randint(3, 7), P["roca_oscura"])
-    for y in range(24, T):  # sombra al pie
-        for x in range(T):
-            f = (y - 23) / 9.0
-            base = img.getpixel((x, y))[:3]
-            poner(img, x, y, tuple(int(base[i] * (1 - f * 0.5) + P["sombra"][i] * f * 0.5) for i in range(3)))
-    for x in range(T):
+        poner(img, x, 1, ro[3])
+    for _ in range(3):  # grietas verticales de 4 a 6 px
+        x, y = r.randrange(3, T - 3), r.randrange(4, 18)
+        linea(img, x, y, x, y + r.randint(4, 6), P["roca_oscura"])
+    for x in range(T):  # sombra al pie: 2 px más oscuros
+        poner(img, x, T - 2, P["sombra"])
         poner(img, x, T - 1, P["contorno"])
     return img
 
 
 def tex_acantilado_cima(semilla):
+    """Parte alta del acantilado: roca plana con manchas y alguna piedrita."""
     r = random.Random(semilla)
-    img = base_ruidosa(semilla, P["roca"], contraste=1.3)
-    for _ in range(5):
-        x, y = r.randrange(T), r.randrange(T)
-        linea(img, x, y, x + r.randint(-5, 5), y + r.randint(-3, 3), P["roca_oscura"])
-    puntos(img, r, 6, [P["roca_clara"]])
-    puntos(img, r, 3, [P["hierba"][1]])  # liquen
+    ro = P["roca"]
+    img = base_manchas(semilla, [ro[1], ro[2], ro[3]], escalas=(3, 5), umbral=(0.36, 0.66))
+    for _ in range(2):
+        x, y = r.randrange(2, T - 6), r.randrange(2, T - 3)
+        linea(img, x, y, x + r.randint(3, 5), y + r.randint(-1, 1), P["roca_oscura"])
+    piedrita(img, r.randrange(2, T - 3), r.randrange(2, T - 3), P["roca_clara"], ro[1])
     return img
 
 
@@ -396,6 +447,15 @@ def tex_muro(semilla, remate=True):
     return img
 
 
+def tex_sombra():
+    """Sombra suave de 2 px (más una franja débil) que cae bajo muros y acantilados sobre el suelo."""
+    img = nuevo()
+    for y, alfa in ((0, 95), (1, 80), (2, 38)):
+        for x in range(T):
+            poner(img, x, y, P["sombra"], alfa)
+    return img
+
+
 def tex_puente(roto=None):
     """Puente de madera horizontal (se cruza de izquierda a derecha). roto: None, 'izq' o 'der'."""
     img = nuevo()
@@ -430,19 +490,19 @@ def tex_puente(roto=None):
 # Agua animada (4 cuadros)
 # ----------------------------------------------------------------------------
 def tex_agua(cuadro, variante=0):
+    """Agua de colores casi planos con manchas grandes y 3 destellos de 2 px que se desplazan cada cuadro."""
     r = random.Random(5 + variante * 13)
-    img = base_ruidosa(31 + variante * 17, P["agua"], contraste=0.9, dither=0.2)
-    ondas = [(r.randrange(T), r.randrange(T), r.randint(4, 8)) for _ in range(7)]
-    for (x, y, largo) in ondas:  # las ondas se desplazan 8 px por cuadro
-        xx = x + cuadro * 8
-        linea(img, xx, y, xx + largo, y, P["agua_clara"])
-        linea(img, xx + 2, y + 1, xx + largo - 1, y + 1, P["agua"][3])
-    destellos = [(r.randrange(T), r.randrange(T)) for _ in range(12)]
-    for i, (x, y) in enumerate(destellos):
-        if (i + cuadro) % 4 == 0:
-            poner(img, x, y, P["agua_espuma"])
-    for _ in range(6):
-        poner(img, r.randrange(T), r.randrange(T), P["agua_oscura"])
+    a = P["agua"]
+    img = base_manchas(31 + variante * 17, [a[0], a[1], a[2]], escalas=(3, 5), umbral=(0.38, 0.64))
+    for i in range(3):  # destellos: 2 px claros que se mueven 6 px a la derecha por cuadro
+        x, y = r.randrange(T), r.randrange(2, T - 2)
+        xx = x + cuadro * 6
+        poner(img, xx, y, P["agua_clara"])
+        poner(img, xx + 1, y, P["agua_clara"])
+    for _ in range(2):  # rayitas oscuras cortas, fijas
+        x, y = r.randrange(T), r.randrange(T)
+        poner(img, x, y, P["agua_oscura"])
+        poner(img, x + 1, y, P["agua_oscura"])
     return img
 
 
@@ -485,12 +545,12 @@ class Borde:
         return self.a * (0.6 * math.sin(2 * math.pi * 2 * t / T + self.f1) + 0.4 * math.sin(2 * math.pi * 5 * t / T + self.f2))
 
 
-def mascara(b, margen, semilla):
+def mascara(b, margen, semilla, radio=10):
     """Máscara booleana TxT del terreno según sus vecinos. Los lados sin vecino se retiran
-    'margen' píxeles con un borde irregular; las esquinas se redondean."""
+    'margen' píxeles con un borde que ondula muy poco; las esquinas se redondean con un radio grande
+    (así los caminos y las orillas no hacen escalones)."""
     r = random.Random(semilla)
-    bn = {k: Borde(r.uniform(0, 6.28), r.uniform(0, 6.28), 1.7) for k in "NSEO"}  # un ruido por lado, igual en todos los tiles
-    radio = margen
+    bn = {k: Borde(r.uniform(0, 6.28), r.uniform(0, 6.28), 0.9) for k in "NSEO"}  # un ruido por lado, igual en todos los tiles
     m = [[True] * T for _ in range(T)]
     for y in range(T):
         for x in range(T):
@@ -517,14 +577,17 @@ def mascara(b, margen, semilla):
             for (esq, lx, ly, ex, ey) in (("NO", "O", "N", 0, 0), ("NE", "E", "N", T, 0),
                                          ("SO", "O", "S", 0, T), ("SE", "E", "S", T, T)):
                 if b[lx] and b[ly] and not b[esq]:
-                    if math.hypot(px - ex, py - ey) < radio + 0.8 * math.sin(math.atan2(py - ey, px - ex) * 5):
+                    if math.hypot(px - ex, py - ey) < margen + radio * 0.55:
                         dentro = False
             m[y][x] = dentro
     return m
 
 
-def componer_autotile(textura, b, margen, color_borde, color_interior, semilla):
-    """Recorta 'textura' con la máscara y dibuja el contorno suave en el borde."""
+def componer_autotile(textura, b, margen, color_borde, color_interior, semilla, estilo="tierra"):
+    """Recorta 'textura' con la máscara y dibuja el borde.
+    estilo 'tierra': línea de 1 px más oscura donde la hierba se monta sobre el camino o la arena,
+                     con algunas hojas de hierba que asoman 1 px hacia dentro.
+    estilo 'agua':   espuma clara en la orilla y una sombra suave de 2 px más oscura por fuera."""
     m = mascara(b, margen, semilla)
 
     def adentro(x, y):
@@ -540,19 +603,44 @@ def componer_autotile(textura, b, margen, color_borde, color_interior, semilla):
             return b["S"]
         return True
 
+    def cerca_fuera(x, y, d):
+        """¿Hay un píxel de fuera de la máscara a distancia (4-vecinos) <= d?"""
+        for k in range(1, d + 1):
+            for dx, dy in ((k, 0), (-k, 0), (0, k), (0, -k)):
+                if not adentro(x + dx, y + dy):
+                    return k
+        return 0
+
     img = nuevo()
     for y in range(T):
         for x in range(T):
             if not m[y][x]:
+                if estilo == "agua":  # sombra suave de 2 px por fuera de la orilla
+                    k = 0
+                    for dist in (1, 2):
+                        for dx, dy in ((dist, 0), (-dist, 0), (0, dist), (0, -dist)):
+                            if 0 <= x + dx < T and 0 <= y + dy < T and m[y + dy][x + dx]:
+                                k = dist
+                                break
+                        if k:
+                            break
+                    if k:
+                        img.putpixel((x, y), tuple(P["contorno"]) + (95 if k == 1 else 50,))
                 continue
-            borde = any(not adentro(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
-            if borde:
+            k = cerca_fuera(x, y, 2)
+            if estilo == "agua":
+                if k == 1:
+                    espuma = ((x * 7 + y * 5 + semilla) % 5) != 0  # la espuma tiene pequeños cortes
+                    img.putpixel((x, y), tuple(P["agua_espuma"] if espuma else P["agua_clara"]) + (255,))
+                elif k == 2 and (x + y) % 3 == 0:
+                    img.putpixel((x, y), tuple(P["agua_clara"]) + (255,))
+                else:
+                    img.putpixel((x, y), textura.getpixel((x, y)))
+                continue
+            if k == 1:
                 img.putpixel((x, y), tuple(color_borde) + (255,))
-                continue
-            segundo = color_interior is not None and any(
-                not adentro(x + dx, y + dy) for dx, dy in ((2, 0), (-2, 0), (0, 2), (0, -2), (1, 1), (-1, -1), (1, -1), (-1, 1)))
-            if segundo and (x + y) % 2 == 0:
-                img.putpixel((x, y), tuple(color_interior) + (255,))
+            elif k == 2 and color_interior is not None and (x * 3 + y * 7 + semilla) % 7 == 0:
+                img.putpixel((x, y), tuple(color_interior) + (255,))  # hojita de hierba que asoma
             else:
                 img.putpixel((x, y), textura.getpixel((x, y)))
     return img
@@ -584,6 +672,113 @@ def apagar(img):
     return out
 
 
+
+# ----------------------------------------------------------------------------
+# Decoración suelta de 16x16: matas, flores, piedritas y hojas (se reparten con ruido en Mundo.gd)
+# ----------------------------------------------------------------------------
+D = 16
+
+
+def pd(img, x, y, color):
+    if 0 <= x < D and 0 <= y < D:
+        img.putpixel((x, y), tuple(color[:3]) + (255,))
+
+
+def det_mata(semilla):
+    """Mata de hierba: 3 o 4 puntas juntas, con la base más oscura."""
+    r = random.Random(semilla)
+    img = Image.new("RGBA", (D, D), (0, 0, 0, 0))
+    h = P["hierba"]
+    for i in range(r.randint(3, 4)):
+        x = 4 + i * 3 + r.randint(-1, 0)
+        alto = r.randint(3, 5)
+        for k in range(alto):
+            pd(img, x + (1 if k == alto - 1 and i % 2 else 0), 12 - k, h[3] if k >= alto - 2 else h[2])
+        pd(img, x, 13, P["hierba_oscura"])
+    return img
+
+
+def det_flores(semilla, color):
+    """Racimo de 3 florecitas con hojas verdes."""
+    r = random.Random(semilla)
+    img = Image.new("RGBA", (D, D), (0, 0, 0, 0))
+    h = P["hierba"]
+    sitios = [(4, 10), (9, 7), (11, 11)]
+    for (x, y) in sitios:
+        pd(img, x, y + 2, h[1])
+        pd(img, x, y + 1, h[2])
+        pd(img, x - 1, y + 2, h[2])
+        pd(img, x + 1, y + 2, h[2])
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            pd(img, x + dx, y + dy, color)
+        pd(img, x, y, P["flor_oro"])
+    return img
+
+
+def det_piedras(semilla):
+    """Tres piedritas de 2x2 (o 3x2) con luz arriba y sombra abajo."""
+    r = random.Random(semilla)
+    img = Image.new("RGBA", (D, D), (0, 0, 0, 0))
+    for (x, y, ancho) in ((3, 9, 3), (9, 6, 2), (10, 11, 2)):
+        for dx in range(ancho):
+            pd(img, x + dx, y, P["roca"][3] if dx < ancho - 1 else P["roca"][2])
+            pd(img, x + dx, y + 1, P["roca"][1])
+        pd(img, x + 1, y + 2, P["contorno"])
+        pd(img, x + ancho - 1, y + 2, P["contorno"])
+    return img
+
+
+def det_hojas(semilla, colores, secas=False):
+    """Dos o tres hojas caídas (Pasado, de colores) u hojas secas (Presente, curvadas y apagadas)."""
+    r = random.Random(semilla)
+    img = Image.new("RGBA", (D, D), (0, 0, 0, 0))
+    sitios = [(3, 9), (8, 5), (9, 11)]
+    for i, (x, y) in enumerate(sitios[:r.randint(2, 3)]):
+        col = colores[(i + semilla) % len(colores)]
+        osc = tuple(int(v * 0.7) for v in col)
+        if secas:
+            for dx, dy in ((0, 1), (1, 0), (2, 0), (3, 1)):
+                pd(img, x + dx, y + dy, col)
+            pd(img, x + 1, y + 1, osc)
+        else:
+            for dx, dy in ((0, 1), (1, 0), (1, 1), (2, 0), (2, 1)):
+                pd(img, x + dx, y + dy, col)
+            pd(img, x + 1, y + 1, osc)  # nervio
+    return img
+
+
+def construir_detalles():
+    """Hoja de detalles (Pasado y Presente). Devuelve (png_pasado, png_presente, info)."""
+    h = P["hierba"]
+    hojas_vivas = [c("e0833a"), c("e2b54a"), c("c8604a"), c("d99a52")]
+    hojas_secas = [c("8a6a45"), c("7a6048"), c("96794f"), c("6e5a44")]
+    nombres = []
+    celdas = []
+    for i in range(4):
+        nombres.append(("matas", len(celdas)))
+        celdas.append((det_mata(100 + i), det_mata(100 + i)))
+    for i, col in enumerate((P["flor_rosa"], P["flor_lila"], P["flor_crema"], P["flor_oro"])):
+        nombres.append(("flores", len(celdas)))
+        celdas.append((det_flores(200 + i, col), det_flores(200 + i, col)))
+    for i in range(3):
+        nombres.append(("piedras", len(celdas)))
+        celdas.append((det_piedras(300 + i), det_piedras(300 + i)))
+    for i in range(4):
+        nombres.append(("hojas", len(celdas)))
+        celdas.append((det_hojas(400 + i, hojas_vivas), det_hojas(400 + i, hojas_secas, secas=True)))
+    columnas = 8
+    filas = (len(celdas) + columnas - 1) // columnas
+    pasado = Image.new("RGBA", (columnas * D, filas * D), (0, 0, 0, 0))
+    presente = Image.new("RGBA", (columnas * D, filas * D), (0, 0, 0, 0))
+    info = {"tamano": D, "grupos": {}}
+    for i, (img_p, img_s) in enumerate(celdas):
+        pasado.paste(img_p, ((i % columnas) * D, (i // columnas) * D))
+        presente.paste(img_s, ((i % columnas) * D, (i // columnas) * D))
+    for grupo, i in nombres:
+        info["grupos"].setdefault(grupo, []).append([i % columnas, i // columnas])
+    return pasado, apagar(presente), info
+
+
 # ----------------------------------------------------------------------------
 # Ensamblado del atlas
 # ----------------------------------------------------------------------------
@@ -597,8 +792,9 @@ def construir():
 
     # fila 0: suelos
     lista0 = [
-        ("hierba_0", tex_hierba(1)), ("hierba_1", tex_hierba(2)), ("hierba_2", tex_hierba(3)), ("hierba_3", tex_hierba(4)),
-        ("hierba_flores_0", tex_hierba(5, flores=5)), ("hierba_flores_1", tex_hierba(6, flores=6)),
+        ("hierba_0", tex_hierba(1, matas=3)), ("hierba_1", tex_hierba(2, matas=2)), ("hierba_2", tex_hierba(3, matas=4)),
+        ("hierba_3", tex_hierba(4, matas=2, piedras=1)),
+        ("hierba_flores_0", tex_hierba(5, matas=2, flores=4)), ("hierba_flores_1", tex_hierba(6, matas=1, flores=5)),
         ("pasto_seco_0", tex_seco(7)), ("pasto_seco_1", tex_seco(8)),
         ("tierra_roja_0", tex_roja(9)), ("tierra_roja_1", tex_roja(10)),
         ("volcanico_0", tex_volcanico(11)), ("volcanico_1", tex_volcanico(12)),
@@ -631,8 +827,8 @@ def construir():
     # camino (filas 3-5) y arena (filas 6-8)
     tex_c, tex_a = tex_camino(41), tex_arena(42)
     for nombre, tex, fila0, margen, borde, inter, sem in (
-            ("camino", tex_c, 3, 5, P["borde_camino"], P["tierra"][0], 100),
-            ("arena", tex_a, 6, 6, P["borde_arena"], P["arena"][0], 200)):
+            ("camino", tex_c, 3, 5, P["borde_camino"], P["hierba"][2], 100),
+            ("arena", tex_a, 6, 6, P["borde_arena"], P["hierba"][2], 200)):
         tiles = []
         for j, b in enumerate(pats):
             col, fila = j % COLUMNAS, fila0 + j // COLUMNAS
@@ -646,7 +842,7 @@ def construir():
     for j, b in enumerate(pats):
         col0, fila = (j % 4) * 4, 9 + j // 4
         for f in range(4):
-            piezas.append((col0 + f, fila, componer_autotile(cuadros[f], b, 6, P["borde_agua"], P["agua_clara"], 300)))
+            piezas.append((col0 + f, fila, componer_autotile(cuadros[f], b, 6, P["borde_agua"], P["agua_clara"], 300, "agua")))
         tiles.append({"coords": [col0, fila], "bits": bits_json(b)})
     info_auto["agua"] = {"tiles": tiles, "cuadros": 4}
 
@@ -655,8 +851,8 @@ def construir():
     llena = next(b for b in pats if all(b[k] for k in LADOS))
     col_v = 0
     for nombre, fn, semillas, margen, borde, inter, sem in (
-            ("camino", tex_camino, (51, 61), 5, P["borde_camino"], P["tierra"][0], 100),
-            ("arena", tex_arena, (52, 62), 6, P["borde_arena"], P["arena"][0], 200)):
+            ("camino", tex_camino, (51, 61), 5, P["borde_camino"], P["hierba"][2], 100),
+            ("arena", tex_arena, (52, 62), 6, P["borde_arena"], P["hierba"][2], 200)):
         for semilla in semillas:
             piezas.append((col_v, 21, componer_autotile(fn(semilla), llena, margen, borde, inter, sem)))
             info_auto[nombre]["tiles"].append({"coords": [col_v, 21], "bits": bits_json(llena), "variante": True})
@@ -664,10 +860,19 @@ def construir():
     for v in (1, 2):
         col0 = (v - 1) * 4
         for f in range(4):
-            piezas.append((col0 + f, 22, componer_autotile(tex_agua(f, v), llena, 6, P["borde_agua"], P["agua_clara"], 300)))
+            piezas.append((col0 + f, 22, componer_autotile(tex_agua(f, v), llena, 6, P["borde_agua"], P["agua_clara"], 300, "agua")))
         info_auto["agua"]["tiles"].append({"coords": [col0, 22], "bits": bits_json(llena), "variante": True})
 
-    filas_total = 23
+    # fila 23: variantes de hierba (más oscura y más clara) y la sombra que cae bajo muros y acantilados
+    extra = [
+        ("hierba_oscura_0", tex_hierba(71, 0, matas=2)), ("hierba_oscura_1", tex_hierba(72, 0, matas=3)),
+        ("hierba_clara_0", tex_hierba(73, 2, matas=2)), ("hierba_clara_1", tex_hierba(74, 2, matas=3, flores=3)),
+        ("sombra_s", tex_sombra()),
+    ]
+    for i, (nombre, img) in enumerate(extra):
+        poner_tile(nombre, i, 23, img)
+
+    filas_total = 24
     atlas = Image.new("RGBA", (COLUMNAS * T, filas_total * T), (0, 0, 0, 0))
     for (col, fila, img) in piezas:
         atlas.paste(img, (col * T, fila * T))
@@ -683,6 +888,12 @@ def main():
     apagar(atlas).save(ruta_presente)
     with open(os.path.join(RAIZ, "tools", "tileset_info.json"), "w", encoding="utf-8") as f:
         json.dump(info, f, indent=1, ensure_ascii=False)
+    d_pasado, d_presente, d_info = construir_detalles()
+    d_pasado.save(os.path.join(SALIDA, "detalles_pasado.png"))
+    d_presente.save(os.path.join(SALIDA, "detalles_presente.png"))
+    with open(os.path.join(RAIZ, "tools", "detalles_info.json"), "w", encoding="utf-8") as f:
+        json.dump(d_info, f, indent=1, ensure_ascii=False)
+    print("Detalles 16x16 -> detalles_pasado.png / detalles_presente.png")
     print("Atlas %dx%d  ->  %s" % (atlas.width, atlas.height, ruta_pasado))
     print("Presente      ->  %s" % ruta_presente)
     print("Tiles base: %d | autotiles: %s" % (len(info["base"]), {k: len(v["tiles"]) for k, v in info["autotiles"].items()}))

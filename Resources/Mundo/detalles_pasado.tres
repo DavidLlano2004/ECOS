@@ -1,0 +1,41 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Mundo/detalles_pasado.png" id="1_kusuu"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s7s7g"]
+texture = ExtResource("1_kusuu")
+0:0/0 = 0
+0:0/0/custom_data_0 = "matas"
+1:0/0 = 0
+1:0/0/custom_data_0 = "matas"
+2:0/0 = 0
+2:0/0/custom_data_0 = "matas"
+3:0/0 = 0
+3:0/0/custom_data_0 = "matas"
+4:0/0 = 0
+4:0/0/custom_data_0 = "flores"
+5:0/0 = 0
+5:0/0/custom_data_0 = "flores"
+6:0/0 = 0
+6:0/0/custom_data_0 = "flores"
+7:0/0 = 0
+7:0/0/custom_data_0 = "flores"
+0:1/0 = 0
+0:1/0/custom_data_0 = "piedras"
+1:1/0 = 0
+1:1/0/custom_data_0 = "piedras"
+2:1/0 = 0
+2:1/0/custom_data_0 = "piedras"
+3:1/0 = 0
+3:1/0/custom_data_0 = "hojas"
+4:1/0 = 0
+4:1/0/custom_data_0 = "hojas"
+5:1/0 = 0
+5:1/0/custom_data_0 = "hojas"
+6:1/0 = 0
+6:1/0/custom_data_0 = "hojas"
+
+[resource]
+custom_data_layer_0/name = "grupo"
+custom_data_layer_0/type = 4
+sources/0 = SubResource("TileSetAtlasSource_s7s7g")

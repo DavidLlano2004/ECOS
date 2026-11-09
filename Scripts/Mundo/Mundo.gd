@@ -24,18 +24,32 @@ const TERRENO_ARENA := 1
 const TERRENO_AGUA := 2
 
 const PROP := preload("res://Scenes/Objetos/Prop.tscn")
+## Decoración suelta de 16x16 (matas, flores, piedritas y hojas) de cada época.
+const DETALLES := {
+	"Pasado": preload("res://Resources/Mundo/detalles_pasado.tres"),
+	"Presente": preload("res://Resources/Mundo/detalles_presente.tres"),
+}
+const TEXTURA_LUZ := preload("res://Resources/Mundo/luz_calida.tres")
+const VINETA := preload("res://Shaders/vineta.gdshader")
+## Color del ambiente: atardecer cálido en el Pasado y frío en el Presente (CanvasModulate).
+const COLOR_PASADO := Color(1.0, 0.87, 0.72)
+const COLOR_PRESENTE := Color(0.74, 0.83, 1.0)
+## Casillas que no son suelo libre: no llevan sombra debajo y no se les pone decoración encima.
+const OCUPADAS := "CMRXTwPqQ"
 
 ## Caracteres que son agua (el puente va sobre agua).
 const AGUA := "wPqQ"
 
-@export_tool_button("Reconstruir mapa", "Reload") var _boton_reconstruir: Callable = construir_mapa
+@export_tool_button("Reconstruir mapa", "Reload") var _boton_reconstruir: Callable = reconstruir_todo
 
 var _epoca_actual := "pasado"
+var _puestos: Array[Dictionary] = []   # props colocados (los usa la decoración suelta)
+var _ruido_hierba := FastNoiseLite.new()
+var _modulador: CanvasModulate
 
 
 func _ready() -> void:
-	construir_mapa()
-	colocar_props()
+	reconstruir_todo()
 	if Engine.is_editor_hint():
 		return
 	GameState.epoca_cambiada.connect(mostrar_epoca)
@@ -44,6 +58,15 @@ func _ready() -> void:
 		jugador.global_position = posicion_zona("Hub")
 		jugador.establecer_limites(LIMITES)  # el mundo es quien define hasta dónde puede ver la cámara
 	mostrar_epoca(GameState.epoca)
+
+
+## Reconstruye todo lo que se genera por código: mapa, props, decoración suelta y ambiente.
+func reconstruir_todo() -> void:
+	construir_mapa()
+	colocar_props()
+	construir_detalles()
+	_crear_ambiente()
+	_aplicar_ambiente(_epoca_actual == "pasado", false)
 
 
 func _unhandled_input(evento: InputEvent) -> void:
@@ -87,6 +110,7 @@ func mostrar_epoca(epoca: String) -> void:
 	presente.visible = not es_pasado
 	_activar_colisiones(pasado, es_pasado)
 	_activar_colisiones(presente, not es_pasado)
+	_aplicar_ambiente(es_pasado, true)
 	var jugador := _jugador()
 	if jugador != null:
 		var destino: Node = (pasado if es_pasado else presente).get_node("Objetos")
@@ -163,6 +187,7 @@ func colocar_props() -> int:
 			posiciones.append(to_local(marcador.global_position))
 		marcadores[grupo] = posiciones
 	var puestos := Decorador.generar(filas, zonas, marcadores)
+	_puestos = puestos
 	for epoca in ["Pasado", "Presente"]:
 		var objetos := get_node_or_null("%s/Objetos" % epoca)
 		if objetos == null:
@@ -173,6 +198,7 @@ func colocar_props() -> int:
 		for puesto in puestos:
 			var prop := PROP.instantiate() as Prop
 			prop.tipo = puesto["tipo"]
+			prop.con_colision = not puesto.get("borde", false)
 			prop.name = "%s_%d" % [puesto["tipo"], objetos.get_child_count()]
 			prop.position = puesto["pos"]
 			objetos.add_child(prop)
@@ -200,6 +226,7 @@ func construir_mapa() -> void:
 		return
 	var pasado := get_node_or_null("Pasado")
 	var presente := get_node_or_null("Presente")
+	_preparar_ruido_hierba()
 	# Los terrenos eligen al azar entre las variantes de una pieza: se fija la semilla para que
 	# el mapa sea siempre igual, y luego se vuelve a aleatorizar para el resto del juego
 	seed(20240901)
@@ -242,7 +269,7 @@ func _vaciar_capas() -> void:
 
 func _capas_de(epoca: Node) -> Array[TileMapLayer]:
 	var capas: Array[TileMapLayer] = []
-	for ruta in ["Suelo", "Orilla", "Camino", "Agua", "Colision", "Objetos/Detalles"]:
+	for ruta in ["Suelo", "Orilla", "Camino", "Agua", "Sombras", "Colision", "Objetos/Detalles"]:
 		var capa := epoca.get_node_or_null(ruta) as TileMapLayer
 		if capa != null:
 			capas.append(capa)
@@ -257,6 +284,7 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 	var colision := epoca.get_node("Colision") as TileMapLayer
 	var detalles := epoca.get_node("Objetos/Detalles") as TileMapLayer
 	var tiles := _buscar_tiles(suelo.tile_set)
+	var sombras := _capa_extra(epoca, "Sombras", suelo.tile_set, "Colision")
 	for capa in _capas_de(epoca):
 		capa.clear()
 
@@ -275,6 +303,9 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 				celdas_agua.append(c)
 			if ch == "s" or AGUA.contains(ch):
 				celdas_arena.append(c)  # la arena va debajo del agua, así la orilla se ve natural
+			# Sombra suave de 2 px en el suelo justo debajo de muros y acantilados
+			if (ch == "C" or ch == "M") and y + 1 < TILES.y and not OCUPADAS.contains(filas[y + 1][x]):
+				sombras.set_cell(Vector2i(x, y + 1), 0, tiles["sombra_s"])
 			match ch:
 				"R":
 					detalles.set_cell(c, 0, tiles["roca"])
@@ -291,7 +322,7 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 					detalles.set_cell(c, 0, tiles["puente_roto_izq"])
 				"Q":
 					detalles.set_cell(c, 0, tiles["puente_roto_der"])
-				"X":
+				"X", "T":
 					colision.set_cell(c, 0, tiles["colision"])
 				"w":
 					if _es_agua_profunda(filas, x, y):
@@ -348,7 +379,13 @@ func _nombre_suelo(ch: String, x: int, y: int) -> String:
 			return "ruinas_%d" % _variante(x, y, 2)
 		"a":
 			return "adoquines_%d" % _variante(x, y, 2)
-	return "hierba_%d" % _variante(x, y, 4)  # el resto de casillas llevan hierba debajo
+	# El resto de casillas llevan hierba debajo: más oscura o más clara según el ruido de baja frecuencia
+	var tono := _ruido_hierba.get_noise_2d(x, y)
+	if tono < -0.2:
+		return "hierba_oscura_%d" % _variante(x, y, 2)
+	if tono > 0.28:
+		return "hierba_clara_%d" % _variante(x, y, 2)
+	return "hierba_%d" % _variante(x, y, 4)
 
 
 ## Variante "al azar" pero siempre la misma para la misma casilla (así el mapa no cambia entre ejecuciones).
@@ -372,7 +409,7 @@ func _buscar_tiles(tileset: TileSet) -> Dictionary:
 ## el mapa, así que se toma el más común entre sus vecinas (una roca sobre tierra roja lleva tierra roja debajo).
 func _suelo_de(filas: PackedStringArray, x: int, y: int) -> String:
 	var ch := filas[y][x]
-	if not "RCMX".contains(ch):
+	if not "RCMXT".contains(ch):
 		return ch if "fdrvbua.".contains(ch) else "."  # arena, camino y agua llevan hierba debajo
 	var votos := {}
 	for dy in range(-1, 2):
@@ -391,3 +428,177 @@ func _suelo_de(filas: PackedStringArray, x: int, y: int) -> String:
 			mejor = clave
 			mejor_votos = votos[clave]
 	return mejor
+
+
+# --- Variación de la hierba, decoración suelta y ambiente ---
+
+## Ruido de baja frecuencia: reparte zonas de hierba más clara y más oscura (siempre las mismas).
+func _preparar_ruido_hierba() -> void:
+	_ruido_hierba.seed = 7
+	_ruido_hierba.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	_ruido_hierba.frequency = 0.04
+
+
+## Devuelve la capa hija `nombre` de `padre`; si no existe la crea (sin dueño, así no se guarda en la
+## escena) y la deja justo antes del nodo `antes_de`.
+func _capa_extra(padre: Node, nombre: String, tileset: TileSet, antes_de: String) -> TileMapLayer:
+	var capa := padre.get_node_or_null(nombre) as TileMapLayer
+	if capa == null:
+		capa = TileMapLayer.new()
+		capa.name = nombre
+		capa.tile_set = tileset
+		padre.add_child(capa)
+		var referencia := padre.get_node_or_null(antes_de)
+		if referencia != null:
+			padre.move_child(capa, referencia.get_index())
+	return capa
+
+
+## Reparte matas de hierba, flores, piedritas y hojas (16x16) con ruido sobre la hierba:
+## más densas cerca de árboles y bordes, y nunca sobre caminos, agua ni arena.
+## Las dos épocas llevan los mismos detalles en los mismos sitios (en el Presente son hojas secas y colores apagados).
+func construir_detalles() -> void:
+	var filas := _leer_mapa()
+	if filas.is_empty():
+		return
+	var cerca_arbol := _casillas_cerca_de_arboles(filas)
+	var ruido := FastNoiseLite.new()
+	ruido.seed = 99
+	ruido.frequency = 0.05
+	var azar := RandomNumberGenerator.new()
+	azar.seed = 5150
+	var colocados: Array[Dictionary] = []
+	for cy in TILES.y * 2:
+		for cx in TILES.x * 2:
+			var tx := cx / 2
+			var ty := cy / 2
+			if not ".fd".contains(filas[ty][tx]):
+				continue
+			if _toca(filas, tx, ty, "cwPqQs"):
+				continue  # junto a caminos, agua o arena no se pone nada
+			var densidad := 0.06 + 0.14 * clampf((ruido.get_noise_2d(cx, cy) + 0.15) / 0.7, 0.0, 1.0)
+			var junto_a_arbol := cerca_arbol.has(Vector2i(tx, ty))
+			if junto_a_arbol:
+				densidad += 0.22
+			elif _toca(filas, tx, ty, "CMRT"):
+				densidad += 0.10
+			if azar.randf() >= densidad:
+				continue
+			var tirada := azar.randf()
+			var grupo := "matas"
+			if junto_a_arbol and tirada < 0.40:
+				grupo = "hojas"
+			elif filas[ty][tx] == "f" and tirada < 0.45:
+				grupo = "flores"
+			elif tirada > 0.93:
+				grupo = "piedras"
+			elif tirada > 0.84:
+				grupo = "hojas"
+			elif tirada > 0.74:
+				grupo = "flores"
+			colocados.append({"celda": Vector2i(cx, cy), "grupo": grupo, "variante": azar.randi()})
+	for epoca in ["Pasado", "Presente"]:
+		var nodo := get_node_or_null(epoca)
+		if nodo == null:
+			continue
+		var capa := _capa_extra(nodo, "DetallesSuelo", DETALLES[epoca], "Colision")
+		capa.clear()
+		var grupos := _grupos_de_detalles(capa.tile_set)
+		for d in colocados:
+			var lista: Array = grupos[d["grupo"]]
+			capa.set_cell(d["celda"], 0, lista[d["variante"] % lista.size()])
+
+
+## grupo ("matas", "flores", "piedras", "hojas") -> lista de coordenadas del atlas (dato personalizado "grupo").
+func _grupos_de_detalles(tileset: TileSet) -> Dictionary:
+	var resultado := {}
+	var fuente := tileset.get_source(0) as TileSetAtlasSource
+	for i in fuente.get_tiles_count():
+		var coords := fuente.get_tile_id(i)
+		var grupo := str(fuente.get_tile_data(coords, 0).get_custom_data("grupo"))
+		if not resultado.has(grupo):
+			resultado[grupo] = []
+		resultado[grupo].append(coords)
+	return resultado
+
+
+## ¿Alguna casilla vecina (8 direcciones) es de uno de los tipos de `letras`?
+func _toca(filas: PackedStringArray, x: int, y: int, letras: String) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var nx := x + dx
+			var ny := y + dy
+			if nx < 0 or ny < 0 or nx >= TILES.x or ny >= TILES.y:
+				continue
+			if letras.contains(filas[ny][nx]):
+				return true
+	return false
+
+
+## Casillas a menos de 2 tiles de un árbol (franja del límite del mapa y árboles colocados).
+func _casillas_cerca_de_arboles(filas: PackedStringArray) -> Dictionary:
+	var cerca := {}
+	var centros: Array[Vector2i] = []
+	for y in TILES.y:
+		for x in TILES.x:
+			if filas[y][x] == "T":
+				centros.append(Vector2i(x, y))
+	for puesto in _puestos:
+		if puesto["tipo"] in ["arbol_dorado", "cerezo", "arbol_redondo", "tocon"]:
+			centros.append(Vector2i((puesto["pos"] / TAMANO_TILE).floor()))
+	for c in centros:
+		for dy in range(-2, 3):
+			for dx in range(-2, 3):
+				cerca[c + Vector2i(dx, dy)] = true
+	return cerca
+
+
+# --- Ambiente: color de atardecer, luces de los portales y viñeta ---
+
+func _crear_ambiente() -> void:
+	if _modulador == null or not is_instance_valid(_modulador):
+		_modulador = CanvasModulate.new()
+		_modulador.name = "Atardecer"
+		add_child(_modulador)
+	# Luces de los portales (el del hub y la Puerta del Reflejo): cálidas en el Pasado y frías en el Presente
+	for epoca in ["Pasado", "Presente"]:
+		var nodo := get_node_or_null(epoca)
+		if nodo == null:
+			continue
+		for nombre_luz in ["Luz_Portal", "Luz_Reflejo"]:
+			var luz := nodo.get_node_or_null(nombre_luz) as PointLight2D
+			if luz == null:
+				luz = PointLight2D.new()
+				luz.name = nombre_luz
+				luz.texture = TEXTURA_LUZ
+				nodo.add_child(luz)
+			var es_pasado: bool = epoca == "Pasado"
+			luz.global_position = posicion_zona("Hub" if nombre_luz == "Luz_Portal" else "Final") + Vector2(0, -24)
+			luz.color = Color(1.0, 0.8, 0.45) if es_pasado else Color(0.62, 0.76, 1.0)
+			luz.energy = 0.85 if es_pasado else 0.6
+			luz.texture_scale = 2.4
+	# Viñeta suave en los bordes de la pantalla (solo en el juego, no en el editor)
+	if Engine.is_editor_hint() or get_node_or_null("Vineta") != null:
+		return
+	var capa := CanvasLayer.new()
+	capa.name = "Vineta"
+	capa.layer = 4  # por debajo de los diálogos y los menús
+	var rect := ColorRect.new()
+	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var material := ShaderMaterial.new()
+	material.shader = VINETA
+	rect.material = material
+	capa.add_child(rect)
+	add_child(capa)
+
+
+## Cambia el color del ambiente según la época (con un fundido corto en el juego).
+func _aplicar_ambiente(es_pasado: bool, con_fundido: bool) -> void:
+	if _modulador == null or not is_instance_valid(_modulador):
+		return
+	var color := COLOR_PASADO if es_pasado else COLOR_PRESENTE
+	if con_fundido and not Engine.is_editor_hint() and is_inside_tree():
+		create_tween().tween_property(_modulador, "color", color, 0.5)
+	else:
+		_modulador.color = color

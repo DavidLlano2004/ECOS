@@ -5,10 +5,12 @@ extends SceneTree
 ##   godot --headless --path . --import
 ##   godot --headless --path . --script res://tools/construir_tileset.gd
 ##
-## Salida: Resources/Mundo/tileset_pasado.tres y tileset_presente.tres (idénticos salvo la textura).
+## Salida: Resources/Mundo/tileset_pasado.tres y tileset_presente.tres (idénticos salvo la textura)
+## y detalles_pasado.tres / detalles_presente.tres (matas, flores, piedritas y hojas de 16x16).
 
 const TAMANO := 32
 const RUTA_INFO := "res://tools/tileset_info.json"
+const RUTA_INFO_DETALLES := "res://tools/detalles_info.json"
 
 ## Tiles con colisión de cuadrado completo: acantilados, muros, rocas y los bloques invisibles.
 const SOLIDOS := [
@@ -49,7 +51,34 @@ func _init() -> void:
 		var ruta := "res://Resources/Mundo/tileset_%s.tres" % epoca
 		var error := ResourceSaver.save(tileset, ruta)
 		print("%s: %s (error=%d)" % [ruta, "guardado" if error == OK else "FALLÓ", error])
+		var detalles := _crear_tileset_detalles("res://Assets/Mundo/detalles_%s.png" % epoca)
+		var ruta_d := "res://Resources/Mundo/detalles_%s.tres" % epoca
+		var error_d := ResourceSaver.save(detalles, ruta_d)
+		print("%s: %s (error=%d)" % [ruta_d, "guardado" if error_d == OK else "FALLÓ", error_d])
 	quit()
+
+
+## TileSet de la decoración suelta (cuadros de 16x16). Cada tile guarda su grupo
+## ("matas", "flores", "piedras" o "hojas") en el dato personalizado "grupo".
+func _crear_tileset_detalles(ruta_textura: String) -> TileSet:
+	var info: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(RUTA_INFO_DETALLES))
+	var tamano: int = int(info["tamano"])
+	var tileset := TileSet.new()
+	tileset.tile_size = Vector2i(tamano, tamano)
+	tileset.add_custom_data_layer()
+	tileset.set_custom_data_layer_name(0, "grupo")
+	tileset.set_custom_data_layer_type(0, TYPE_STRING)
+	var fuente := TileSetAtlasSource.new()
+	fuente.texture = load(ruta_textura)
+	fuente.texture_region_size = Vector2i(tamano, tamano)
+	tileset.add_source(fuente, 0)
+	var grupos: Dictionary = info["grupos"]
+	for grupo in grupos:
+		for celda in grupos[grupo]:
+			var coords := Vector2i(int(celda[0]), int(celda[1]))
+			fuente.create_tile(coords)
+			fuente.get_tile_data(coords, 0).set_custom_data("grupo", grupo)
+	return tileset
 
 
 func _crear_tileset(info: Dictionary, ruta_textura: String) -> TileSet:

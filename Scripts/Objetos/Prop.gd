@@ -43,6 +43,8 @@ const TIPOS: Array[String] = [
 
 @export_enum("arbol_dorado", "cerezo", "arbol_redondo", "arbusto_flores", "roca", "farol_poste", "tocon", "banco")
 var tipo: String = "arbol_redondo"
+## Falso en los árboles de la franja del borde: ahí la casilla ya es sólida y no hace falta otra colisión.
+@export var con_colision: bool = true
 
 @onready var _sprite: Sprite2D = $Sprite
 @onready var _forma: CollisionShape2D = $Cuerpo/Forma
@@ -67,7 +69,7 @@ func _ready() -> void:
 
 	# Colisión pequeña, solo en la base (capa 1 = mundo)
 	var rect: Rect2 = datos["colision"]
-	if rect.has_area():
+	if rect.has_area() and con_colision:
 		var cuadrado := RectangleShape2D.new()
 		cuadrado.size = rect.size
 		_forma.shape = cuadrado

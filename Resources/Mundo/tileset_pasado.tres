@@ -1,6 +1,6 @@
-[gd_resource type="TileSet" format=3 uid="uid://bojb21xcnb3sh"]
+[gd_resource type="TileSet" format=3]
 
-[ext_resource type="Texture2D" uid="uid://ccska1aakxwpp" path="res://Assets/Mundo/tileset_pasado.png" id="1_6ucrj"]
+[ext_resource type="Texture2D" path="res://Assets/Mundo/tileset_pasado.png" id="1_6ucrj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4nqya"]
 texture = ExtResource("1_6ucrj")
@@ -92,6 +92,16 @@ texture_region_size = Vector2i(32, 32)
 15:1/0 = 0
 15:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 15:1/0/custom_data_0 = "colision_agua_profunda"
+0:23/0 = 0
+0:23/0/custom_data_0 = "hierba_oscura_0"
+1:23/0 = 0
+1:23/0/custom_data_0 = "hierba_oscura_1"
+2:23/0 = 0
+2:23/0/custom_data_0 = "hierba_clara_0"
+3:23/0 = 0
+3:23/0/custom_data_0 = "hierba_clara_1"
+4:23/0 = 0
+4:23/0/custom_data_0 = "sombra_s"
 0:3/0 = 0
 0:3/0/terrain_set = 0
 0:3/0/terrain = 0

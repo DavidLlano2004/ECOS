@@ -11,7 +11,7 @@ const TAMANO_TILE := 32
 ## Suelos donde se puede poner un objeto (hierba, flores, pasto, tierra, volcánico, bosque, ruinas, adoquines).
 const SUELOS := "fdrvbua."
 ## Casillas que un objeto grande no puede tocar ni de lado (agua, puentes, muros, rocas, bloqueos).
-const PROHIBIDAS := "wPqQRCMX"
+const PROHIBIDAS := "wPqQRCMXT"
 ## Distancia mínima (px) entre objetos y a las entradas de las zonas (donde irán portal y bloqueos).
 const SEPARACION := 44.0
 const LIBRE_ZONA := 150.0
@@ -61,9 +61,11 @@ static func generar(filas: PackedStringArray, zonas: Dictionary, marcadores: Dic
 	d._filas = filas
 	d._zonas = zonas
 	d._azar.seed = 4242
+	d._poner_franja_de_arboles()
 	d._poner_marcadores(marcadores)
 	d._poner_temas()
 	d._poner_faroles_de_camino()
+	d._poner_arboledas()
 	return d._puestos
 
 
@@ -79,6 +81,42 @@ func _poner_marcadores(marcadores: Dictionary) -> void:
 			else:
 				continue  # arcos y espejos no tienen sprite todavía
 			_intentar(tipo, pos)
+
+
+## Franja densa de árboles en el límite del mapa: una casilla de cada dos de las 'T', con un pequeño desplazamiento.
+## Son decoración (la casilla 'T' ya es sólida), por eso no llevan colisión propia. Nunca llevan árboles
+## dorados (que tienen luces) para no llenar el borde de luces.
+func _poner_franja_de_arboles() -> void:
+	for y in _filas.size():
+		for x in _filas[y].length():
+			if _filas[y][x] != "T" or (x + (y % 2)) % 2 != 0:
+				continue
+			var pos := _centro_de(Vector2i(x, y)) + Vector2(_azar.randf_range(-9, 9), _azar.randf_range(-5, 12))
+			var tipo := "arbol_redondo"
+			var tirada := _azar.randf()
+			if tirada < 0.18:
+				tipo = "arbusto_flores"
+			elif tirada < 0.40 and _zona_mas_cercana(pos) in ["Hub", "Soledad", "Final", "Verguenza", "Tristeza"]:
+				tipo = "cerezo"
+			_puestos.append({"tipo": tipo, "pos": pos, "borde": true})
+
+
+## Arboledas: grupos de árboles en los claros, repartidos con ruido para que formen manchas y no puntos sueltos.
+func _poner_arboledas() -> void:
+	var ruido := FastNoiseLite.new()
+	ruido.seed = 31
+	ruido.frequency = 0.05
+	var puestos := 0
+	for _i in 3000:
+		var pos := _centrar(Vector2(_azar.randf_range(80, _filas[0].length() * TAMANO_TILE - 80), _azar.randf_range(80, _filas.size() * TAMANO_TILE - 80)))
+		if ruido.get_noise_2d(pos.x / TAMANO_TILE, pos.y / TAMANO_TILE) < 0.22:
+			continue
+		var opciones: Array = ARBOLES_DE_ZONA[_zona_mas_cercana(pos)]
+		var tipo: String = opciones[_azar.randi() % opciones.size()]
+		if _intentar(tipo, pos + Vector2(_azar.randf_range(-8, 8), _azar.randf_range(-6, 6))):
+			puestos += 1
+			if puestos >= 90:
+				return
 
 
 ## Reparte los objetos extra de cada zona, según su tema.
@@ -143,6 +181,8 @@ func _es_valido(tipo: String, pos: Vector2) -> bool:
 		if pos.distance_to(_zonas[zona]) < libre:
 			return false
 	for puesto in _puestos:
+		if puesto.get("borde", false):
+			continue
 		var minima := maxf(SEPARACION, MEDIO_ANCHO[tipo] + MEDIO_ANCHO[puesto["tipo"]])
 		if tipo == "farol_poste" and puesto["tipo"] == "farol_poste":
 			minima = SEPARACION_FAROLES
