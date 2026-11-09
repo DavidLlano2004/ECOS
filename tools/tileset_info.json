@@ -1,7 +1,7 @@
 {
  "tamano": 32,
  "columnas": 16,
- "filas": 24,
+ "filas": 30,
  "base": {
   "hierba_0": [
    0,
@@ -131,24 +131,8 @@
    15,
    1
   ],
-  "hierba_oscura_0": [
-   0,
-   23
-  ],
-  "hierba_oscura_1": [
-   1,
-   23
-  ],
-  "hierba_clara_0": [
-   2,
-   23
-  ],
-  "hierba_clara_1": [
-   3,
-   23
-  ],
   "sombra_s": [
-   4,
+   0,
    23
   ]
  },
@@ -2525,6 +2509,1520 @@
     }
    ],
    "cuadros": 4
+  },
+  "tono_oscuro": {
+   "tiles": [
+    {
+     "coords": [
+      0,
+      24
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      1,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      2,
+      24
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      3,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      4,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      5,
+      24
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      6,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      7,
+      24
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      8,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      9,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      10,
+      24
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      11,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      12,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      13,
+      24
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      14,
+      24
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      15,
+      24
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      0,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      1,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      2,
+      25
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      3,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      4,
+      25
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      5,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      6,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      7,
+      25
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      8,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      9,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      10,
+      25
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      11,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      12,
+      25
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      13,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      14,
+      25
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      15,
+      25
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      0,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      1,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      2,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      3,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      4,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      5,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      6,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      7,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      8,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      9,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      10,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      11,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      12,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      13,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      14,
+      26
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    }
+   ],
+   "cuadros": 1
+  },
+  "tono_claro": {
+   "tiles": [
+    {
+     "coords": [
+      0,
+      27
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      1,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      2,
+      27
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      3,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      4,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      5,
+      27
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      6,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      7,
+      27
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      8,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      9,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      10,
+      27
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      11,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      12,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": false,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      13,
+      27
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      14,
+      27
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      15,
+      27
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      0,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      1,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      2,
+      28
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      3,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      4,
+      28
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      5,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      6,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      7,
+      28
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      8,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      9,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      10,
+      28
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      11,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      12,
+      28
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      13,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      14,
+      28
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      15,
+      28
+     ],
+     "bits": {
+      "N": false,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      0,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      1,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": false
+     }
+    },
+    {
+     "coords": [
+      2,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      3,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      4,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": false,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      5,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      6,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      7,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      8,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      9,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": false,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      10,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": false,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      11,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      12,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": false,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      13,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": false,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    },
+    {
+     "coords": [
+      14,
+      29
+     ],
+     "bits": {
+      "N": true,
+      "NE": true,
+      "E": true,
+      "SE": true,
+      "S": true,
+      "SO": true,
+      "O": true,
+      "NO": true
+     }
+    }
+   ],
+   "cuadros": 1
   }
  }
 }

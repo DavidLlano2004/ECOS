@@ -136,6 +136,8 @@ def construir():
     este = [3 + int(re_(0, y) * 2.4) for y in range(H)]
     sur = [2 + int(rs(x, 0) * 2.4) for x in range(W)]
     oeste = [2 + int(rw(0, y) * 2.2) for y in range(H)]
+    for y in range(17, 38):
+        oeste[y] = 2          # la colina de Soledad queda a 3 tiles o más del agua del oeste
     for y in range(H):
         for x in range(W):
             if x >= W - este[y]:
@@ -255,26 +257,31 @@ def construir():
                         if dentro(x, y) and m.g[y][x] in SUELO and m.g[y][x] != "T":
                             m.g[y][x] = "c"
 
-    trazar([(48, 27), (58, 24), (66, 19), (73, 14), (80, 12)], semilla=1)               # Rabia
+    trazar([(48, 27), (62, 26), (72, 21), (76, 14), (80, 12)], 2.4, semilla=1)          # Rabia
     trazar([(48, 27), (60, 25), (72, 26), (81, 27)], 1.2, semilla=2)                   # Culpa: hasta el puente roto
     trazar([(86, 27), (87, 27), (88, 27)], 0.0, semilla=3)                              # Culpa: orilla este
     trazar([(52, 29), (62, 33), (72, 33), (80, 31)], 1.4, semilla=4)                   # Culpa: hacia el vado
     trazar([(86, 31), (87, 30), (88, 27)], 0.0, semilla=5)                              # Culpa: salida del vado
-    trazar([(48, 27), (56, 32), (64, 38), (72, 43), (78, 44)], semilla=6)               # Ansiedad
+    trazar([(48, 27), (52, 36), (60, 43), (70, 44), (78, 44)], 2.4, semilla=6)          # Ansiedad
     trazar([(48, 27), (48, 34), (47, 41), (48, 48)], semilla=7)                         # Miedo
-    trazar([(48, 27), (38, 32), (28, 38), (20, 41), (16, 42)], semilla=8)               # Tristeza
-    trazar([(48, 27), (36, 28), (24, 27), (14, 27), (8, 27)], semilla=9)                # Soledad
-    trazar([(48, 27), (38, 22), (28, 16), (20, 13), (16, 12)], semilla=10)              # Vergüenza
+    trazar([(48, 27), (44, 35), (34, 41), (24, 42), (16, 42)], 2.4, semilla=8)          # Tristeza
+    trazar([(48, 27), (36, 28), (24, 27), (15, 27), (11, 27)], semilla=9)                # Soledad
+    trazar([(48, 27), (42, 20), (32, 14), (22, 12), (16, 12)], 2.4, semilla=10)         # Vergüenza
     trazar([(48, 27), (48, 20), (48, 14), (48, 9), (48, 6)], 1.6, semilla=11)           # Reflejo
 
-    # suavizado: quita los escalones de 1 tile (rellena huecos y quita puntas del camino)
-    for _ in range(2):
+    # suavizado: filtro de mayoría en un círculo de radio 2 (redondea los escalones de los bordes)
+    disco = [(dx, dy) for dy in range(-2, 3) for dx in range(-2, 3) if math.hypot(dx, dy) <= 2.1]
+    for _ in range(3):
         nuevo = [fila[:] for fila in m.g]
-        for y in range(1, H - 1):
-            for x in range(1, W - 1):
-                vecinos = sum(1 for dy in (-1, 0, 1) for dx in (-1, 0, 1) if (dx or dy) and m.g[y + dy][x + dx] == "c")
-                if m.g[y][x] != "c" and vecinos >= 5 and m.g[y][x] in SUELO and m.g[y][x] != "T":
+        for y in range(2, H - 2):
+            for x in range(2, W - 2):
+                if m.g[y][x] not in SUELO or m.g[y][x] == "T":
+                    continue
+                dentro_c = sum(1 for dx, dy in disco if m.g[y + dy][x + dx] == "c")
+                if m.g[y][x] != "c" and dentro_c >= 11:
                     nuevo[y][x] = "c"
+                elif m.g[y][x] == "c" and dentro_c <= 7 and base[y][x] in SUELO:
+                    nuevo[y][x] = base[y][x]
         m.g = nuevo
     for y in range(H):
         for x in range(W):
@@ -336,7 +343,7 @@ def construir():
                        for dy in range(-3, 4) for dx in range(-3, 4)):
                     m.g[y][x] = "C"
 
-    meseta(9, 27, 5.2, 4.4, "f")
+    meseta(12, 27, 5.0, 4.4, "f")
     meseta(80, 12, 8.6, 6.4, "v")
 
     # 8. obstáculos (lejos de los caminos y de los centros de zona)

@@ -22,6 +22,8 @@ const LIMITES := Rect2(Vector2.ZERO, Vector2(TILES.x * TAMANO_TILE, TILES.y * TA
 const TERRENO_CAMINO := 0
 const TERRENO_ARENA := 1
 const TERRENO_AGUA := 2
+const TERRENO_TONO_OSCURO := 3
+const TERRENO_TONO_CLARO := 4
 
 const PROP := preload("res://Scenes/Objetos/Prop.tscn")
 ## Decoración suelta de 16x16 (matas, flores, piedritas y hojas) de cada época.
@@ -321,7 +323,7 @@ func _vaciar_capas() -> void:
 
 func _capas_de(epoca: Node) -> Array[TileMapLayer]:
 	var capas: Array[TileMapLayer] = []
-	for ruta in ["Suelo", "Orilla", "Camino", "Agua", "Sombras", "Colision", "Objetos/Detalles"]:
+	for ruta in ["Suelo", "TonoOscuro", "TonoClaro", "Orilla", "Camino", "Agua", "Sombras", "Colision", "Objetos/Detalles"]:
 		var capa := epoca.get_node_or_null(ruta) as TileMapLayer
 		if capa != null:
 			capas.append(capa)
@@ -337,6 +339,11 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 	var detalles := epoca.get_node("Objetos/Detalles") as TileMapLayer
 	var tiles := _buscar_tiles(suelo.tile_set)
 	var sombras := _capa_extra(epoca, "Sombras", suelo.tile_set, "Colision")
+	# Manchas de hierba más oscura y más clara: capas translúcidas con bordes tramados (justo sobre el suelo)
+	var tono_oscuro := _capa_extra(epoca, "TonoOscuro", suelo.tile_set, "Orilla")
+	var tono_claro := _capa_extra(epoca, "TonoClaro", suelo.tile_set, "Orilla")
+	var celdas_oscuras: Array[Vector2i] = []
+	var celdas_claras: Array[Vector2i] = []
 	for capa in _capas_de(epoca):
 		capa.clear()
 
@@ -348,7 +355,14 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 		for x in TILES.x:
 			var c := Vector2i(x, y)
 			var ch := filas[y][x]
-			suelo.set_cell(c, 0, tiles[_nombre_suelo(_suelo_de(filas, x, y), x, y)])
+			var suelo_aqui := _suelo_de(filas, x, y)
+			suelo.set_cell(c, 0, tiles[_nombre_suelo(suelo_aqui, x, y)])
+			if suelo_aqui == "." or suelo_aqui == "f":
+				var tono := _ruido_hierba.get_noise_2d(x, y)
+				if tono < -0.2:
+					celdas_oscuras.append(c)
+				elif tono > 0.28:
+					celdas_claras.append(c)
 			if ch == "c":
 				celdas_camino.append(c)
 			if AGUA.contains(ch):
@@ -390,12 +404,14 @@ func _construir_epoca(epoca: Node, filas: PackedStringArray, referencia: Node) -
 
 	# Terrenos: Godot elige solo las piezas de transición según los vecinos (o se copian de la época de referencia)
 	if referencia != null:
-		for nombre_capa in ["Orilla", "Camino", "Agua"]:
+		for nombre_capa in ["TonoOscuro", "TonoClaro", "Orilla", "Camino", "Agua"]:
 			var origen := referencia.get_node(nombre_capa) as TileMapLayer
 			var destino := epoca.get_node(nombre_capa) as TileMapLayer
 			for c in origen.get_used_cells():
 				destino.set_cell(c, 0, origen.get_cell_atlas_coords(c))
 		return
+	tono_oscuro.set_cells_terrain_connect(celdas_oscuras, TERRENO_TONO_OSCURO, 0)
+	tono_claro.set_cells_terrain_connect(celdas_claras, TERRENO_TONO_CLARO, 0)
 	orilla.set_cells_terrain_connect(celdas_arena, TERRENO_ARENA, 0)
 	camino.set_cells_terrain_connect(celdas_camino, TERRENO_CAMINO, 0)
 	agua.set_cells_terrain_connect(celdas_agua, TERRENO_AGUA, 0)
@@ -431,12 +447,7 @@ func _nombre_suelo(ch: String, x: int, y: int) -> String:
 			return "ruinas_%d" % _variante(x, y, 2)
 		"a":
 			return "adoquines_%d" % _variante(x, y, 2)
-	# El resto de casillas llevan hierba debajo: más oscura o más clara según el ruido de baja frecuencia
-	var tono := _ruido_hierba.get_noise_2d(x, y)
-	if tono < -0.2:
-		return "hierba_oscura_%d" % _variante(x, y, 2)
-	if tono > 0.28:
-		return "hierba_clara_%d" % _variante(x, y, 2)
+	# El resto de casillas llevan hierba debajo (las manchas de tono van en las capas TonoOscuro y TonoClaro)
 	return "hierba_%d" % _variante(x, y, 4)
 
 
