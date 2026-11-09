@@ -71,7 +71,13 @@ Nota: `Player.gd` todavía no tiene la propiedad `facing`; hay que añadirla cua
 - `Dialogos/`: contenido de los diálogos.
 - `Scenes/UI/PantallaTitulo.tscn`: pantalla de título (escena principal): Comenzar -> onboarding cinematográfico (`Scenes/Intro/Onboarding.tscn`), Continuar -> juego. Se salta la entrada con INTERACTUAR o Enter. Shaders en `Shaders/`.
 - `Scenes/Mundo/PruebaEmociones.tscn`: arena para probar las 7 emociones (se juega con **F6**, no es la escena principal). En depuración: **F3** muestra/oculta el panel de estado, **F4** reinicia la partida y recarga la escena.
+- `Scenes/Mundo/Mundo.tscn`: el mundo de 96x54 tiles (32 px) en dos épocas con la misma forma: nodos `Pasado` y `Presente`. Se prueba con **F6**; en depuración **F2** cambia de época. El diseño está en `Resources/Mundo/mapa.txt` (un carácter por tile, leyenda al inicio del archivo): edítalo y pulsa "Reconstruir mapa" en el inspector de `Mundo` (el `@tool` también lo dibuja en el editor). Los marcadores de zonas (`Spawn_Hub`, `Zona_*`) y de decoración (grupos `arboles`, `rocas`, `faroles`, `bancos`, `arcos`, `espejos`) son `Marker2D`; `Mundo.colocar_decoracion()` los rellena cuando existan los sprites.
+- `tools/`: generadores. `generar_tileset.py` (Python + Pillow) dibuja `Assets/Mundo/tileset_*.png`; `construir_tileset.gd` (Godot) crea los `TileSet` de `Resources/Mundo/`; `generar_mapa.py` hace el borrador de `mapa.txt` y `Mundo.tscn` (el modo `--escena` sobrescribe la escena). El Presente es el mismo tileset con otra paleta.
 - `addons/`: plugins (solo con permiso del usuario).
+
+## Capas de física
+
+1 = `mundo` (muros, acantilados, agua profunda), 2 = `interactuable`.
 
 ## Reglas de trabajo
 

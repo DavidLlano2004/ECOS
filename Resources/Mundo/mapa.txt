@@ -1,0 +1,65 @@
+; ECOS - mapa de 96x54 tiles. Un carácter por tile. Las líneas que empiezan con ';' son comentarios.
+; Las dos épocas (Pasado y Presente) usan exactamente este mismo mapa.
+;
+;   .  hierba                     f  hierba con flores         d  pasto seco
+;   r  tierra roja                v  suelo volcánico           b  suelo de bosque oscuro
+;   u  suelo de ruinas            a  adoquines
+;   c  camino de tierra           s  arena de orilla           w  agua (los bordes son poco profundos y se pueden pisar)
+;   R  roca (sólida)              C  acantilado (sólido)       M  muro de piedra (sólido)
+;   P  puente                     q  puente roto (parte izquierda)   Q  puente roto (parte derecha)
+;   X  bloqueo invisible
+;
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCCCCCCC......CCCCCCCCCCCCCCCCCCCCCMMMMMMMMMMMMMffCCCCCCCCCCCCCCCCCC............CCCCCCCCC
+wws....................CCCCCCCCC..........MaaaaaaaaaaaM.....f............................CCCCCCC
+wws............fff...........f.........dd.MaaaaaaaaaaaM.fff...................rRrRrr........CCCC
+wwsf.......ffMffaffMf.....ff..............MaaaaaaaaaaaMff...................rRrrRrrrrr......CCCC
+wws.......ffffffaffffff....ff...........f.MaaaaaaaaaaaM.f.fff.............RrrrRrrrrRrRRR....CCCC
+wws......fffffffaffffffff.f.............f.MaaaaaaaaaaaMffffff.........dd.rrrrrvRvvvvrRrrr...CCCC
+wws.....fffMfffaaaffffffff.f.f..........f..MaaaaaaaaaMf.f..............drrrrvvvvvvvvRrrRrr..CCCC
+wws....fffffffaaaaafffffffd.............ff.aaaaaaaaaaa.fff............ddrrrvvvvvvvvvvvrrrr..CCCC
+wws....ffffffaaaaaaaffffffd...............f..ffcccdd.f.ff...ff........drrrvvvcccccvvRvRrrr..CCCC
+wws....fffaaaaaaaaaaaaafff...............f..ff.cccfffff.f.f.f..........rrrccccccccvvvvvrRr..CCCC
+wws....ffffffaaaaaaacccccc.............ffdff...ccc.ddf.....fdf.........rccccccccccvvRvvrRr..CCCC
+wws....fffffffaaaaacccccccccc.d.d....dddfffffddcccf.f.f......d.f......cccccccccvvvvvvvRRr....CCC
+wwws...ffffMfffaaafffcccccccccc......dddfffd.fdcccfff...f.dfdfdffdd..cccccccvvvvvvvvvvrrr....CCC
+wwws....ffffffffafffffffcccccccc.d..d.d.ff.f.ddcccfff.ff.fffddffdd.cccccccrrrvvvvRvvRrrrR....CCC
+wwwws.ff.fffffffafffffff..ccccccccdd.ddd..df.ffcccfdf.....fff.f.ddcccccccrrrrrrrrrRrRRrr.....CCC
+wwwwsff....ffMffaffMffff...fccccccccd........ffcccffdf.....f....ccccccc.d.drRrrrrrRrsssssssssCCC
+wwwwsfddd.......fffffffff.f.f.ccccccc.......fffcccffff......fffcccccccd..dd..d.rrRsssssssssssCCC
+wwwsdddddddd.......ffff.fff.f...ccccccc...fffffcccfffff.......cccccccdddddd.dddd.ssswwwwwwwwwCCC
+wwwsdddddddddd.......f.f.f.f.f...cccccccc.fffffaaaffffff....ccccccc..dd.d..d....sswwwwwwwwwwwCCC
+wwwsdddCCCddddd...fff..f..f........cccccccfffaaaaaaafffff.cccccccddd......dddd..sswwwwwwwwwwwCCC
+wwwsdCCCCCCCddddd.f.f.fffff...d.....ccccccccaaaaaaaaafffcccccccc.d.d............sswwwwsssssssCCC
+wwwsCCfffffCCCddddf.fff.f.....dd.......ccccaaaaaaaaaaacccccccc.d.dd.............sswwwwsssssssCCC
+wwwsCfffffffCCddddf..f......dd.d........cccaaaaaaaaaaaccccccc..d.d.............dsswwwwssuuuuuCCC
+wwwsfffccccccccccccccccccccccccd.......ffffaaaaaaaaaaaacccccccccccccccccccccccccccPqwQccccuuuCCC
+wwwsfffcccccccccccccccccccccccccccccccccccaaaaaaaaaaaaacccccccccccccccccccccccccccPqwQccccuuuCCC
+wwwsfffccccccccccccccccccccccccccccccccccccaaaaaaaaaaaacccccccccccccccccccccccccccPqwQccccuuuCCC
+wwwsCfffffffCCdddd.fff..ddd..ccccccccccccccaaaaaaaaaaaccccccccc...............ddsswwwsccccuuMCCC
+wwsCCCfffffCCCddddf.....dd.............ccccaaaaaaaaaaaccccccccccccccccccccccccccccwwwccccuuuuCCC
+wwsddCCCCCCCddddd.......ddd.........ccccccccaaaaaaaaacccccccccccccccccccccccccccccswwccccuuuMCCC
+wwsddddCCCddddddd.......d.d........cccccccfffaaaaaaafccccccc.cccccccccccccccccccccswwccccuuddCCC
+wwsddddddddddddd.................ccccccccffffffaaaffffccccccc........ddd....f..f.sswwssddddddCCC
+wws.ddd........ddd..............ccccccc.f.fffffcccfffff.ccccccc......ddd...fff.fsswwwwssddd..CCC
+wws..ddd......ddd.d...........ccccccc...ff.ffffcccffffff.ccccccc.....d......f.ffsswwwwss.....CCC
+wws.d.dd........d...........cccccccc.f....f..ffcccfdd...ffccccccc....d.........sswwwwwwss...CCCC
+wwsdd.dd..................cccccccc..f.........ccccd.d...f...ccccccc.........f.sswwwwwwwwss...CCC
+wws.d.dd................cccccccc..............ccccd.........dccccccc..........sswwwwwwwwss...CCC
+wws.dddd.............cccccccccc........dd.....ccc.d........dddcccccccc....ddd..sswwwwwwss....CCC
+wws..d.d....s....cccccccccccc.........dddd....cccddd......ddddddcccccccaaaaaaaMasssssMss.....CCC
+wws.dd..ssssRssccccccccccc............ddd.....cccbb...........d..ccccccaaaaaaaaaassssss......CCC
+wws...sssssswsscccccccc...............dd.dd..bcccbbbRb.....dddd....ccccaaaaaaaaaaaaaaa.f.....CCC
+wws..sRswwwwwwwwcccc.....................ddbbbcccbbbbRb.....d.......cccaaaaaaaaaaaaaaaf......CCC
+wws.sswwwwwwwwwwwss......dd............ddbbbbbccccbbbbRbb.............caaaaaaaaaaaaaaaf.....dCCC
+wwssswwwwwwwwwwwwwss....ddddd..........dbbbbbbccccbbbbbRbb............daaaaaaaaaaaaaaa...dd.dCCC
+wwssswwwwwwwwwwwwwss....ddddd..........dbRbbbbccccbbbbbbbbb...........daaaaaaaaaaaaaaa..ddd.CCCC
+wwssswwwwwwwwwwwwwss..ff.f..f..........bbbRbbbbcccbbbbbbbRR..........f.aaaaaaaaaaaaaaa.d.dddCCCC
+wws.sswwwwwwwwwwwss.ff..fff............bbbRbbbbcccbbbbbbbbb.........ffdMaaaaaaMaaaaaaM.dddddCCCC
+wws..sRswwwwwwwssR..ff.ff..............bbbbbRbbcccbbbbbbbbb.....sss.fdff.dffd.fff...d.d..dddCCCC
+wwssssRsssssRsRsssssssff..ff.f...ssssssRbbbbbbbbbbbbRbbbbbbssssswwwsssff.fdsssssss..ddddssssCCCC
+wwwwwwwwwsssssssswwwwwssssssssssswwwwwwwwwwwwbbbbbbwwwwwwwwwwwwwwwwwwwssssswwwwwwwsssssswwwwCCCC
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwCCCC
+wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwCCCC

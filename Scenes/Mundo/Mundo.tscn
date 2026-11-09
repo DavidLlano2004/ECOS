@@ -1,0 +1,481 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Mundo/Mundo.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/Personajes/Player.tscn" id="2_player"]
+[ext_resource type="TileSet" path="res://Resources/Mundo/tileset_pasado.tres" id="3_pasado"]
+[ext_resource type="TileSet" path="res://Resources/Mundo/tileset_presente.tres" id="4_presente"]
+
+[node name="Mundo" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Pasado" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Suelo" type="TileMapLayer" parent="Pasado"]
+tile_set = ExtResource("3_pasado")
+
+[node name="Orilla" type="TileMapLayer" parent="Pasado"]
+tile_set = ExtResource("3_pasado")
+
+[node name="Camino" type="TileMapLayer" parent="Pasado"]
+tile_set = ExtResource("3_pasado")
+
+[node name="Agua" type="TileMapLayer" parent="Pasado"]
+tile_set = ExtResource("3_pasado")
+
+[node name="Colision" type="TileMapLayer" parent="Pasado"]
+tile_set = ExtResource("3_pasado")
+
+[node name="Objetos" type="Node2D" parent="Pasado"]
+y_sort_enabled = true
+
+[node name="Detalles" type="TileMapLayer" parent="Pasado/Objetos"]
+y_sort_enabled = true
+tile_set = ExtResource("3_pasado")
+
+[node name="Jugador" parent="Pasado/Objetos" instance=ExtResource("2_player")]
+position = Vector2(1552, 880)
+
+[node name="Presente" type="Node2D" parent="."]
+y_sort_enabled = true
+visible = false
+
+[node name="Suelo" type="TileMapLayer" parent="Presente"]
+tile_set = ExtResource("4_presente")
+
+[node name="Orilla" type="TileMapLayer" parent="Presente"]
+tile_set = ExtResource("4_presente")
+
+[node name="Camino" type="TileMapLayer" parent="Presente"]
+tile_set = ExtResource("4_presente")
+
+[node name="Agua" type="TileMapLayer" parent="Presente"]
+tile_set = ExtResource("4_presente")
+
+[node name="Colision" type="TileMapLayer" parent="Presente"]
+tile_set = ExtResource("4_presente")
+
+[node name="Objetos" type="Node2D" parent="Presente"]
+y_sort_enabled = true
+
+[node name="Detalles" type="TileMapLayer" parent="Presente/Objetos"]
+y_sort_enabled = true
+tile_set = ExtResource("4_presente")
+
+[node name="Marcadores" type="Node2D" parent="."]
+
+[node name="Spawn_Hub" type="Marker2D" parent="Marcadores"]
+position = Vector2(1552, 880)
+
+[node name="Zona_Rabia" type="Marker2D" parent="Marcadores"]
+position = Vector2(2576, 400)
+
+[node name="Zona_Miedo" type="Marker2D" parent="Marcadores"]
+position = Vector2(1552, 1552)
+
+[node name="Zona_Tristeza" type="Marker2D" parent="Marcadores"]
+position = Vector2(528, 1360)
+
+[node name="Zona_Soledad" type="Marker2D" parent="Marcadores"]
+position = Vector2(272, 880)
+
+[node name="Zona_Culpa" type="Marker2D" parent="Marcadores"]
+position = Vector2(2832, 880)
+
+[node name="Zona_Ansiedad" type="Marker2D" parent="Marcadores"]
+position = Vector2(2512, 1424)
+
+[node name="Zona_Verguenza" type="Marker2D" parent="Marcadores"]
+position = Vector2(528, 400)
+
+[node name="Zona_Final" type="Marker2D" parent="Marcadores"]
+position = Vector2(1552, 176)
+
+[node name="Decoracion" type="Node2D" parent="."]
+
+[node name="Arboles" type="Node2D" parent="Decoracion"]
+
+[node name="Arbol_01" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1744, 1552)
+
+[node name="Arbol_02" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1776, 1424)
+
+[node name="Arbol_03" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1840, 1616)
+
+[node name="Arbol_04" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1680, 1456)
+
+[node name="Arbol_05" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1392, 1520)
+
+[node name="Arbol_06" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1424, 1616)
+
+[node name="Arbol_07" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1328, 1616)
+
+[node name="Arbol_08" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1264, 1552)
+
+[node name="Arbol_09" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1872, 1488)
+
+[node name="Arbol_10" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1392, 1424)
+
+[node name="Arbol_11" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1296, 1456)
+
+[node name="Arbol_12" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1712, 1360)
+
+[node name="Arbol_13" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(720, 1008)
+
+[node name="Arbol_14" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(144, 1168)
+
+[node name="Arbol_15" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(272, 304)
+
+[node name="Arbol_16" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1168, 1360)
+
+[node name="Arbol_17" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1392, 1360)
+
+[node name="Arbol_18" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(912, 1392)
+
+[node name="Arbol_19" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(304, 560)
+
+[node name="Arbol_20" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1840, 368)
+
+[node name="Arbol_21" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2384, 144)
+
+[node name="Arbol_22" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2896, 400)
+
+[node name="Arbol_23" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2896, 240)
+
+[node name="Arbol_24" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(624, 624)
+
+[node name="Arbol_25" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(976, 752)
+
+[node name="Arbol_26" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1200, 400)
+
+[node name="Arbol_27" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(144, 496)
+
+[node name="Arbol_28" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(944, 304)
+
+[node name="Arbol_29" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(816, 336)
+
+[node name="Arbol_30" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(752, 624)
+
+[node name="Arbol_31" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2448, 752)
+
+[node name="Arbol_32" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2896, 1456)
+
+[node name="Arbol_33" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2064, 304)
+
+[node name="Arbol_34" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2000, 496)
+
+[node name="Arbol_35" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1392, 1200)
+
+[node name="Arbol_36" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1872, 1360)
+
+[node name="Arbol_37" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1808, 624)
+
+[node name="Arbol_38" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(272, 432)
+
+[node name="Arbol_39" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1328, 560)
+
+[node name="Arbol_40" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2192, 144)
+
+[node name="Arbol_41" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(560, 1136)
+
+[node name="Arbol_42" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1968, 1488)
+
+[node name="Arbol_43" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2736, 176)
+
+[node name="Arbol_44" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(528, 1008)
+
+[node name="Arbol_45" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1424, 368)
+
+[node name="Arbol_46" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(464, 752)
+
+[node name="Arbol_47" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2512, 1168)
+
+[node name="Arbol_48" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1072, 432)
+
+[node name="Arbol_49" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2320, 688)
+
+[node name="Arbol_50" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2128, 432)
+
+[node name="Arbol_51" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1104, 304)
+
+[node name="Arbol_52" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2256, 304)
+
+[node name="Arbol_53" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2384, 1136)
+
+[node name="Arbol_54" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1232, 1488)
+
+[node name="Arbol_55" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(688, 176)
+
+[node name="Arbol_56" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2800, 1360)
+
+[node name="Arbol_57" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1040, 1392)
+
+[node name="Arbol_58" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1712, 432)
+
+[node name="Arbol_59" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2896, 1232)
+
+[node name="Arbol_60" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(528, 144)
+
+[node name="Arbol_61" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(304, 1136)
+
+[node name="Arbol_62" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(272, 1264)
+
+[node name="Arbol_63" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(2576, 656)
+
+[node name="Arbol_64" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(1328, 240)
+
+[node name="Arbol_65" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(368, 208)
+
+[node name="Arbol_66" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(624, 752)
+
+[node name="Arbol_67" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(240, 176)
+
+[node name="Arbol_68" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(816, 752)
+
+[node name="Arbol_69" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(528, 624)
+
+[node name="Arbol_70" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(272, 368)
+
+[node name="Arbol_71" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(336, 560)
+
+[node name="Arbol_72" type="Marker2D" parent="Decoracion/Arboles" groups=["arboles"]]
+position = Vector2(464, 208)
+
+[node name="Rocas" type="Node2D" parent="Decoracion"]
+
+[node name="Roca_01" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(1872, 1360)
+
+[node name="Roca_02" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(1936, 336)
+
+[node name="Roca_03" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(1776, 656)
+
+[node name="Roca_04" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2768, 496)
+
+[node name="Roca_05" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(1392, 1264)
+
+[node name="Roca_06" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2864, 304)
+
+[node name="Roca_07" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(144, 656)
+
+[node name="Roca_08" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2864, 1264)
+
+[node name="Roca_09" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(176, 432)
+
+[node name="Roca_10" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2736, 176)
+
+[node name="Roca_11" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(368, 688)
+
+[node name="Roca_12" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(1872, 496)
+
+[node name="Roca_13" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2320, 1136)
+
+[node name="Roca_14" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2160, 368)
+
+[node name="Roca_15" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(240, 1136)
+
+[node name="Roca_16" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(1360, 528)
+
+[node name="Roca_17" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(1232, 1392)
+
+[node name="Roca_18" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2224, 752)
+
+[node name="Roca_19" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2896, 592)
+
+[node name="Roca_20" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2224, 176)
+
+[node name="Roca_21" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2608, 144)
+
+[node name="Roca_22" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(656, 1488)
+
+[node name="Roca_23" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2864, 1456)
+
+[node name="Roca_24" type="Marker2D" parent="Decoracion/Rocas" groups=["rocas"]]
+position = Vector2(2032, 272)
+
+[node name="Faroles" type="Node2D" parent="Decoracion"]
+
+[node name="Farol_01" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(1744, 976)
+
+[node name="Farol_02" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(1552, 1104)
+
+[node name="Farol_03" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(1360, 1008)
+
+[node name="Farol_04" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(1360, 784)
+
+[node name="Farol_05" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(1552, 656)
+
+[node name="Farol_06" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(1744, 752)
+
+[node name="Farol_07" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(1488, 272)
+
+[node name="Farol_08" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(1616, 272)
+
+[node name="Farol_09" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(432, 400)
+
+[node name="Farol_10" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(624, 400)
+
+[node name="Farol_11" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(528, 304)
+
+[node name="Farol_12" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(528, 496)
+
+[node name="Farol_13" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(2384, 1328)
+
+[node name="Farol_14" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(2640, 1328)
+
+[node name="Farol_15" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(2800, 784)
+
+[node name="Farol_16" type="Marker2D" parent="Decoracion/Faroles" groups=["faroles"]]
+position = Vector2(2576, 464)
+
+[node name="Bancos" type="Node2D" parent="Decoracion"]
+
+[node name="Banco_01" type="Marker2D" parent="Decoracion/Bancos" groups=["bancos"]]
+position = Vector2(336, 816)
+
+[node name="Banco_02" type="Marker2D" parent="Decoracion/Bancos" groups=["bancos"]]
+position = Vector2(1456, 720)
+
+[node name="Banco_03" type="Marker2D" parent="Decoracion/Bancos" groups=["bancos"]]
+position = Vector2(1648, 1040)
+
+[node name="Arcos" type="Node2D" parent="Decoracion"]
+
+[node name="Arco_01" type="Marker2D" parent="Decoracion/Arcos" groups=["arcos"]]
+position = Vector2(400, 272)
+
+[node name="Arco_02" type="Marker2D" parent="Decoracion/Arcos" groups=["arcos"]]
+position = Vector2(656, 272)
+
+[node name="Arco_03" type="Marker2D" parent="Decoracion/Arcos" groups=["arcos"]]
+position = Vector2(400, 528)
+
+[node name="Arco_04" type="Marker2D" parent="Decoracion/Arcos" groups=["arcos"]]
+position = Vector2(656, 528)
+
+[node name="Arco_05" type="Marker2D" parent="Decoracion/Arcos" groups=["arcos"]]
+position = Vector2(528, 208)
+
+[node name="Espejos" type="Node2D" parent="Decoracion"]
+
+[node name="Espejo_01" type="Marker2D" parent="Decoracion/Espejos" groups=["espejos"]]
+position = Vector2(464, 336)
+
+[node name="Espejo_02" type="Marker2D" parent="Decoracion/Espejos" groups=["espejos"]]
+position = Vector2(592, 336)
+
+[node name="Espejo_03" type="Marker2D" parent="Decoracion/Espejos" groups=["espejos"]]
+position = Vector2(464, 464)
+
+[node name="Espejo_04" type="Marker2D" parent="Decoracion/Espejos" groups=["espejos"]]
+position = Vector2(592, 464)
+
+[node name="Espejo_05" type="Marker2D" parent="Decoracion/Espejos" groups=["espejos"]]
+position = Vector2(528, 400)
