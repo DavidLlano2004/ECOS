@@ -2,6 +2,11 @@
 
 [ext_resource type="PackedScene" path="res://Scenes/Emociones/Emocion.tscn" id="1_base"]
 [ext_resource type="Resource" path="res://Resources/Emociones/verguenza.tres" id="2_datos"]
+[ext_resource type="SpriteFrames" path="res://Resources/Emociones/frames_verguenza.tres" id="3_frames"]
 
 [node name="Verguenza" instance=ExtResource("1_base")]
 datos = ExtResource("2_datos")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = ExtResource("3_frames")
+animation = &"idle"

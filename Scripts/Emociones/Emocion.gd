@@ -76,14 +76,13 @@ func _ready() -> void:
 		set_physics_process(false)
 		return
 
-	if datos.frames != null:
-		sprite.sprite_frames = datos.frames
+	_preparar_sprite()
 
 	# Si ya estaba integrada, vuelve en calma y sin comportamiento
 	if GameState.estado.get(datos.id, "pendiente") == "integrada":
 		_entrar_en_calma()
 	else:
-		sprite.play(ANIMACION_IDLE)
+		_reproducir(ANIMACION_IDLE)
 		# Los comportamientos con pausas arrancan en momentos distintos para no moverse todas igual
 		temporizador.start(randf_range(0.1, 1.2))
 
@@ -123,6 +122,29 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_atascada = get_slide_collision_count() > 0 and get_real_velocity().length() < _velocidad() * 0.3
 	_aplicar_vibracion(delta)
+
+
+# --- Sprite ---
+
+## true si el AnimatedSprite2D tiene una animación "idle" con cuadros.
+func _sprite_tiene_cuadros() -> bool:
+	var frames := sprite.sprite_frames
+	return frames != null and frames.has_animation(ANIMACION_IDLE) and frames.get_frame_count(ANIMACION_IDLE) > 0
+
+
+## Usa los SpriteFrames de la escena; si no tiene, usa datos.frames de respaldo.
+## Si no hay ninguno, avisa en la consola (la criatura queda invisible pero funciona).
+func _preparar_sprite() -> void:
+	if not _sprite_tiene_cuadros() and datos.frames != null:
+		sprite.sprite_frames = datos.frames
+	if not _sprite_tiene_cuadros():
+		push_warning("Emocion '%s' (%s): sin sprite. Asigna 'sprite_frames' al AnimatedSprite2D de la escena o el campo 'frames' en su EmocionData (Resources/Emociones/frames_%s.tres) con las animaciones 'idle' y 'calma'." % [name, datos.id, datos.id])
+
+
+## Reproduce una animación solo si existe (así no falla en silencio ni da errores).
+func _reproducir(animacion: StringName) -> void:
+	if sprite.sprite_frames != null and sprite.sprite_frames.has_animation(animacion):
+		sprite.play(animacion)
 
 
 ## Velocidad actual (la de los datos, más lo que haya subido por ser ignorada).
@@ -438,7 +460,7 @@ func _entrar_en_calma() -> void:
 	if _tween_alpha != null:
 		_tween_alpha.kill()
 	modulate.a = 1.0
-	sprite.play(ANIMACION_CALMA)
+	_reproducir(ANIMACION_CALMA)
 	if _tween_flotar != null:
 		_tween_flotar.kill()
 	var base_y := sprite.position.y
