@@ -15,9 +15,11 @@ func _crear_fondo() -> void:
 	tex.fill_from = Vector2(0.5, 0.0)
 	tex.fill_to = Vector2(0.5, 1.0)
 	tex.width = 64
-	tex.height = 64
+	tex.height = 256
 	var rect := TextureRect.new()
 	rect.texture = tex
+	# Filtro lineal: el filtro por defecto del proyecto es Nearest y el degradado se vería en bandas
+	rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	rect.stretch_mode = TextureRect.STRETCH_SCALE
 	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
