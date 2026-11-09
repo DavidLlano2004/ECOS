@@ -45,6 +45,8 @@ func _cargar_emociones() -> void:
 		if not nombre.ends_with(".tres"):
 			continue
 		var recurso := load(CARPETA_EMOCIONES.path_join(nombre))
+		if recurso is SpriteFrames:
+			continue  # las animaciones (frames_*.tres) viven en la misma carpeta pero no son emociones
 		if recurso is EmocionData and recurso.id != "":
 			cargadas.append(recurso)
 		else:

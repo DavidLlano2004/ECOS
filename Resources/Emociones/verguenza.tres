@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="EmocionData" format=3]
 
 [ext_resource type="Script" path="res://Scripts/Datos/EmocionData.gd" id="1_emocion"]
+[ext_resource type="SpriteFrames" path="res://Resources/Emociones/frames_verguenza.tres" id="2_frames"]
 
 [resource]
 script = ExtResource("1_emocion")
@@ -14,6 +15,7 @@ habilidad_nombre = "Revelar"
 habilidad_descripcion = "Muestra caminos, puentes y puertas ocultos"
 comportamiento = 6
 velocidad = 30.0
+frames = ExtResource("2_frames")
 mensaje_integracion = "La vergüenza dice que te importa lo que otros piensan. Si la miras con cariño, te deja ser tú."
 mensaje_fallo = "La vergüenza se tapó la cara y se escondió todavía más. No se fue: solo se hizo más pequeña."
 mensaje_presente_aliada = "Una pequeña guía encapuchada camina a tu lado y te muestra lo que estaba oculto: un puente, una puerta, un camino."

@@ -35,3 +35,7 @@ enum Comportamiento {
 @export_multiline var mensaje_fallo: String = ""
 @export_multiline var mensaje_presente_aliada: String = ""
 @export_multiline var mensaje_presente_bloqueo: String = ""
+
+@export_group("Sprite")
+## Animaciones de la criatura ("idle" y "calma"). Ver Resources/Emociones/frames_*.tres.
+@export var frames: SpriteFrames
