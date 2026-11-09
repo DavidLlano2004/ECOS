@@ -20,5 +20,6 @@ mensaje_integracion = "Equivocarte te enseña. Repara y sigue, sin castigarte pa
 mensaje_fallo = "La culpa se pega más a ti. Lo roto del Presente sigue roto, y ella lo recuerda."
 mensaje_presente_aliada = "Ahora la culpa te ayuda a arreglar lo roto. Aprender de un error no es cargarlo para siempre."
 mensaje_presente_bloqueo = "Puentes y puertas rotas te cierran el paso. La culpa sigue esperando que alguien repare con ella."
+frase_cierre = "Cuando estés listo, aquí estaré."
 mensaje_presente_atacada = "Las tablas del puente están rotas a golpes. Cada intento de aplastar la culpa lo dejó peor."
 mensaje_presente_ignorada = "El puente se pudrió de tanto esperar. Lo roto siguió roto y nadie lo miró."

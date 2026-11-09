@@ -154,7 +154,9 @@ func interactuar() -> void:
 	if not puede_interactuar():
 		return
 	_ocupado = true
-	await Dialogo.mostrar_texto("", lineas_de_mensaje())
+	var resultado := await Dialogo.mostrar_texto("", lineas_de_mensaje())
+	if resultado == Dialogo.CANCELADO:
+		GloboCierre.mostrar(self, datos.frase_cierre, -110.0)
 	_ocupado = false
 
 

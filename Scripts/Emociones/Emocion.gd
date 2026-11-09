@@ -402,29 +402,34 @@ func interactuar() -> void:
 	if jugador != null and jugador.has_method("bloquear"):
 		jugador.bloquear()
 
-	await _abrir_dialogo()
-	_reaccionar_al_resultado()
+	var estado_antes: String = GameState.estado.get(datos.id, "pendiente")
+	var resultado := await _abrir_dialogo()
+	if resultado == Dialogo.CANCELADO and GameState.estado.get(datos.id, "pendiente") == estado_antes:
+		# "Ahora no": no es una decisión. Nada cambia, reanuda su vida y se despide con una frase breve
+		GloboCierre.mostrar(self, datos.frase_cierre, -72.0)
+	else:
+		_reaccionar_al_resultado()
 
 	_ocupada = false
 	if jugador != null and is_instance_valid(jugador) and jugador.has_method("liberar"):
 		jugador.liberar()
 
 
-func _abrir_dialogo() -> void:
+func _abrir_dialogo() -> int:
 	var ruta := ruta_dialogo if ruta_dialogo != "" else RUTA_DIALOGO % datos.id
 	if ResourceLoader.exists(ruta):
-		await Dialogo.mostrar(load(ruta), CUE_DIALOGO)
-	else:
-		await _dialogo_provisional()
+		return await Dialogo.mostrar(load(ruta), CUE_DIALOGO)
+	return await _dialogo_provisional()
 
 
 ## Diálogo de emergencia si todavía no existe el .dialogue de esta emoción.
-func _dialogo_provisional() -> void:
+func _dialogo_provisional() -> int:
 	var opciones := ["Atacarla", "Ignorarla", "Escucharla"]
 	var elegida: int = await Dialogo.preguntar("%s te mira en silencio. ¿Qué haces?" % datos.nombre, opciones)
 	var resultados := ["atacada", "ignorada", "integrada"]
 	if elegida >= 0 and elegida < resultados.size():
 		GameState.resolver(datos.id, resultados[elegida])
+	return elegida
 
 
 func _reaccionar_al_resultado() -> void:

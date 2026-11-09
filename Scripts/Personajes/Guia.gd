@@ -48,8 +48,10 @@ func interactuar() -> void:
 	if not puede_interactuar():
 		return
 	_sprite.play(&"hablar")
-	await Dialogo.mostrar(DIALOGO, "start", [self])
+	var resultado := await Dialogo.mostrar(DIALOGO, "start", [self])
 	_sprite.play(&"idle")
+	if resultado == Dialogo.CANCELADO:
+		GloboCierre.mostrar(self, "Aquí estaré, sin prisa.", -84.0)
 
 
 func _on_dialogo_cerrado() -> void:

@@ -22,6 +22,12 @@ const SEGUNDOS_POR_LETRA := 0.03
 const FUNDIDO_ENTRADA := 0.2
 const FUNDIDO_SALIDA := 0.15
 const ACCION_SIGUIENTE := &"INTERACTUAR"
+## ESC: cancela la conversación (una pulsación con opciones visibles; mantenida durante el texto).
+const ACCION_CANCELAR := &"PAUSA"
+const SEGUNDOS_PARA_SALIR := 0.7
+const TEXTO_CANCELAR := "Ahora no"
+const COLOR_CANCELAR := Color("8a7fa3")        # gris violáceo apagado
+const COLOR_CANCELAR_FOCO := Color("c9bfe0")
 
 ## Recurso .dialogue y cue inicial (los rellena DialogueManager o Dialogo.mostrar).
 @export var dialogue_resource: DialogueResource
@@ -40,16 +46,24 @@ const ACCION_SIGUIENTE := &"INTERACTUAR"
 var estados_temporales: Array = []
 ## true cuando el texto ya terminó y se espera que el jugador avance.
 var esperando_entrada := false
+## false en los cuestionarios (onboarding y final): no hay "Ahora no" y ESC no hace nada.
+var cancelable := true
 ## Evita elegir dos veces la misma respuesta (clic + tecla).
 var _respuesta_tomada := false
 var _ultima_respuesta := -1
 var _cerrando := false
 var _temporizador_mutacion := Timer.new()
 var _ocultar_por_mutacion := false
+var _boton_cancelar: Button
+var _separador: ColorRect
+var _pista: Label
+var _tiempo_salida := 0.0
 
 ## Línea actual. Al asignar una línea nula, el diálogo terminó.
 var linea: DialogueLine:
 	set(valor):
+		if _cerrando:
+			return  # ya se canceló o terminó: se ignoran las líneas que lleguen tarde
 		if valor:
 			linea = valor
 			_aplicar_linea()
@@ -61,6 +75,7 @@ var linea: DialogueLine:
 
 func _ready() -> void:
 	_aplicar_estilo()
+	_crear_cancelacion()
 	raiz.hide()
 	raiz.modulate.a = 0.0
 	retrato.hide()
@@ -93,6 +108,16 @@ func start(recurso: DialogueResource = null, cue: String = "", estados_extra: Ar
 func _input(evento: InputEvent) -> void:
 	if not raiz.visible or linea == null or _cerrando:
 		return
+	# Con las opciones a la vista, una pulsación de ESC cancela. También con INTERACTUAR sobre "Ahora no".
+	if cancelable and respuestas.visible:
+		if evento.is_action_pressed(ACCION_CANCELAR) and not evento.is_echo():
+			get_viewport().set_input_as_handled()
+			_cancelar()
+			return
+		if evento.is_action_pressed(ACCION_SIGUIENTE) and _boton_cancelar.has_focus():
+			get_viewport().set_input_as_handled()
+			_cancelar()
+			return
 	var presionado := evento.is_action_pressed(ACCION_SIGUIENTE)
 	var clic: bool = evento is InputEventMouseButton and evento.pressed \
 		and evento.button_index == MOUSE_BUTTON_LEFT
@@ -109,6 +134,31 @@ func _input(evento: InputEvent) -> void:
 		_siguiente(linea.next_id)
 
 
+func _process(delta: float) -> void:
+	# Durante el texto, mantener ESC sale de la conversación
+	if cancelable and raiz.visible and not _cerrando and linea != null and not respuestas.visible:
+		if Input.is_action_pressed(ACCION_CANCELAR):
+			_tiempo_salida += delta
+			_pista.text = "Saliendo…"
+			_pista.modulate.a = 1.0
+			if _tiempo_salida >= SEGUNDOS_PARA_SALIR:
+				_cancelar()
+			return
+	_tiempo_salida = 0.0
+	if _pista != null:
+		_pista.text = "Mantén ESC para salir"
+		_pista.modulate.a = 0.45
+
+
+## Cierra la conversación sin elegir nada. NO es una decisión del juego: no se ejecuta ninguna
+## línea más del .dialogue, así que ningún estado cambia. mostrar() devuelve Dialogo.CANCELADO.
+func _cancelar() -> void:
+	if not cancelable or _cerrando:
+		return
+	_ultima_respuesta = Dialogo.CANCELADO
+	_terminar()
+
+
 func _siguiente(id: String) -> void:
 	linea = await dialogue_resource.get_next_dialogue_line(id, estados_temporales)
 
@@ -121,6 +171,10 @@ func _aplicar_linea() -> void:
 	_respuesta_tomada = false
 	esperando_entrada = false
 	indicador.hide()
+	_tiempo_salida = 0.0
+	_boton_cancelar.hide()
+	_separador.hide()
+	_pista.visible = cancelable
 
 	# Nombre de quien habla (se oculta si es narrador)
 	var nombre := tr(linea.character, "dialogue")
@@ -142,11 +196,14 @@ func _aplicar_linea() -> void:
 		texto.type_out()
 		await texto.finished_typing
 		escribiendo_terminado.emit()
-		if esta_linea != linea:
-			return  # ya cambió la línea mientras se escribía
+		if _cerrando or esta_linea != linea:
+			return  # ya cambió la línea (o se canceló) mientras se escribía
 
 	if linea.responses.size() > 0:
 		respuestas.show()
+		_pista.hide()
+		_boton_cancelar.visible = cancelable
+		_separador.visible = cancelable
 		respuestas.focus_first_item()
 	elif linea.time != "":
 		var segundos := linea.text.length() * 0.02 if linea.time == "auto" else linea.time.to_float()
@@ -195,9 +252,50 @@ func _terminar() -> void:
 
 ## Los botones también responden a Enter/clic (el menú solo escucha INTERACTUAR y el ratón).
 func _conectar_botones() -> void:
-	for item in respuestas.get_menu_items():
+	var items := respuestas.get_menu_items()
+	for item in items:
 		if item is BaseButton:
 			item.pressed.connect(_on_respuesta_elegida.bind(item.get_meta("response")))
+	# Con el teclado se llega a "Ahora no" bajando desde la última respuesta (y se vuelve subiendo)
+	if not items.is_empty():
+		var ultimo := items[items.size() - 1] as Control
+		ultimo.focus_neighbor_bottom = ultimo.get_path_to(_boton_cancelar)
+		_boton_cancelar.focus_neighbor_top = _boton_cancelar.get_path_to(ultimo)
+
+
+## "Ahora no": una opción pequeña, gris violácea y separada por una línea tenue de las respuestas,
+## para que no se confunda con una decisión. Se crea por código (así no hay que editar la escena).
+func _crear_cancelacion() -> void:
+	var contenedor := respuestas.get_parent()
+	_separador = ColorRect.new()
+	_separador.custom_minimum_size = Vector2(0, 1)
+	_separador.color = Color(COLOR_CANCELAR, 0.35)
+	_separador.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_separador.hide()
+	contenedor.add_child(_separador)
+
+	_boton_cancelar = Button.new()
+	_boton_cancelar.text = TEXTO_CANCELAR
+	_boton_cancelar.flat = true
+	_boton_cancelar.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_boton_cancelar.focus_mode = Control.FOCUS_ALL
+	_boton_cancelar.add_theme_font_size_override("font_size", 12)
+	_boton_cancelar.add_theme_color_override("font_color", COLOR_CANCELAR)
+	_boton_cancelar.add_theme_color_override("font_hover_color", COLOR_CANCELAR_FOCO)
+	_boton_cancelar.add_theme_color_override("font_focus_color", COLOR_CANCELAR_FOCO)
+	_boton_cancelar.hide()
+	_boton_cancelar.pressed.connect(_cancelar)
+	contenedor.add_child(_boton_cancelar)
+
+	_pista = Label.new()
+	_pista.text = "Mantén ESC para salir"
+	_pista.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_pista.add_theme_font_size_override("font_size", 10)
+	_pista.add_theme_color_override("font_color", COLOR_CANCELAR)
+	_pista.modulate.a = 0.45
+	_pista.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pista.hide()
+	contenedor.add_child(_pista)
 
 
 func _on_respuesta_elegida(respuesta: DialogueResponse) -> void:

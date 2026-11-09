@@ -144,3 +144,10 @@ Reglas de cada bloqueo (para la tarea 3.3):
 - `Dialogo.mostrar_texto(personaje, lineas)` muestra líneas de texto sin archivo `.dialogue` (evita ":" en las del narrador y `[ ]`, `{{ }}`).
 - **`PuertaReflejo`** (`Scenes/Objetos/PuertaReflejo.tscn`, arte de `tools/generar_puerta_reflejo.py`): en `Zona_Final`, en las dos épocas (espejo agrietado en el Presente). Con alguna emoción pendiente dice que aún falta algo; con todas resueltas muestra `GameState.calcular_final()` como texto simple. **TEMPORAL**: la secuencia final se hace después.
 - Las grietas quedan a 170-210 px del centro de su zona y el bloqueo más cerca, para que viajar por una grieta no se salte el bloqueo.
+
+## Cancelar conversaciones
+
+- **Regla de diseño:** cancelar ("Ahora no" o ESC) NO es una decisión del juego. No cambia `GameState.estado`, no cuenta como ignorada, no escribe en el diario ni afecta a los finales. `Dialogo.mostrar()` devuelve `Dialogo.CANCELADO` (-2) y quien lo llama no debe cambiar ningún estado.
+- **Balloon:** con opciones visibles aparece "Ahora no" (más pequeña, gris violácea, separada por una línea tenue) y una pulsación de ESC (`PAUSA`) cancela. Durante el texto, mantener ESC 0.7 s sale (hay una pista "Mantén ESC para salir"). Una conversación cancelada a la mitad no aplica ningún cambio porque los `$>` del `.dialogue` aún no se ejecutaron.
+- **Despedida:** la criatura (y la forma aliada, el bloqueo y la Guía) dicen una frase breve en un globo pequeño (`GloboCierre`); la frase de cada emoción es `frase_cierre` en su `.tres`.
+- **NO cancelables:** el cuestionario de entrada (onboarding) y el de salida. Se abren con `Dialogo.mostrar(recurso, titulo, [self], false)`; ESC no hace nada y `Dialogo.pausa_permitida()` devuelve false mientras duran (el menú de pausa, cuando exista, debe consultarlo).

@@ -77,7 +77,10 @@ func _process(delta: float) -> void:
 
 func _empezar() -> void:
 	await _aparecer_guia()
-	await Dialogo.mostrar(DIALOGO, "start", [self])
+	# El cuestionario de entrada NO se puede cancelar ni saltar (ni con "Ahora no" ni con ESC): es la
+	# evaluación del aprendizaje y debe quedar completo. Lo mismo vale para el cuestionario de salida.
+	# Por eso se pasa cancelable = false (y Dialogo.pausa_permitida() devuelve false mientras dura).
+	await Dialogo.mostrar(DIALOGO, "start", [self], false)
 	ocultar_emocion()
 	_avisar_si_faltan_respuestas()
 	await _cierre()

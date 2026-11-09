@@ -35,6 +35,8 @@ enum Comportamiento {
 @export_multiline var mensaje_fallo: String = ""
 @export_multiline var mensaje_presente_aliada: String = ""
 @export_multiline var mensaje_presente_bloqueo: String = ""
+## Frase breve que dice la criatura (en un globo pequeño) cuando cancelas la conversación con "Ahora no".
+@export_multiline var frase_cierre: String = ""
 ## Lo que dice el bloqueo del Presente si atacaste a la emoción (refleja el daño causado).
 @export_multiline var mensaje_presente_atacada: String = ""
 ## Lo que dice el bloqueo del Presente si la ignoraste (refleja el abandono).

@@ -75,7 +75,7 @@ func interactuar() -> void:
 	if not puede_interactuar():
 		return
 	_ocupada = true
-	await Dialogo.mostrar_texto("", lineas_de_dialogo())
+	await Dialogo.mostrar_texto("", lineas_de_dialogo())  # se puede salir con ESC; no cambia nada
 	_ocupada = false
 
 

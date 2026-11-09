@@ -20,5 +20,6 @@ mensaje_integracion = "La vergüenza dice que te importa lo que otros piensan. S
 mensaje_fallo = "La vergüenza se tapó la cara y se escondió todavía más. No se fue: solo se hizo más pequeña."
 mensaje_presente_aliada = "Una pequeña guía encapuchada camina a tu lado y te muestra lo que estaba oculto: un puente, una puerta, un camino."
 mensaje_presente_bloqueo = "Un muro de espejos cubiertos con telas te esconde el camino. Vuelve al Pasado y mírala con cariño."
+frase_cierre = "Está bien. Vuelve cuando quieras."
 mensaje_presente_atacada = "Las telas están rasgadas y los espejos, torcidos. La vergüenza se esconde todavía más."
 mensaje_presente_ignorada = "Las telas lo cubren todo y hasta los espejos callan. Nadie se acercó a mirar con cariño."
