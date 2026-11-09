@@ -1,0 +1,72 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" uid="uid://v4hvp36vnq5u" path="res://Assets/Mundo/portal.png" id="1_hoja"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f00"]
+atlas = ExtResource("1_hoja")
+region = Rect2(0, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f01"]
+atlas = ExtResource("1_hoja")
+region = Rect2(96, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f02"]
+atlas = ExtResource("1_hoja")
+region = Rect2(192, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f03"]
+atlas = ExtResource("1_hoja")
+region = Rect2(288, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f10"]
+atlas = ExtResource("1_hoja")
+region = Rect2(0, 96, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f11"]
+atlas = ExtResource("1_hoja")
+region = Rect2(96, 96, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f12"]
+atlas = ExtResource("1_hoja")
+region = Rect2(192, 96, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f13"]
+atlas = ExtResource("1_hoja")
+region = Rect2(288, 96, 96, 96)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f00")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f01")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f02")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f03")
+}],
+"loop": true,
+"name": &"dormido",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f11")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f12")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f13")
+}],
+"loop": true,
+"name": &"activo",
+"speed": 6.0
+}]
