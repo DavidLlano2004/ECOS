@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://ci74w3iei76td"]
+
+[ext_resource type="Script" uid="uid://bhf8rrh0owlqe" path="res://Autoload/Dialogo.gd" id="1_2f54f"]
+
+[node name="Dialogo" type="CanvasLayer" unique_id=1309323393]
+layer = 10
+visible = false
+script = ExtResource("1_2f54f")
+
+[node name="Panel" type="Panel" parent="." unique_id=945370921]
+custom_minimum_size = Vector2(0, 160)
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel" unique_id=1865150824]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Texto" type="Label" parent="Panel/VBoxContainer" unique_id=1826023141]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="Botones" type="VBoxContainer" parent="Panel/VBoxContainer" unique_id=1655108222]
+layout_mode = 2

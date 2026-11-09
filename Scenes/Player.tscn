@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://dtxwhsbyp2ndj"]
+
+[ext_resource type="Script" uid="uid://bip2hkln85pwu" path="res://Scripts/Player.gd" id="1_rpqav"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gntrk"]
+radius = 14.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dewec"]
+radius = 18.0
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=166973816]
+script = ExtResource("1_rpqav")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1087729020]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1871061015]
+shape = SubResource("CircleShape2D_gntrk")
+
+[node name="ZonaInteraccion" type="Area2D" parent="." unique_id=1713478329]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaInteraccion" unique_id=1358698725]
+shape = SubResource("CircleShape2D_dewec")
+
+[connection signal="area_entered" from="ZonaInteraccion" to="." method="_on_zona_interaccion_area_entered"]
+[connection signal="area_exited" from="ZonaInteraccion" to="." method="_on_zona_interaccion_area_exited"]
