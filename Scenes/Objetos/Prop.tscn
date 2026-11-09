@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Objetos/Prop.gd" id="1_prop"]
+[ext_resource type="Texture2D" path="res://Resources/Mundo/luz_calida.tres" id="2_luz"]
+
+[node name="Prop" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_prop")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+
+[node name="Luz" type="PointLight2D" parent="."]
+color = Color(1, 0.78, 0.4, 1)
+energy = 0.9
+texture = ExtResource("2_luz")
+texture_scale = 0.7

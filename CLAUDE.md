@@ -89,3 +89,33 @@ Nota: `Player.gd` todavía no tiene la propiedad `facing`; hay que añadirla cua
 - Explicar cada cambio **en español sencillo**.
 - **Pedir confirmación** antes de: instalar addons, borrar archivos o editar una escena que pueda estar abierta en el editor de Godot.
 - No borrar ni mover archivos existentes sin permiso.
+
+## Bloqueos del Presente
+
+Siete hojas `Assets/Mundo/bloqueo_<id>.png` (384x192, cuadros de 96x96, 4 columnas x 2 filas) con sus `SpriteFrames` en `Resources/Mundo/frames_bloqueo_<id>.tres` (6 FPS). Animaciones: `bloqueo` y `abierto` en bucle; `abriendo` sin bucle (~0.4 s, un solo cuadro). **Regla general:** si una hoja no tiene `abriendo`, se pasa directo de `bloqueo` a `abierto`. Filas y columnas contadas desde 1:
+
+| id | bloqueo | abriendo | abierto |
+|----|---------|----------|---------|
+| rabia | fila 1 (4 cuadros) | cuadro 1 de la fila 2 | cuadros 2, 3 y 4 de la fila 2 |
+| miedo | fila 1 | no tiene | fila 2 |
+| tristeza | fila 1 | no tiene | fila 2 |
+| soledad | fila 1 | cuadro 1 de la fila 2 | cuadros 2, 3 y 4 de la fila 2 |
+| culpa | cuadros 1, 2 y 3 de la fila 1 | cuadro 4 de la fila 1 | fila 2 |
+| ansiedad | fila 1 | no tiene | fila 2 |
+| verguenza | fila 1 | no tiene | fila 2 |
+
+Reglas de cada bloqueo (para la tarea 3.3):
+
+- **Rabia**: bloquea el paso mientras está `bloqueo`; al abrirse se puede pasar.
+- **Miedo**: en `abierto`, una `PointLight2D` cálida y pequeña con parpadeo suave sobre la linterna del centro.
+- **Tristeza** (caso especial): el sprite (el estanque) va **al lado del camino**, no encima. Mientras está bloqueado, una zona de lluvia intensa (partículas de gotas y la sombra de una nube) cubre el camino y tiene su propia colisión. Al integrarse, la lluvia se detiene con un fundido, desaparece esa colisión y el estanque lleno conserva una colisión propia para no caminar sobre el agua.
+- **Soledad**: escala 1.25. En `abierto`, la colisión solo cubre los laterales del marco y los pedestales; el hueco central queda libre (mínimo 24 px). `PointLight2D` pequeña y cálida sobre cada luciérnaga.
+- **Culpa**: es un puente **vertical** sobre el río horizontal de la zona de Culpa. Los tiles de agua de debajo **no** tienen colisión propia: la pone el bloqueo. Bloqueado no se puede cruzar; en `abierto` se camina sobre el puente y el río a los lados sigue bloqueando. Si el puente queda corto para el río, escalarlo en vertical o ajustar el río a 3 tiles en ese punto.
+- **Ansiedad**: en `abierto`, la colisión cubre solo las dos columnas de engranajes; el arco central queda libre (mínimo 24 px).
+- **Vergüenza**: en `abierto`, la colisión cubre solo los laterales (telas y espejos); el arco de luz central queda libre (mínimo 24 px).
+
+## Decorados (props)
+
+- `Assets/Mundo/props_pasado.png` y `props_presente.png`: 512x256, cuadros de 128x128 (4x2). Fila 1: `arbol_dorado` (con faroles), `cerezo`, `arbol_redondo`, `arbusto_flores`. Fila 2: `roca`, `farol_poste`, `tocon`, `banco`. Cada objeto está apoyado en la base de su cuadro (a 2 px del borde de abajo).
+- `Scenes/Objetos/Prop.tscn` + `Scripts/Objetos/Prop.gd`: `@export var tipo` (los 8 nombres). Elige la hoja según el ancestro `Pasado` o `Presente`. Colisión pequeña solo en la base (el arbusto no tiene). Las luces cálidas (`PointLight2D` con `Resources/Mundo/luz_calida.tres`) solo existen en el Pasado.
+- `Scripts/Mundo/Decorador.gd` decide las posiciones (marcadores de `Decoracion` + extras por tema de zona + faroles junto a los caminos) y `Mundo.colocar_props()` los crea en las dos épocas en las mismas posiciones. No se guardan en la escena. Dejan libres caminos, agua, muros y la zona de 150 px alrededor de cada marcador de zona (donde irán el portal y los bloqueos).

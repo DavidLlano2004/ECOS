@@ -23,6 +23,8 @@ const TERRENO_CAMINO := 0
 const TERRENO_ARENA := 1
 const TERRENO_AGUA := 2
 
+const PROP := preload("res://Scenes/Objetos/Prop.tscn")
+
 ## Caracteres que son agua (el puente va sobre agua).
 const AGUA := "wPqQ"
 
@@ -33,6 +35,7 @@ var _epoca_actual := "pasado"
 
 func _ready() -> void:
 	construir_mapa()
+	colocar_props()
 	if Engine.is_editor_hint():
 		return
 	GameState.epoca_cambiada.connect(mostrar_epoca)
@@ -140,6 +143,40 @@ func colocar_decoracion(del_pasado: Dictionary, del_presente: Dictionary = {}) -
 				objeto.global_position = marcador.global_position
 				total += 1
 	return total
+
+
+## Coloca los decorados (Prop) en las dos épocas, siempre en las mismas posiciones.
+## Usa los marcadores del grupo y añade más según el tema de cada zona (ver Decorador.gd).
+## Los props se crean al arrancar y no se guardan en la escena; si ya había, se reemplazan.
+## Devuelve cuántos puso en cada época.
+func colocar_props() -> int:
+	var filas := _leer_mapa()
+	if filas.is_empty():
+		return 0
+	var zonas := {}
+	for nombre in ["Hub", "Rabia", "Miedo", "Tristeza", "Soledad", "Culpa", "Ansiedad", "Verguenza", "Final"]:
+		zonas[nombre] = posicion_zona(nombre)
+	var marcadores := {}
+	for grupo in ["arboles", "rocas", "faroles", "bancos"]:
+		var posiciones: Array[Vector2] = []
+		for marcador in marcadores_de(grupo):
+			posiciones.append(to_local(marcador.global_position))
+		marcadores[grupo] = posiciones
+	var puestos := Decorador.generar(filas, zonas, marcadores)
+	for epoca in ["Pasado", "Presente"]:
+		var objetos := get_node_or_null("%s/Objetos" % epoca)
+		if objetos == null:
+			continue
+		for viejo in objetos.get_children():
+			if viejo is Prop:
+				viejo.free()
+		for puesto in puestos:
+			var prop := PROP.instantiate() as Prop
+			prop.tipo = puesto["tipo"]
+			prop.name = "%s_%d" % [puesto["tipo"], objetos.get_child_count()]
+			prop.position = puesto["pos"]
+			objetos.add_child(prop)
+	return puestos.size()
 
 
 func _crear_objeto(origen: Variant) -> Node2D:
