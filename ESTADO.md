@@ -1,7 +1,21 @@
 # ECOS: estado del proyecto (para la siguiente sesión)
 
-Léelo junto con `CLAUDE.md` (reglas y arquitectura). Última actualización: 2026-11-09.
+Léelo junto con `CLAUDE.md` (reglas y arquitectura). Última actualización: 2026-11-13.
 Godot 4.7.2, GDScript. Todo en español. Un commit por tarea y **sin líneas de atribución a Claude** (solo el perfil del usuario).
+
+## SIGUIENTE PASO
+
+**Lo que sigue es el prompt 4.7** (lo envía el usuario; todavía no se conoce su contenido, no lo supongas). Todo lo anterior está terminado y commiteado (último commit: `1850757` "Tecla E, texto unificado y consejos"). El usuario trabaja por prompts numerados que le prepara otro asistente (Claude chat) y los pega aquí.
+
+## Lo hecho en la última etapa (commits, de más nuevo a más viejo)
+
+- `1850757` Tecla E, texto unificado y consejos: los textos dicen E para portales y grietas (Q sigue funcionando pero oculta); `Dialogo.mostrar_texto(nombre, texto, opciones, retrato, automatico)` es la única vía para mostrar texto (borrados `GloboCierre` y `Dialogo.preguntar`); `EmocionData.nombre_bloqueo`; 84 consejos en `Resources/Consejos/*.json` (`Consejos.charlar`), `GameState.consejos_vistos`; `docs/consejos_para_revision.md`.
+- `0e8561f` Sistema de audio (`Sonido`: efectos, música y ambientes con fundido, pasos, portal por cercanía, panel de depuración con la tecla M).
+- `6e81819` Audio del juego: los 60 audios de ElevenLabs procesados (`tools/procesar_audio.py`) e importados; originales en `audio_originales/` (ignorado por git).
+- `8af8e26` Diario (TAB) y menú de pausa (ESC), opciones (buses `Musica` y `Efectos`, pantalla completa), autoguardado con ícono, guardado seguro y carga a prueba de archivos dañados, Continuar con posición y época.
+- `999e6da` Acertijos de habilidad y fragmentos de memoria (7 recintos en el Presente, `Resources/Recuerdos.tres`).
+- `f5e9b1a` Arte de los acertijos y los íconos de habilidad.
+- `5e8da54`, `086170b`, `a8713ae` las 7 habilidades y el HUD. `975afd8` teclas de prueba de la arena (U, I, O).
 
 ## Cómo trabajar
 
@@ -10,6 +24,7 @@ Godot 4.7.2, GDScript. Todo en español. Un commit por tarea y **sin líneas de 
 - Receta tras cambiar arte o mapa (detalle en `CLAUDE.md`, sección `tools/`): `generar_tileset.py` -> `godot --headless --import` -> `construir_tileset.gd` -> `generar_mapa.py` -> `godot --path . res://tools/preview_mapa.tscn` (necesita ventana). Regenerar siempre `tools/preview_mapa_*.png`.
 - Tras crear un `.dialogue`, `.png` o shader nuevo, ejecutar `--import` **dos veces** (la primera vez falla el `preload`).
 - Pruebas: scripts temporales fuera del proyecto y se borran. Para probar con el mundo cargado hay que usar una escena temporal (los autoloads no existen con `--script`). Ejemplos de lo que se verificó: alcance físico cada 8 px con la forma real del jugador, cancelar diálogos, estados de bloqueos.
+- Lecciones de esta etapa: (1) las teclas F5 a F10 son atajos del editor de Godot (pausan o detienen el juego): para depurar se usan letras (U, I, O en `PruebaHabilidades`; F2, F3 y F4 sí funcionan). (2) En el balloon de diálogo las opciones se mueven con las flechas, no con W y S; para salir de un texto sin opciones hay que MANTENER ESC (0.7 s), con opciones basta pulsarlo. (3) Mis `git add -A` pueden colarse archivos que el usuario copió o cachés: revisar `git status` antes de commitear (`__pycache__` ya está ignorado). (4) Al editar `project.godot` con el editor abierto, avisar de que lo recargue. (5) Las pruebas con ventana real (`godot --path .`) sirven para shaders, UI y audio (WASAPI); las `--headless` para lógica y física. Las pruebas no deben dejar archivos en `%APPDATA%\Godot\app_userdata\ECOS` (guardado y opciones del usuario): respaldar y restaurar. (6) En modo headless con `--quit-after`, cerrar con un sonido a medias imprime "resources still in use": es inofensivo (el juego real sale con calma, `Sonido.salir()`). (7) ffmpeg no está instalado: `tools/procesar_audio.py` usa `imageio-ffmpeg` desde un entorno virtual en `%TEMP%\ecos_audio_venv` (fuera del proyecto).
 - No editar escenas que puedan estar abiertas en el editor sin avisar. No borrar archivos sin permiso. Las entidades del mundo (portales, props, Guía, criaturas, bloqueos, puerta) se crean por código en `Mundo.gd`, así que `Mundo.tscn` casi no se toca.
 
 ## Qué está hecho
