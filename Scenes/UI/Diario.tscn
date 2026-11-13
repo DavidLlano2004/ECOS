@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/Diario.gd" id="1_diario"]
+
+[node name="Diario" type="CanvasLayer"]
+layer = 8
+script = ExtResource("1_diario")

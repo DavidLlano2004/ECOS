@@ -32,6 +32,11 @@ var habilidad_seleccionada: String = ""
 var fragmentos: Array[String] = []
 ## true cuando se recogieron todos los fragmentos (se usará en el final).
 var recuerdos_completos: bool = false
+## Dónde estaba el jugador al guardar (lo rellena el autoload Guardado; ver Mundo).
+var posicion_jugador: Vector2 = Vector2.ZERO
+var tiene_posicion: bool = false
+## true justo después de cargar una partida con posición: Mundo coloca al jugador ahí y lo apaga.
+var restaurar_posicion: bool = false
 var respuestas_inicio: Array[int] = []
 var respuestas_final: Array[int] = []
 ## Mensajes capturados: [{"id": "rabia", "texto": "..."}]
@@ -211,6 +216,8 @@ func nueva_partida() -> void:
 	habilidad_seleccionada = ""
 	fragmentos.clear()
 	recuerdos_completos = false
+	tiene_posicion = false
+	restaurar_posicion = false
 	respuestas_inicio.clear()
 	respuestas_final.clear()
 	diario.clear()
@@ -218,7 +225,9 @@ func nueva_partida() -> void:
 	partida_reiniciada.emit()
 
 
-func guardar() -> void:
+## Guarda la partida de forma segura: escribe un archivo temporal y lo renombra (así, si algo falla a
+## medias, la partida anterior no se estropea). Devuelve true si se pudo guardar.
+func guardar() -> bool:
 	var contenido := {
 		"epoca": epoca,
 		"estado": estado,
@@ -231,11 +240,20 @@ func guardar() -> void:
 		"diario": diario,
 		"guia_conocida": guia_conocida,
 	}
-	var archivo := FileAccess.open(RUTA_GUARDADO, FileAccess.WRITE)
+	if tiene_posicion:
+		contenido["posicion"] = [posicion_jugador.x, posicion_jugador.y]
+	var temporal := RUTA_GUARDADO + ".tmp"
+	var archivo := FileAccess.open(temporal, FileAccess.WRITE)
 	if archivo == null:
 		push_error("GameState: no se pudo guardar (error %d)." % FileAccess.get_open_error())
-		return
-	archivo.store_string(JSON.stringify(contenido, "\t"))
+		return false
+	archivo.store_string(JSON.stringify(contenido, "	"))
+	archivo.close()
+	var error := DirAccess.rename_absolute(ProjectSettings.globalize_path(temporal), ProjectSettings.globalize_path(RUTA_GUARDADO))
+	if error != OK:
+		push_error("GameState: no se pudo terminar de guardar (error %d)." % error)
+		return false
+	return true
 
 
 ## true si existe un archivo de guardado (no carga nada; sirve para mostrar "Continuar").
@@ -243,43 +261,80 @@ func hay_partida_guardada() -> bool:
 	return FileAccess.file_exists(RUTA_GUARDADO)
 
 
-## Devuelve true si se cargó una partida guardada.
-func cargar() -> bool:
+## Estado del archivo de guardado: "falta" (no existe), "danada" (no se puede leer) o "ok".
+func diagnosticar_partida() -> String:
 	if not FileAccess.file_exists(RUTA_GUARDADO):
+		return "falta"
+	var lectura: Variant = _leer_partida()
+	if typeof(lectura) != TYPE_DICTIONARY or typeof(lectura.get("estado", null)) != TYPE_DICTIONARY:
+		return "danada"
+	return "ok"
+
+
+## Lee y entiende el JSON del archivo de guardado. Devuelve null si no se puede (sin ensuciar la consola).
+func _leer_partida() -> Variant:
+	var json := JSON.new()
+	if json.parse(FileAccess.get_file_as_string(RUTA_GUARDADO)) != OK:
+		return null
+	return json.data
+
+
+## Carga la partida guardada. Devuelve true si se cargó. Si el archivo falta o está dañado no cambia
+## nada y devuelve false (quien llama avisa al jugador y le ofrece una partida nueva). Cada dato se
+## comprueba: lo que no tenga el tipo esperado se ignora en vez de romper el juego.
+func cargar() -> bool:
+	if diagnosticar_partida() != "ok":
+		if FileAccess.file_exists(RUTA_GUARDADO):
+			push_warning("GameState: el archivo de guardado está dañado.")
 		return false
-	var lectura = JSON.parse_string(FileAccess.get_file_as_string(RUTA_GUARDADO))
-	if typeof(lectura) != TYPE_DICTIONARY:
-		push_warning("GameState: el archivo de guardado está dañado.")
-		return false
+	var lectura: Dictionary = _leer_partida()
 
 	nueva_partida()
-	epoca = "presente" if lectura.get("epoca", "pasado") == "presente" else "pasado"
+	var epoca_guardada: Variant = lectura.get("epoca", "pasado")
+	epoca = "presente" if typeof(epoca_guardada) == TYPE_STRING and epoca_guardada == "presente" else "pasado"
 
 	# Solo se aceptan emociones y estados que existen
-	var estado_guardado: Dictionary = lectura.get("estado", {})
+	var estado_guardado: Dictionary = lectura["estado"]
 	for id in estado_guardado:
 		if _datos.has(id) and RESULTADOS.has(estado_guardado[id]):
 			estado[id] = estado_guardado[id]
 
-	for h in lectura.get("habilidades", []):
-		habilidades.append(str(h))
+	for h in _lista(lectura, "habilidades"):
+		if not habilidades.has(str(h)):
+			habilidades.append(str(h))
 	habilidad_seleccionada = str(lectura.get("habilidad_seleccionada", ""))
 	# Solo se aceptan fragmentos de emociones que existen, sin repetir
-	for f in lectura.get("fragmentos", []):
+	for f in _lista(lectura, "fragmentos"):
 		if _datos.has(str(f)) and not fragmentos.has(str(f)):
 			fragmentos.append(str(f))
 	_actualizar_recuerdos_completos()
 	# JSON devuelve los números como float, se pasan a int
-	for r in lectura.get("respuestas_inicio", []):
-		respuestas_inicio.append(int(r))
-	for r in lectura.get("respuestas_final", []):
-		respuestas_final.append(int(r))
-	for entrada in lectura.get("diario", []):
+	for r in _lista(lectura, "respuestas_inicio"):
+		if typeof(r) == TYPE_FLOAT or typeof(r) == TYPE_INT:
+			respuestas_inicio.append(int(r))
+	for r in _lista(lectura, "respuestas_final"):
+		if typeof(r) == TYPE_FLOAT or typeof(r) == TYPE_INT:
+			respuestas_final.append(int(r))
+	for entrada in _lista(lectura, "diario"):
 		if typeof(entrada) == TYPE_DICTIONARY and entrada.has("id") and entrada.has("texto"):
 			diario.append({"id": str(entrada["id"]), "texto": str(entrada["texto"])})
 
-	guia_conocida = bool(lectura.get("guia_conocida", false))
+	var conocida: Variant = lectura.get("guia_conocida", false)
+	guia_conocida = typeof(conocida) == TYPE_BOOL and conocida
+
+	# Dónde estaba el jugador (Mundo lo coloca ahí al entrar)
+	var pos: Variant = lectura.get("posicion", null)
+	if typeof(pos) == TYPE_ARRAY and pos.size() == 2 and (typeof(pos[0]) == TYPE_FLOAT or typeof(pos[0]) == TYPE_INT) 			and (typeof(pos[1]) == TYPE_FLOAT or typeof(pos[1]) == TYPE_INT):
+		posicion_jugador = Vector2(float(pos[0]), float(pos[1]))
+		tiene_posicion = true
+		restaurar_posicion = true
 
 	epoca_cambiada.emit(epoca)
 	partida_cargada.emit()
 	return true
+
+
+## El valor de `clave` si es una lista; si no, una lista vacía.
+func _lista(datos: Dictionary, clave: String) -> Array:
+	var valor: Variant = datos.get(clave, [])
+	return valor if typeof(valor) == TYPE_ARRAY else []

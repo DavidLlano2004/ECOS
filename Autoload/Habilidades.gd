@@ -164,6 +164,11 @@ func puede_operar() -> bool:
 	return get_tree().get_first_node_in_group("player") != null
 
 
+## true si hay un bloqueo activo por ese motivo (por ejemplo "transicion", mientras se viaja de época).
+func bloqueado_por(motivo: String) -> bool:
+	return _bloqueos.has(motivo)
+
+
 ## Bloquea las habilidades por un motivo (ej. "transicion"). Hay que liberar con el mismo motivo.
 func bloquear(motivo: String) -> void:
 	_bloqueos[motivo] = true

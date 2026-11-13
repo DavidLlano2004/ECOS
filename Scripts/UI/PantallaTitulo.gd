@@ -59,6 +59,8 @@ var _tiempo := 0.0
 
 
 func _ready() -> void:
+	musica.bus = Opciones.BUS_MUSICA          # los volúmenes de Opciones valen también aquí
+	sonido_seleccion.bus = Opciones.BUS_EFECTOS
 	if ResourceLoader.exists(RUTA_FUENTE):
 		_fuente = load(RUTA_FUENTE)
 	_crear_fondo()
@@ -439,8 +441,13 @@ func _continuar() -> void:
 	if _eligiendo:
 		return
 	if not GameState.cargar():
+		# La partida falta o está dañada: no se rompe nada, se avisa y se ofrece una partida nueva
+		var dañada := GameState.diagnosticar_partida() == "danada"
 		boton_continuar.visible = false
 		boton_comenzar.grab_focus()
+		Notificacion.mostrar(
+			"No se pudo leer la partida" if dañada else "No hay partida guardada",
+			"Tu partida guardada está dañada. Puedes empezar una nueva con Comenzar." if dañada 				else "Empieza una nueva con Comenzar.")
 		return
 	_eligiendo = true
 	var t := create_tween()

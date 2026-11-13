@@ -78,6 +78,11 @@ func _ready() -> void:
 	var jugador := _jugador()
 	if jugador != null:
 		jugador.global_position = posicion_zona("Hub") + Vector2(0, 56)  # delante del portal
+		# Al continuar una partida guardada, el jugador vuelve a donde estaba (si el sitio es válido)
+		if GameState.restaurar_posicion:
+			GameState.restaurar_posicion = false
+			if LIMITES.grow(-16.0).has_point(GameState.posicion_jugador):
+				jugador.global_position = GameState.posicion_jugador
 		jugador.establecer_limites(LIMITES)  # el mundo es quien define hasta dónde puede ver la cámara
 	GameState.emocion_resuelta.connect(func(_id: String, _resultado: String) -> void: _actualizar_saturacion(true))
 	_actualizar_saturacion(false)
