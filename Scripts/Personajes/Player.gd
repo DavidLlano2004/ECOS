@@ -129,11 +129,10 @@ func liberar() -> void:
 
 # --- Habilidades ---
 
-## Gancho para las habilidades (Impulso, Visión, Calma, Vínculo, Reparar, Pausa, Revelar).
-## Se llama al pulsar la acción HABILIDAD. Todavía no hace nada: se implementará
-## consultando GameState.tiene_habilidad(id).
+## Se llama al pulsar la acción HABILIDAD. El autoload Habilidades decide si se puede usar
+## la seleccionada (desbloqueo, espera, diálogos, transiciones) y la ejecuta.
 func usar_habilidad() -> void:
-	pass
+	Habilidades.usar(self)
 
 
 # --- Cámara ---

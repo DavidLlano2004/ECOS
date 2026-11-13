@@ -660,6 +660,7 @@ func viajar() -> void:
 	if _viajando or Engine.is_editor_hint() or _rect_transicion == null:
 		return
 	_viajando = true
+	Habilidades.bloquear("transicion")
 	var jugador := _jugador()
 	if jugador != null and jugador.has_method("bloquear"):
 		jugador.bloquear()
@@ -673,6 +674,7 @@ func viajar() -> void:
 	_rect_transicion.visible = false
 	if jugador != null and jugador.has_method("liberar"):
 		jugador.liberar()
+	Habilidades.liberar("transicion")
 	_viajando = false
 
 

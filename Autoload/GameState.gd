@@ -6,6 +6,9 @@ extends Node
 signal epoca_cambiada(epoca: String)
 signal emocion_resuelta(id: String, resultado: String)
 signal habilidad_desbloqueada(habilidad_id: String)
+## Se emiten al reiniciar la partida y al cargar una guardada (las habilidades y el HUD se actualizan).
+signal partida_reiniciada
+signal partida_cargada
 
 const CARPETA_EMOCIONES := "res://Resources/Emociones"
 const RUTA_GUARDADO := "user://ecos_save.json"
@@ -19,6 +22,8 @@ var epoca: String = "pasado"
 var estado: Dictionary = {}
 ## ids de habilidades ya desbloqueadas (ej. "impulso")
 var habilidades: Array[String] = []
+## id de la habilidad elegida en el HUD ("" = ninguna). Se guarda con la partida.
+var habilidad_seleccionada: String = ""
 var respuestas_inicio: Array[int] = []
 var respuestas_final: Array[int] = []
 ## Mensajes capturados: [{"id": "rabia", "texto": "..."}]
@@ -156,10 +161,12 @@ func nueva_partida() -> void:
 	for id in _datos:
 		estado[id] = "pendiente"
 	habilidades.clear()
+	habilidad_seleccionada = ""
 	respuestas_inicio.clear()
 	respuestas_final.clear()
 	diario.clear()
 	guia_conocida = false
+	partida_reiniciada.emit()
 
 
 func guardar() -> void:
@@ -167,6 +174,7 @@ func guardar() -> void:
 		"epoca": epoca,
 		"estado": estado,
 		"habilidades": habilidades,
+		"habilidad_seleccionada": habilidad_seleccionada,
 		"respuestas_inicio": respuestas_inicio,
 		"respuestas_final": respuestas_final,
 		"diario": diario,
@@ -204,6 +212,7 @@ func cargar() -> bool:
 
 	for h in lectura.get("habilidades", []):
 		habilidades.append(str(h))
+	habilidad_seleccionada = str(lectura.get("habilidad_seleccionada", ""))
 	# JSON devuelve los números como float, se pasan a int
 	for r in lectura.get("respuestas_inicio", []):
 		respuestas_inicio.append(int(r))
@@ -216,4 +225,5 @@ func cargar() -> bool:
 	guia_conocida = bool(lectura.get("guia_conocida", false))
 
 	epoca_cambiada.emit(epoca)
+	partida_cargada.emit()
 	return true
