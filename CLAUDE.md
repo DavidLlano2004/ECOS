@@ -177,7 +177,7 @@ Reglas de cada bloqueo (para la tarea 3.3):
 | `reparable` | `reparar()` | Reparar, al completar 1.2 s | El nodo debe ser `Node2D`. Propiedad opcional `radio_reparar` (px) para el tamaño del anillo. Al repararse debe salir del grupo. |
 
 - Pendiente: los grupos de las habilidades de 4.3 (Vínculo, Pausa y Revelar) se añadirán a esta tabla cuando se implementen.
-- **Arena de pruebas:** `Scenes/Mundo/PruebaHabilidades.tscn` (F6, no es la principal): muro, roca rompible, planta seca, objeto roto, Rabia y Miedo. En depuración: **F9** desbloquea las 7 habilidades (sin tocar las emociones), **F10** pone a Rabia como atacada y a Miedo como ignorada, **F7** reinicia los objetos. (F5 y F8 se evitan: son atajos del editor.)
+- **Arena de pruebas:** `Scenes/Mundo/PruebaHabilidades.tscn` (F6, no es la principal): muro, roca rompible, planta seca, objeto roto, Rabia y Miedo. En depuración: **U** desbloquea las 7 habilidades (sin tocar las emociones), **I** pone a Rabia como atacada y a Miedo como ignorada, **O** reinicia los objetos. (Se evitan F5 a F10: son atajos del editor y pausan o detienen el juego.)
 
 ## Atribución en git
 

@@ -4,10 +4,10 @@ extends Node2D
 ## y dos emociones (Rabia y Miedo) para ver cómo les afecta Calma.
 ##
 ## Teclas de depuración (solo en compilaciones de depuración):
-##   F9  = desbloquear las 7 habilidades (sin tocar el estado de las emociones)
-##   F10 = poner a Rabia como "atacada" y a Miedo como "ignorada" (para probar Calma con ellas)
-##   F7  = reiniciar los objetos (recarga la escena; conserva las habilidades)
-## (F5 y F8 se evitan a propósito: son atajos del editor de Godot para ejecutar y detener.)
+##   U = desbloquear las 7 habilidades (sin tocar el estado de las emociones)
+##   I = poner a Rabia como "atacada" y a Miedo como "ignorada" (para probar Calma con ellas)
+##   O = reiniciar los objetos (recarga la escena; conserva las habilidades)
+## (Se evitan las teclas F5 a F10: son atajos del editor de Godot, que pausa o detiene el juego antes de que las reciba.)
 
 const ARENA := Rect2(0, 0, 800, 480)
 const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
@@ -36,12 +36,12 @@ func _unhandled_input(evento: InputEvent) -> void:
 		return
 	if evento is InputEventKey and evento.pressed and not evento.echo:
 		match evento.keycode:
-			KEY_F9:
+			KEY_U:
 				_desbloquear_todas()
-			KEY_F10:
+			KEY_I:
 				GameState.estado["rabia"] = "atacada"
 				GameState.estado["miedo"] = "ignorada"
-			KEY_F7:
+			KEY_O:
 				get_tree().reload_current_scene()
 
 
@@ -96,7 +96,7 @@ func _estilo_etiqueta(etiqueta: Label, tamano: int) -> void:
 func _actualizar_panel() -> void:
 	var lineas: Array[String] = [
 		"PRUEBA DE HABILIDADES",
-		"[F9] desbloquear todas  [F10] agitar emociones  [F7] reiniciar",
+		"[U] desbloquear todas  [I] agitar emociones  [O] reiniciar",
 		"1-7 elegir · R/F cambiar · ESPACIO usar",
 	]
 	for nombre in ["Rabia", "Miedo"]:
