@@ -9,3 +9,7 @@ export_credentials.cfg
 # Archivos del sistema
 Thumbs.db
 .DS_Store
+
+# Caché de Python
+__pycache__/
+*.pyc

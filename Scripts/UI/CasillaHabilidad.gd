@@ -63,6 +63,7 @@ func _ready() -> void:
 	size = TAMANO
 	pivot_offset = TAMANO / 2.0
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST  # pixel art: sin suavizado
 	if ResourceLoader.exists(RUTA_FUENTE):
 		_fuente = load(RUTA_FUENTE)
 	if ResourceLoader.exists(RUTA_ICONOS):

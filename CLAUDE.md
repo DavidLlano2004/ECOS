@@ -187,6 +187,28 @@ Reglas de cada bloqueo (para la tarea 3.3):
 - **HUD:** una casilla con un efecto en marcha (Visión encendida, Pausa, compañero invocado) muestra un halo que late (`HabilidadBase.activa`, `Habilidades.esta_activa(id)`). `HabilidadBase.reiniciar()` apaga todo al empezar una nueva partida.
 - **Arena de pruebas:** `Scenes/Mundo/PruebaHabilidades.tscn` (F6, no es la principal, 1200x520). A la izquierda: muro, roca rompible, planta seca, objeto roto, Rabia y Miedo, dos placas dobles y una reja que se abre con las dos ocupadas. A la derecha (por la puerta del muro grande): una zona de sombra tapando la puerta (Visión), un abismo con una plataforma que va de lado a lado (solo se cruza con Pausa) y un puente oculto sobre un segundo abismo (Revelar). El abismo no hace daño: si pisas el vacío sin apoyo vuelves al último punto seguro. En depuración: **U** desbloquea las 7 habilidades (sin tocar las emociones), **I** pone a Rabia como atacada y a Miedo como ignorada, **O** reinicia los objetos. (Se evitan F5 a F10: son atajos del editor y pausan o detienen el juego.)
 
+## Arte de los acertijos de habilidad y de los íconos
+
+- **Íconos del HUD:** `Assets/UI/iconos_habilidades.png` (128x64, cuadros de 32x32, 4 columnas x 2 filas; orden: impulso, vision, calma, vinculo, reparacion, pausa, revelar, candado). `CasillaHabilidad` los usa solos si existen (si no, dibuja marcadores por código).
+- **Hojas de objetos:** `Assets/Mundo/objetos_habilidad_a.png` y `_b.png` (512x256, cuadros de 128x128, 4 columnas x 2 filas; fila 1 = estado inicial, fila 2 = resuelto). Columnas: hoja A = `roca_rompible`, `planta_marchita`, `placa_doble`, `porton_roto`; hoja B = `plataforma_movil`, `camino_oculto`, `niebla_sombra`, `fragmento`.
+- **Importación:** las tres imágenes van sin compresión con pérdida (`compress/mode=0`, lossless), sin mipmaps, y se dibujan con filtro Nearest (es el filtro por defecto del proyecto, `default_texture_filter=0`; los nodos que las usan lo repiten explícito).
+- **SpriteFrames:** `tools/generar_frames_objetos.py` escribe `Resources/Mundo/frames_objeto_<nombre>.tres` (uno por objeto) con dos animaciones de un cuadro: `inicial` y `resuelto`.
+- **Escalas iniciales** (el jugador mide 56 px; cada cuadro es de 128 px) y el sitio de apoyo en el cuadro (px, para poner el origen del nodo):
+
+| objeto | escala | tamaño útil en el juego | origen del nodo |
+|--------|--------|-------------------------|-----------------|
+| roca_rompible | 0.41 | ~39x37 px | base de la roca (y=118 del cuadro) |
+| planta_marchita | 0.38 | ~43x43 px | base (y=126) |
+| placa_doble | 0.42 | ~40x32 px, plana | borde de arriba de la placa (y=42) |
+| porton_roto | 0.5 | ~56x54 px | base (y=120) |
+| plataforma_movil | 1.15 | disco de ~94 px de ancho; **la niebla del abismo va dentro del sprite**, debajo del disco | borde de arriba del disco (y=35) |
+| camino_oculto | 0.8 | ~96x53 px, plano; el estado `inicial` ya es semitransparente | borde de arriba (y=60) |
+| niebla_sombra | 0.92 | ~109x93 px; el estado `resuelto` son solo jirones lila (se le añade una `PointLight2D` cálida para el brillo) | base (y=126) |
+| fragmento | 0.5 | ~12x16 px | base (y=122) |
+
+- **Orden de dibujo:** los objetos de pie (roca, planta, portón, niebla, fragmento) tienen el origen en la base. Los planos o sobre los que se camina (placa, plataforma, camino) lo tienen en su borde de arriba, para que el jugador (cuyo origen son los pies) siempre se dibuje por encima.
+- **Colisión de la plataforma:** solo en el disco de arriba, no en el abismo.
+
 ## Atribución en git
 
 Los mensajes de commit nunca llevan líneas `Co-Authored-By`, `Claude-Session` ni "Generated with Claude Code", y los pull requests tampoco llevan texto de atribución. Solo debe aparecer el perfil del usuario como autor.
