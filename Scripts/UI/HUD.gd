@@ -56,6 +56,12 @@ func _process(delta: float) -> void:
 	_visible_objetivo = Habilidades.puede_operar()
 	var destino := 1.0 if _visible_objetivo else 0.0
 	_raiz.modulate.a = move_toward(_raiz.modulate.a, destino, delta / SEGUNDOS_FUNDIDO)
+	# El halo de las habilidades en marcha late, así que se redibuja mientras estén activas
+	for id in _casillas:
+		var casilla: CasillaHabilidad = _casillas[id]
+		casilla.activa = Habilidades.esta_activa(id)
+		if casilla.activa:
+			casilla.queue_redraw()
 	# Las celebraciones esperan a que el HUD se vea
 	if _visible_objetivo and _raiz.modulate.a > 0.9 and not _por_celebrar.is_empty():
 		_celebrar(_por_celebrar.pop_front())

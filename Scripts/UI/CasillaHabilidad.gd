@@ -32,6 +32,13 @@ var seleccionada := false:
 		if valor and is_inside_tree():
 			_rebotar()
 		queue_redraw()
+## true mientras la habilidad tiene un efecto en marcha (Visión encendida, Pausa, compañero): el borde late.
+var activa := false:
+	set(valor):
+		if valor == activa:
+			return
+		activa = valor
+		queue_redraw()
 ## 0 a 1: cuánto falta de la espera (1 = acaba de usarse, 0 = lista).
 var espera := 0.0:
 	set(valor):
@@ -102,6 +109,10 @@ func _draw() -> void:
 	if brillo > 0.0:
 		draw_rect(rect, Color(1, 0.95, 0.8, 0.55 * brillo))
 		draw_rect(rect.grow(2.0 * brillo), Color(COLOR_DORADO, brillo), false, 2.0)
+	# Habilidad en marcha: un halo del color de la emoción que late
+	if activa:
+		var pulso := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 5.0)
+		draw_rect(rect.grow(1.0), Color(color, 0.35 + 0.45 * pulso), false, 2.0)
 	# Borde
 	var borde := COLOR_DORADO if seleccionada else (COLOR_BORDE if desbloqueada else gris.darkened(0.3))
 	draw_rect(rect, borde, false, 2.0 if seleccionada else 1.0)

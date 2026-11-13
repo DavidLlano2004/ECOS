@@ -1,7 +1,10 @@
 extends Node2D
-## Arena pequeña para probar las habilidades Impulso, Calma y Reparar. Se juega con F6 (no es la
-## escena principal). Tiene un muro interior, una roca rompible, una planta seca, un objeto roto
-## y dos emociones (Rabia y Miedo) para ver cómo les afecta Calma.
+## Arena para probar las 7 habilidades. Se juega con F6 (no es la escena principal).
+## Zona izquierda: muro, roca rompible (Impulso), planta seca y Rabia/Miedo (Calma), objeto roto
+## (Reparar) y dos placas dobles con una reja (Vínculo).
+## Zona derecha (pasa por la puerta del muro grande): una zona de sombra en la puerta (Visión), un
+## abismo con una plataforma que va de lado a lado (Pausa) y un puente oculto sobre un segundo
+## abismo (Revelar).
 ##
 ## Teclas de depuración (solo en compilaciones de depuración):
 ##   U = desbloquear las 7 habilidades (sin tocar el estado de las emociones)
@@ -9,7 +12,7 @@ extends Node2D
 ##   O = reiniciar los objetos (recarga la escena; conserva las habilidades)
 ## (Se evitan las teclas F5 a F10: son atajos del editor de Godot, que pausa o detiene el juego antes de que las reciba.)
 
-const ARENA := Rect2(0, 0, 800, 480)
+const ARENA := Rect2(0, 0, 1200, 520)
 const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
 
 @onready var jugador: Player = $Mundo/Player
@@ -23,6 +26,16 @@ func _ready() -> void:
 	_poner_marcador($Mundo/PlantaSeca, "Planta seca: Calma")
 	_poner_marcador($Mundo/ObjetoRoto, "Roto: mantén ESPACIO (Reparar)")
 	_poner_marcador($MuroInterior, "Muro (el Impulso no lo atraviesa)", Vector2(0, 86))
+	_poner_marcador($Mundo/PlacaA, "Placa doble A", Vector2(0, 12))
+	_poner_marcador($Mundo/PlacaB, "Placa doble B", Vector2(0, 12))
+	_poner_marcador($Mundo/Reja, "Reja (se abre con las 2 placas)", Vector2(0, 14))
+	_poner_marcador($Mundo/ZonaSombra, "Sombra: Visión (ESPACIO alterna)", Vector2(0, 46))
+	_poner_marcador($Mundo/Plataforma, "Plataforma: usa Pausa", Vector2(0, 46))
+	_poner_marcador($CaminoOculto, "Puente oculto: usa Revelar", Vector2(0, 26))
+	_poner_marcador($AbismoB, "Meta", Vector2(1140, 450))
+	# La reja se abre mientras las dos placas están ocupadas (por señales, sin referencias cruzadas)
+	$Mundo/PlacaA.ocupacion_cambiada.connect(_actualizar_reja)
+	$Mundo/PlacaB.ocupacion_cambiada.connect(_actualizar_reja)
 	_crear_panel()
 	_actualizar_panel()
 
@@ -43,6 +56,13 @@ func _unhandled_input(evento: InputEvent) -> void:
 				GameState.estado["miedo"] = "ignorada"
 			KEY_O:
 				get_tree().reload_current_scene()
+
+
+func _actualizar_reja() -> void:
+	if $Mundo/PlacaA.ocupada and $Mundo/PlacaB.ocupada:
+		$Mundo/Reja.abrir()
+	else:
+		$Mundo/Reja.cerrar()
 
 
 ## Añade todas las habilidades sin pasar por las emociones. partida_cargada hace que el HUD se

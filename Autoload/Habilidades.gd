@@ -12,6 +12,8 @@ signal habilidad_seleccionada_cambiada(id: String)
 signal habilidad_usada(id: String)
 ## Cambió la espera de una habilidad (restante y total en segundos).
 signal cooldown_cambiado(id: String, restante: float, total: float)
+## Cambió la velocidad del tiempo del mundo (Pausa).
+signal factor_tiempo_cambiado(factor: float)
 ## El jugador intentó elegir o usar una habilidad que aún no tiene (el HUD hace temblar el candado).
 signal intento_bloqueado(id: String)
 
@@ -31,9 +33,19 @@ var _clases: Dictionary = {
 
 const ESCENA_HUD := preload("res://Scenes/UI/HUD.tscn")
 
-## Velocidad del tiempo del mundo (1.0 = normal). La usa Pausa: lo que dependa del tiempo
-## (mecanismos, plataformas móviles) debe multiplicar su delta por este valor.
-var factor_tiempo: float = 1.0
+## Velocidad del tiempo del mundo (1.0 = normal). La usa Pausa: los nodos del grupo "tiempo"
+## (mecanismos, plataformas móviles, engranajes) y las emociones multiplican su delta por este
+## valor. El jugador NO se ve afectado. No se usa Engine.time_scale. Las partículas del grupo
+## "tiempo" (CPUParticles2D o GPUParticles2D) reciben el factor en su speed_scale automáticamente.
+var factor_tiempo: float = 1.0:
+	set(valor):
+		if is_equal_approx(valor, factor_tiempo):
+			return
+		factor_tiempo = valor
+		_aplicar_factor_a_particulas()
+		factor_tiempo_cambiado.emit(valor)
+
+var _tween_factor: Tween
 
 ## Catálogo en orden fijo: [{id, nombre, descripcion, color, emocion}] (de los EmocionData).
 var catalogo: Array[Dictionary] = []
@@ -113,6 +125,29 @@ func esta_desbloqueada(id: String) -> bool:
 ## Segundos que faltan para poder usarla (0 si está lista).
 func cooldown_restante(id: String) -> float:
 	return cooldowns.get(id, 0.0)
+
+
+## true mientras la habilidad tiene un efecto en marcha (Visión encendida, Pausa, compañero invocado).
+func esta_activa(id: String) -> bool:
+	var habilidad: HabilidadBase = _habilidades.get(id, null)
+	return habilidad != null and habilidad.activa
+
+
+## Lleva factor_tiempo suavemente hasta `destino` en `segundos` (es lo que usa Pausa).
+func transicionar_factor(destino: float, segundos: float) -> void:
+	if _tween_factor != null:
+		_tween_factor.kill()
+	_tween_factor = create_tween()
+	_tween_factor.tween_property(self, "factor_tiempo", destino, segundos)
+
+
+## Pone el factor en las partículas del grupo "tiempo" (su speed_scale).
+func _aplicar_factor_a_particulas() -> void:
+	if not is_inside_tree():
+		return
+	for nodo in get_tree().get_nodes_in_group("tiempo"):
+		if nodo is CPUParticles2D or nodo is GPUParticles2D:
+			nodo.speed_scale = factor_tiempo
 
 
 ## Segundos de espera total de la habilidad (0 si no existe).
@@ -274,7 +309,11 @@ func _reiniciar() -> void:
 		_terminar_efecto(id)
 	cooldowns.clear()
 	_bloqueos.clear()
+	if _tween_factor != null:
+		_tween_factor.kill()
 	factor_tiempo = 1.0
+	for habilidad in _habilidades.values():
+		habilidad.reiniciar()  # apaga Visión, Pausa, el compañero, etc.
 	habilidad_seleccionada_cambiada.emit(GameState.habilidad_seleccionada)
 
 

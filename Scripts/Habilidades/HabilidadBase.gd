@@ -12,6 +12,14 @@ var color: Color = Color.WHITE
 var cooldown: float = 1.0
 ## Segundos que dura el efecto (0 = instantáneo). Al acabar se llama a terminar().
 var duracion: float = 0.0
+## true mientras hay un efecto en marcha que el HUD debe mostrar (Visión encendida, Pausa,
+## compañero invocado). Lo mantienen las subclases.
+var activa: bool = false
+
+
+## Apaga todo lo que haya en marcha (se llama al empezar una nueva partida).
+func reiniciar() -> void:
+	activa = false
 
 
 ## Condición extra para poder usarla (por ejemplo, "hay algo cerca"). Habilidades ya comprueba

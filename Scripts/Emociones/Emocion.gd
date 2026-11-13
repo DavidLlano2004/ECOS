@@ -125,7 +125,7 @@ func _physics_process(delta: float) -> void:
 		# Ya fue escuchada: deambula despacio y flota con su animación "calma"
 		_mover_calma(delta)
 		_limitar_a_la_zona(delta)
-		move_and_slide()
+		_deslizar()
 		_aplicar_vibracion(delta)
 		return
 
@@ -152,9 +152,22 @@ func _physics_process(delta: float) -> void:
 				_mover_esconderse(delta)
 
 	_limitar_a_la_zona(delta)
-	move_and_slide()
-	_atascada = get_slide_collision_count() > 0 and get_real_velocity().length() < _velocidad() * 0.3
+	_deslizar()
+	_atascada = get_slide_collision_count() > 0 		and get_real_velocity().length() < _velocidad() * 0.3 * Habilidades.factor_tiempo
 	_aplicar_vibracion(delta)
+
+
+## move_and_slide() a la velocidad del tiempo del mundo: con la habilidad Pausa
+## (Habilidades.factor_tiempo < 1) la criatura se mueve más despacio. El jugador no se ve afectado.
+func _deslizar() -> void:
+	var factor := Habilidades.factor_tiempo
+	if is_equal_approx(factor, 1.0):
+		move_and_slide()
+		return
+	var propia := velocity
+	velocity = propia * factor
+	move_and_slide()
+	velocity = propia
 
 
 # --- Sprite ---

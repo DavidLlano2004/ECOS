@@ -852,6 +852,7 @@ func _crear_particulas() -> void:
 				Color(0.74, 0.76, 0.84, 0.0), Color(0.74, 0.76, 0.84, 0.55), Color(0.62, 0.64, 0.74, 0.45),
 				Color(0.62, 0.64, 0.74, 0.0)])
 		p.color_ramp = degradado
+		p.add_to_group("tiempo")  # la habilidad Pausa ralentiza las partículas de ambiente
 		nodo.add_child(p)
 
 
