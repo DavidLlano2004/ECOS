@@ -85,6 +85,8 @@ func _ready() -> void:
 	respuestas.auto_focus_first_item = false
 	respuestas.response_selected.connect(_on_respuesta_elegida)
 	texto.seconds_per_step = SEGUNDOS_POR_LETRA
+	texto.spoke.connect(func(letra: String, _indice: int, _velocidad: float) -> void:
+		Dialogo.letra_escrita.emit(linea.character if linea != null else "", letra))
 
 	_temporizador_mutacion.one_shot = true
 	_temporizador_mutacion.timeout.connect(_on_temporizador_mutacion)
@@ -156,6 +158,7 @@ func _cancelar() -> void:
 	if not cancelable or _cerrando:
 		return
 	_ultima_respuesta = Dialogo.CANCELADO
+	Dialogo.cancelado_por_jugador.emit()
 	_terminar()
 
 
@@ -201,6 +204,7 @@ func _aplicar_linea() -> void:
 
 	if linea.responses.size() > 0:
 		respuestas.show()
+		Dialogo.opciones_mostradas.emit()
 		_pista.hide()
 		_boton_cancelar.visible = cancelable
 		_separador.visible = cancelable
@@ -302,6 +306,7 @@ func _on_respuesta_elegida(respuesta: DialogueResponse) -> void:
 	if _respuesta_tomada or linea == null:
 		return
 	_respuesta_tomada = true
+	Dialogo.respuesta_elegida.emit()
 	_ultima_respuesta = linea.responses.find(respuesta)
 	_siguiente(respuesta.next_id)
 

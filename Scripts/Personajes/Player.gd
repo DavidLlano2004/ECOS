@@ -49,6 +49,7 @@ var impulsando: bool:
 	get:
 		return _impulso_restante > 0.0
 
+var _cuadro_paso := -1   # último cuadro de caminar visto (para sonar un paso por pisada)
 var _bloqueado := false
 var _dialogo_abierto := false
 var _tiempo_rebote := 0.0
@@ -268,6 +269,10 @@ func _actualizar_animacion(caminando: bool, delta: float = 0.0) -> void:
 	if caminando:
 		if not sprite.is_playing():
 			sprite.play(anim)
+		# Un paso cada vez que el pie toca el suelo (cuadros 0 y 2 de la animación de caminar)
+		if sprite.frame != _cuadro_paso and (sprite.frame == 0 or sprite.frame == 2):
+			Sonido.paso(global_position)
+		_cuadro_paso = sprite.frame
 		# Rebote vertical leve, siempre hacia arriba
 		_tiempo_rebote += delta * rebote_velocidad
 		sprite.offset.y = -absf(sin(_tiempo_rebote * PI)) * rebote_altura
@@ -275,6 +280,7 @@ func _actualizar_animacion(caminando: bool, delta: float = 0.0) -> void:
 		# Quieto: primer cuadro de la dirección actual
 		sprite.stop()
 		sprite.frame = 0
+		_cuadro_paso = -1
 		_tiempo_rebote = 0.0
 		sprite.offset.y = move_toward(sprite.offset.y, 0.0, 20.0 * delta)
 

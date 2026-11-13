@@ -19,6 +19,12 @@ signal dialogo_cerrado
 signal linea_escribiendo(personaje: String)
 ## Terminó de escribirse la línea (ahora se espera al jugador).
 signal linea_terminada
+## Se escribió una letra (la usa el audio para los "blips"): quién habla ("" = narrador) y la letra.
+signal letra_escrita(personaje: String, letra: String)
+## Aparecieron las opciones de respuesta, el jugador eligió una, o canceló la conversación.
+signal opciones_mostradas
+signal respuesta_elegida
+signal cancelado_por_jugador
 
 const BALLOON := preload("res://Scenes/UI/DialogoBalloon.tscn")
 

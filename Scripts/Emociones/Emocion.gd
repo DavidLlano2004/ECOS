@@ -500,6 +500,7 @@ func interactuar() -> void:
 		return
 	_ocupada = true
 	velocity = Vector2.ZERO
+	Sonido.efecto("emo_%s" % datos.id)   # la criatura "responde" cuando le hablas
 	if jugador != null and jugador.has_method("bloquear"):
 		jugador.bloquear()
 

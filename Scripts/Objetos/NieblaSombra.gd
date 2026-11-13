@@ -57,6 +57,7 @@ func visionar(activa: bool) -> void:
 	_tween = create_tween().set_parallel(true)
 	if activa:
 		# Los jirones lila se quedan, más tenues, con una luz cálida
+		Sonido.efecto("niebla_disipa")
 		_sprite.animation = &"resuelto"
 		_sprite.modulate.a = 0.0
 		_tween.tween_property(_sprite, "modulate:a", 0.9, 0.7)

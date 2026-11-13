@@ -45,6 +45,7 @@ var _slider_musica: HSlider
 var _slider_efectos: HSlider
 var _casilla_pantalla: CheckButton
 var _sincronizando := false
+var _silenciar_foco := false   # true mientras el foco se pone por código (al cambiar de pantalla)
 
 
 func _ready() -> void:
@@ -60,6 +61,7 @@ func abrir() -> void:
 	if abierta:
 		return
 	abierta = true
+	Sonido.efecto("ui_aceptar")
 	_raiz.visible = true
 	_panel.visible = true
 	_ir_a(Pagina.PRINCIPAL)
@@ -79,6 +81,7 @@ func cerrar() -> void:
 	if not abierta:
 		return
 	abierta = false
+	Sonido.efecto("ui_cancelar")
 	if _tween != null:
 		_tween.kill()
 	_raiz.visible = false   # sin fundido de salida: el juego se reanuda al instante
@@ -96,6 +99,7 @@ func ocultar_panel(oculto: bool) -> void:
 func atras() -> bool:
 	if pagina == Pagina.PRINCIPAL:
 		return false
+	Sonido.efecto("ui_cancelar")
 	_ir_a(Pagina.PRINCIPAL)
 	return true
 
@@ -166,12 +170,16 @@ func _construir() -> void:
 	marco.add_child(_aviso)
 
 
-func _boton(texto: String, accion: Callable) -> Button:
+## `sonido` es el efecto que suena al pulsarlo ("" = ninguno: lo pone otro, como al abrir el diario).
+func _boton(texto: String, accion: Callable, sonido: String = "ui_aceptar") -> Button:
 	var b := Button.new()
 	b.text = texto
 	b.custom_minimum_size = Vector2(0, 28)
 	b.focus_mode = Control.FOCUS_ALL
-	b.pressed.connect(accion)
+	b.pressed.connect(func() -> void:
+		Sonido.efecto(sonido)
+		accion.call())
+	b.focus_entered.connect(_sonar_foco)
 	b.mouse_entered.connect(func() -> void:
 		if b.visible and not b.disabled:
 			b.grab_focus())   # el ratón también mueve el foco
@@ -181,9 +189,9 @@ func _boton(texto: String, accion: Callable) -> Button:
 func _construir_principal() -> VBoxContainer:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 5)
-	var continuar := _boton("Continuar", func() -> void: reanudar_pedido.emit())
+	var continuar := _boton("Continuar", func() -> void: reanudar_pedido.emit(), "")
 	v.add_child(continuar)
-	v.add_child(_boton("Diario", func() -> void: diario_pedido.emit()))
+	v.add_child(_boton("Diario", func() -> void: diario_pedido.emit(), ""))
 	v.add_child(_boton("Controles", func() -> void: _ir_a(Pagina.CONTROLES)))
 	v.add_child(_boton("Opciones", func() -> void: _ir_a(Pagina.OPCIONES)))
 	_boton_guardar = _boton("Guardar partida", _on_guardar)
@@ -207,7 +215,7 @@ func _construir_controles() -> VBoxContainer:
 		que.custom_minimum_size = Vector2(170, 0)
 		rejilla.add_child(que)
 	v.add_child(rejilla)
-	var volver := _boton("Volver", func() -> void: _ir_a(Pagina.PRINCIPAL))
+	var volver := _boton("Volver", func() -> void: _ir_a(Pagina.PRINCIPAL), "ui_cancelar")
 	v.add_child(volver)
 	_primer_foco[Pagina.CONTROLES] = volver
 	return v
@@ -225,8 +233,9 @@ func _construir_opciones() -> VBoxContainer:
 		if not _sincronizando:
 			Opciones.poner_pantalla_completa(activa))
 	_casilla_pantalla.mouse_entered.connect(_casilla_pantalla.grab_focus)
+	_casilla_pantalla.focus_entered.connect(_sonar_foco)
 	v.add_child(_casilla_pantalla)
-	var volver := _boton("Volver", func() -> void: _ir_a(Pagina.PRINCIPAL))
+	var volver := _boton("Volver", func() -> void: _ir_a(Pagina.PRINCIPAL), "ui_cancelar")
 	v.add_child(volver)
 	_primer_foco[Pagina.OPCIONES] = _slider_musica
 	return v
@@ -248,7 +257,9 @@ func _fila_volumen(padre: Control, nombre: String, bus: String) -> HSlider:
 	slider.focus_mode = Control.FOCUS_ALL
 	slider.value_changed.connect(func(valor: float) -> void:
 		if not _sincronizando:
-			Opciones.poner_volumen(bus, valor))
+			Opciones.poner_volumen(bus, valor)
+			Sonido.efecto("ui_mover"))
+	slider.focus_entered.connect(_sonar_foco)
 	slider.mouse_entered.connect(slider.grab_focus)
 	fila.add_child(slider)
 	padre.add_child(fila)
@@ -266,7 +277,7 @@ func _construir_confirmacion() -> VBoxContainer:
 	v.add_child(detalle)
 	var si := _boton("Sí, volver al título", func() -> void: volver_al_titulo_pedido.emit())
 	v.add_child(si)
-	var no := _boton("No, seguir aquí", func() -> void: _ir_a(Pagina.PRINCIPAL))
+	var no := _boton("No, seguir aquí", func() -> void: _ir_a(Pagina.PRINCIPAL), "ui_cancelar")
 	v.add_child(no)
 	_primer_foco[Pagina.CONFIRMAR] = no   # por seguridad el foco empieza en "No"
 	return v
@@ -283,7 +294,18 @@ func _ir_a(nueva: Pagina) -> void:
 	_aviso.text = ""
 	# El foco se pone al terminar el fotograma, cuando los botones ya son visibles
 	var objetivo: Control = _primer_foco[nueva]
+	_silenciar_foco = true   # poner el foco por código no hace sonar el "mover"
 	objetivo.grab_focus.call_deferred()
+	_quitar_silencio_foco.call_deferred()
+
+
+func _quitar_silencio_foco() -> void:
+	_silenciar_foco = false
+
+
+func _sonar_foco() -> void:
+	if abierta and not _silenciar_foco:
+		Sonido.efecto("ui_mover")
 
 
 func _sincronizar_opciones() -> void:

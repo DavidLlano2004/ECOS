@@ -60,6 +60,7 @@ const AGUA := "wPqQ"
 @export_tool_button("Reconstruir mapa", "Reload") var _boton_reconstruir: Callable = reconstruir_todo
 
 var _epoca_actual := "pasado"
+var _filas_suelo: PackedStringArray = []
 var _puestos: Array[Dictionary] = []   # props colocados (los usa la decoración suelta)
 var _ruido_hierba := FastNoiseLite.new()
 var _modulador: CanvasModulate
@@ -74,6 +75,7 @@ func _ready() -> void:
 	reconstruir_todo()
 	if Engine.is_editor_hint():
 		return
+	add_to_group("mundo")   # el audio le pregunta qué suelo hay bajo los pies (suelo_en)
 	GameState.epoca_cambiada.connect(mostrar_epoca)
 	var jugador := _jugador()
 	if jugador != null:
@@ -161,6 +163,19 @@ func mostrar_epoca(epoca: String) -> void:
 	_activar_epoca(pasado, es_pasado)
 	_activar_epoca(presente, not es_pasado)
 	_aplicar_ambiente(es_pasado, true)
+	if not Engine.is_editor_hint():
+		Sonido.ambientar_epoca(epoca)   # música y ambiente de la época
+
+
+## La letra del mapa (ver mapa.txt) en una posición global, o "" si cae fuera. Sirve para elegir el sonido de
+## los pasos (piedra, hierba...).
+func suelo_en(posicion: Vector2) -> String:
+	if _filas_suelo.is_empty():
+		_filas_suelo = _leer_mapa()
+	var celda := Vector2i((to_local(posicion) / TAMANO_TILE).floor())
+	if celda.y < 0 or celda.y >= _filas_suelo.size() or celda.x < 0 or celda.x >= _filas_suelo[celda.y].length():
+		return ""
+	return _filas_suelo[celda.y][celda.x]
 
 
 func _activar_epoca(nodo: Node2D, activa: bool) -> void:
@@ -672,6 +687,7 @@ func viajar() -> void:
 		return
 	_viajando = true
 	Habilidades.bloquear("transicion")
+	Sonido.efecto("viaje_epoca")
 	var jugador := _jugador()
 	if jugador != null and jugador.has_method("bloquear"):
 		jugador.bloquear()

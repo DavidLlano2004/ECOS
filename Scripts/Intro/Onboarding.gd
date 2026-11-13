@@ -205,6 +205,7 @@ func _cierre() -> void:
 	zoom.tween_property(camara, "position", POSICION_PORTAL, 3.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	zoom.tween_property(luz_portal, "energy", 4.0, 3.4).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_IN)
 	zoom.tween_property(luz_blanca, "color:a", 1.0, 1.7).set_delay(1.7).set_trans(Tween.TRANS_SINE)
+	Sonido.efecto("luz_blanca", NAN, 0.0, 1.7)   # suena cuando empieza a llenarse de luz
 	await zoom.finished
 	await get_tree().create_timer(0.3).timeout
 	get_tree().change_scene_to_file(ESCENA_SIGUIENTE)

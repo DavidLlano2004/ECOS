@@ -177,6 +177,7 @@ func _abrir(con_animacion: bool, espera: float, version: int) -> void:
 			await get_tree().create_timer(espera).timeout
 			if version != _version:
 				return
+		Sonido.efecto("bloqueo_abre")
 		if _sprite.sprite_frames.has_animation(&"abriendo"):
 			_sprite.play(&"abriendo")
 			await _sprite.animation_finished

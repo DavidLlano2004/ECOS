@@ -39,6 +39,8 @@ func _physics_process(_delta: float) -> void:
 			hay_companero = true
 			break
 	if hay_jugador != con_jugador or hay_companero != con_companero:
+		if (hay_jugador or hay_companero) and not ocupada:
+			Sonido.efecto("placa_activa")   # acaba de pisarse
 		con_jugador = hay_jugador
 		con_companero = hay_companero
 		_sprite.animation = &"resuelto" if ocupada else &"inicial"  # se enciende el aro

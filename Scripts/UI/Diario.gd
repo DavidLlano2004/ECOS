@@ -57,6 +57,7 @@ func abrir(inicial: int = 0) -> void:
 	if abierto:
 		return
 	abierto = true
+	Sonido.efecto("diario_abrir")
 	seccion = clampi(inicial, 0, SECCIONES.size() - 1)
 	_recuerdo = 0
 	_raiz.visible = true
@@ -72,6 +73,7 @@ func cerrar() -> void:
 	if not abierto:
 		return
 	abierto = false   # el estado cambia ya; el fundido de salida es solo visual
+	Sonido.efecto("diario_cerrar")
 	if _tween != null:
 		_tween.kill()
 	_tween = create_tween()

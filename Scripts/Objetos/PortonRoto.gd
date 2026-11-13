@@ -34,6 +34,7 @@ func reparar() -> void:
 	remove_from_group("reparable")  # ya no hay nada que reparar aquí
 	Colisiones.apagar(_forma, true)
 	_sprite.animation = &"resuelto"   # entero, con el lazo dorado
+	Sonido.efecto("porton_repara")
 	reparado.emit()
 	# Se ve entero un momento y luego sus hojas se abren
 	var t := create_tween()

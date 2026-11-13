@@ -32,6 +32,7 @@ func romper() -> void:
 	remove_from_group("rompible")
 	Colisiones.apagar(_forma, true)
 	_sprite.animation = &"resuelto"  # los pedazos en el suelo
+	Sonido.efecto("roca_rompe")
 	_lanzar_pedazos()
 	var t := create_tween()
 	t.tween_property(_sprite, "scale", _sprite.scale * 1.06, 0.06)

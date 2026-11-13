@@ -14,6 +14,8 @@ signal habilidad_usada(id: String)
 signal cooldown_cambiado(id: String, restante: float, total: float)
 ## Cambió la velocidad del tiempo del mundo (Pausa).
 signal factor_tiempo_cambiado(factor: float)
+## Una habilidad no se pudo usar (bloqueada, o sin nada que hacer): suena el sonido de "denegada".
+signal uso_denegado(id: String)
 ## El jugador intentó elegir o usar una habilidad que aún no tiene (el HUD hace temblar el candado).
 signal intento_bloqueado(id: String)
 
@@ -187,6 +189,7 @@ func seleccionar(id: String) -> void:
 	_poner_seleccion(id)
 	if not esta_desbloqueada(id):
 		intento_bloqueado.emit(id)
+		uso_denegado.emit(id)
 
 
 ## Pasa a la siguiente habilidad desbloqueada (da la vuelta al final).
@@ -231,6 +234,7 @@ func usar(player: Player) -> void:
 		return
 	if not esta_desbloqueada(id):
 		intento_bloqueado.emit(id)
+		uso_denegado.emit(id)
 		return
 	if cooldown_restante(id) > 0.0 or _activas.has(id):
 		return
@@ -238,6 +242,7 @@ func usar(player: Player) -> void:
 	if habilidad == null or not habilidad.puede_usar(player):
 		return
 	if not habilidad.ejecutar(player):
+		uso_denegado.emit(id)
 		return  # no se usó (ej. Reparar sin nada cerca): ni cooldown ni señal
 	habilidad_usada.emit(id)
 	if habilidad.duracion > 0.0:

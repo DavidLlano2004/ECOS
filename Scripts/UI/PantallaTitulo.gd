@@ -61,6 +61,8 @@ var _tiempo := 0.0
 func _ready() -> void:
 	musica.bus = Opciones.BUS_MUSICA          # los volúmenes de Opciones valen también aquí
 	sonido_seleccion.bus = Opciones.BUS_EFECTOS
+	Sonido.musica("musica_titulo", 1.0)
+	Sonido.detener_ambiente(0.5)
 	if ResourceLoader.exists(RUTA_FUENTE):
 		_fuente = load(RUTA_FUENTE)
 	_crear_fondo()
@@ -389,8 +391,8 @@ func _on_foco_cambiado(boton: Button) -> void:
 
 ## Reproduce el sonido de selección si ya tiene un archivo asignado (se agrega en el paso de audio).
 func _sonido_seleccion() -> void:
-	if sonido_seleccion.stream != null and not _en_intro:
-		sonido_seleccion.play()
+	if not _en_intro:
+		Sonido.efecto("ui_mover")
 
 
 func _aplicar_estilo_menu() -> void:
@@ -426,6 +428,7 @@ func _comenzar() -> void:
 	if _eligiendo:
 		return
 	_eligiendo = true
+	Sonido.efecto("titulo_comenzar")
 	GameState.nueva_partida()
 	var t := create_tween()
 	t.tween_property(menu, "modulate:a", 0.0, 0.3)
@@ -450,6 +453,7 @@ func _continuar() -> void:
 			"Tu partida guardada está dañada. Puedes empezar una nueva con Comenzar." if dañada 				else "Empieza una nueva con Comenzar.")
 		return
 	_eligiendo = true
+	Sonido.efecto("ui_aceptar")
 	var t := create_tween()
 	t.tween_property(menu, "modulate:a", 0.0, 0.3)
 	t.tween_property(negro, "color:a", 1.0, 0.7)
@@ -457,6 +461,7 @@ func _continuar() -> void:
 
 
 func _salir() -> void:
+	Sonido.efecto("ui_cancelar")
 	get_tree().quit()
 
 

@@ -23,6 +23,7 @@ Dialogo="*uid://bhf8rrh0owlqe"
 Notificacion="*res://Autoload/Notificacion.gd"
 Habilidades="*res://Autoload/Habilidades.gd"
 Opciones="*res://Autoload/Opciones.gd"
+Sonido="*res://Autoload/Sonido.gd"
 Guardado="*res://Autoload/Guardado.gd"
 Menus="*res://Autoload/Menus.gd"
 

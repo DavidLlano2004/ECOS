@@ -33,6 +33,7 @@ func calmar() -> void:
 	remove_from_group("calmable")
 	Colisiones.apagar(_forma, true)
 	_sprite.animation = &"resuelto"
+	Sonido.efecto("planta_florece")
 	# Pequeña luz rosada que se queda encendida
 	_luz = PointLight2D.new()
 	_luz.texture = Atmosfera.crear_textura_luz(128)

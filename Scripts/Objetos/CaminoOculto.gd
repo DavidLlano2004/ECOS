@@ -36,6 +36,7 @@ func revelar(segundos: float = 6.0) -> void:
 	_version += 1
 	var esta := _version
 	funcional = true
+	Sonido.efecto("puente_aparece")
 	_sprite.animation = &"resuelto"
 	revelado.emit()
 	if _tween != null:

@@ -75,6 +75,8 @@ func interactuar() -> void:
 	if not puede_interactuar():
 		return
 	_ocupada = true
+	if GameState.cantidad_pendientes() == 0:
+		Sonido.musica("final_%s" % GameState.calcular_final(), 2.0)   # TEMPORAL, como el texto del final
 	await Dialogo.mostrar_texto("", lineas_de_dialogo())  # se puede salir con ESC; no cambia nada
 	_ocupada = false
 
