@@ -13,3 +13,6 @@ Thumbs.db
 # Caché de Python
 __pycache__/
 *.pyc
+
+# Audios originales descargados (se conservan fuera de Assets y no se suben al repositorio)
+audio_originales/
