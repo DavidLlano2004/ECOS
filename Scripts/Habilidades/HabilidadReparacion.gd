@@ -7,7 +7,7 @@ extends HabilidadBase
 ## La culpa sana es reparar lo que se rompió.
 
 const DISTANCIA := 48.0
-const TEXTO_NADA := "No hay nada que reparar aquí"
+const TEXTO_NADA := "No hay nada que reparar aquí."
 
 var _efecto: EfectoReparar
 
@@ -26,7 +26,9 @@ func puede_usar(_player: Player) -> bool:
 func ejecutar(player: Player) -> bool:
 	var objetivo := _buscar_objetivo(player)
 	if objetivo == null:
-		GloboCierre.mostrar(player, TEXTO_NADA, -72.0)
+		# Una pista breve con el mismo balloon que todo; habla la Culpa, dueña de esta habilidad
+		if not Dialogo.hay_dialogo():
+			Dialogo.mostrar_texto(GameState.obtener_datos("culpa").nombre, TEXTO_NADA, [], null, true)
 		return false
 	_efecto = EfectoReparar.new()
 	player.add_child(_efecto)

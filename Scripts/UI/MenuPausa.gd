@@ -20,9 +20,8 @@ const SEGUNDOS_ENTRADA := 0.15
 ## Teclas del juego para la pantalla de Controles: [tecla, qué hace].
 const CONTROLES := [
 	["W A S D o flechas", "Moverse"],
-	["E", "Interactuar"],
-	["Q", "Viajar entre el Pasado y el Presente (junto a un portal)"],
-	["ESPACIO", "Usar la habilidad elegida"],
+	["E", "Hablar, recoger y usar portales y grietas para viajar entre el Pasado y el Presente"],
+	["ESPACIO", "Usar la habilidad elegida (Reparar: mantenlo pulsado; Visión: enciende y apaga)"],
 	["1 a 7 y rueda del ratón", "Elegir habilidad (también R y F)"],
 	["TAB", "Diario"],
 	["ESC", "Pausa"],

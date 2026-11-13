@@ -154,9 +154,10 @@ func interactuar() -> void:
 	if not puede_interactuar():
 		return
 	_ocupado = true
-	var resultado := await Dialogo.mostrar_texto("", lineas_de_mensaje())
-	if resultado == Dialogo.CANCELADO:
-		GloboCierre.mostrar(self, datos.frase_cierre, -110.0)
+	# La etiqueta de nombre es la del bloqueo ("La oscuridad", "La tormenta"...), no la de la emoción
+	await Dialogo.mostrar_texto(datos.nombre_bloqueo, lineas_de_mensaje())
+	if Dialogo.cancelada:
+		await Dialogo.despedida(datos.nombre_bloqueo, datos.frase_cierre)
 	_ocupado = false
 
 

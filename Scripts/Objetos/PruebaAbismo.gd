@@ -31,7 +31,8 @@ func _physics_process(delta: float) -> void:
 		salvado.emit()
 		if _bloqueo_aviso <= 0.0:
 			_bloqueo_aviso = 2.0
-			GloboCierre.mostrar(jugador, "Mejor no pisar el vacío", -72.0)
+			if not Dialogo.hay_dialogo():
+				Dialogo.mostrar_texto("Guía", "Mejor no pisar el vacío.", [], null, true)
 
 
 func _draw() -> void:

@@ -31,6 +31,9 @@ enum Comportamiento {
 @export var velocidad: float = 40.0
 
 @export_group("Mensajes")
+## Cómo se llama el bloqueo de esta emoción en el Presente (sale en la etiqueta de nombre del diálogo
+## del bloqueo). Ejemplo: "La oscuridad" para Miedo.
+@export var nombre_bloqueo: String = ""
 @export_multiline var mensaje_integracion: String = ""
 @export_multiline var mensaje_fallo: String = ""
 @export_multiline var mensaje_presente_aliada: String = ""

@@ -7,42 +7,15 @@ Vergüenza: Ya sé que fue una tontería. Por favor, no lo recuerdes.
 - Reírte de ella
 	Vergüenza: ¡Lo sabía! ¡Sabía que se iban a reír!
 	$> GameState.resolver("verguenza", "atacada")
-	{{GameState.obtener_datos("verguenza").mensaje_fallo}}
+	Vergüenza: {{GameState.obtener_datos("verguenza").mensaje_fallo}}
 	=> END
 - Fingir que no la viste
 	Vergüenza: Ah... gracias, supongo. O eso creo.
 	$> GameState.resolver("verguenza", "ignorada")
-	{{GameState.obtener_datos("verguenza").mensaje_fallo}}
+	Vergüenza: {{GameState.obtener_datos("verguenza").mensaje_fallo}}
 	=> END
 - Mirarla con cariño y decirle que a ti también te pasa
 	Vergüenza: ¿A ti también? ¿De verdad? Entonces... no soy tan rara.
 	$> GameState.resolver("verguenza", "integrada")
-	{{GameState.obtener_datos("verguenza").mensaje_integracion}}
+	Vergüenza: {{GameState.obtener_datos("verguenza").mensaje_integracion}}
 	=> END
-
-# Charla de después (la emoción ya fue integrada). No concede nada: solo compañía.
-# La escena elige cuál de las 4 frases (frase_despues), al azar y sin repetir la anterior.
-
-~ despues
-if frase_despues == 0
-	Vergüenza: Ya no me escondo tanto. Tú me miras con cariño.
-elif frase_despues == 1
-	Vergüenza: Puedo mostrarte lo que estaba oculto, si me das la mano.
-elif frase_despues == 2
-	Vergüenza: Hoy saludé a alguien y no pasó nada malo. Qué alivio.
-elif frase_despues == 3
-	Vergüenza: Equivocarme delante de otros ya no me quema las mejillas.
-=> END
-
-# Lo mismo para la forma aliada del Presente (sus propias frases).
-
-~ aliada_despues
-if frase_despues == 0
-	Vergüenza: Camino a tu lado y señalo lo que no se ve.
-elif frase_despues == 1
-	Vergüenza: Mira, un caminito escondido. Siempre estuvo ahí.
-elif frase_despues == 2
-	Vergüenza: Ser vista no duele tanto cuando alguien sonríe.
-elif frase_despues == 3
-	Vergüenza: Gracias por no apartar la mirada.
-=> END

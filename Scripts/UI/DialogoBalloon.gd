@@ -18,7 +18,6 @@ signal escribiendo_terminado()
 
 const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
 const TAM_FUENTE := 16
-const SEGUNDOS_POR_LETRA := 0.03
 const FUNDIDO_ENTRADA := 0.2
 const FUNDIDO_SALIDA := 0.15
 const ACCION_SIGUIENTE := &"INTERACTUAR"
@@ -84,7 +83,7 @@ func _ready() -> void:
 	respuestas.next_action = ACCION_SIGUIENTE
 	respuestas.auto_focus_first_item = false
 	respuestas.response_selected.connect(_on_respuesta_elegida)
-	texto.seconds_per_step = SEGUNDOS_POR_LETRA
+	texto.seconds_per_step = Dialogo.SEGUNDOS_POR_LETRA
 	texto.spoke.connect(func(letra: String, _indice: int, _velocidad: float) -> void:
 		Dialogo.letra_escrita.emit(linea.character if linea != null else "", letra))
 

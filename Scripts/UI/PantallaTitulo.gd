@@ -15,7 +15,7 @@ const PANTALLA := Vector2(640, 360)
 const DORADO := Color("f4c77b")
 const LETRAS_TITULO := "ECOS"
 const SEGUNDOS_APARICION := 1.5
-const SEGUNDOS_POR_LETRA := 0.32
+const SEGUNDOS_POR_LETRA_TITULO := 0.32
 
 # Puntos de luz medidos sobre la ilustración (640x360)
 const FAROLES := [Vector2(52, 175), Vector2(73, 172), Vector2(105, 152), Vector2(161, 185)]
@@ -323,7 +323,7 @@ func _iniciar_intro() -> void:
 	# Letra por letra, con fundido y una pequeña subida
 	for i in _letras.size():
 		_tween_intro.tween_callback(_animar_letra.bind(i))
-		_tween_intro.tween_interval(SEGUNDOS_POR_LETRA)
+		_tween_intro.tween_interval(SEGUNDOS_POR_LETRA_TITULO)
 	_tween_intro.tween_interval(0.5)
 	_tween_intro.tween_property(subtitulo, "modulate:a", 1.0, 1.0)
 	_tween_intro.tween_interval(0.3)
@@ -462,7 +462,7 @@ func _continuar() -> void:
 
 func _salir() -> void:
 	Sonido.efecto("ui_cancelar")
-	get_tree().quit()
+	Sonido.salir()
 
 
 ## El título se disuelve hacia arriba en chispas doradas mientras una ola de luz cruza la pantalla.

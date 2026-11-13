@@ -12,7 +12,7 @@ signal salvado
 ## Zona del abismo en coordenadas globales (px).
 @export var zona := Rect2()
 
-const AVISO := "Mejor no pisar el vacío"
+const AVISO := "Mejor no pisar el vacío."
 
 var _ultimo_seguro := Vector2.INF
 var _espera_aviso := 0.0
@@ -38,7 +38,8 @@ func _physics_process(delta: float) -> void:
 		salvado.emit()
 		if _espera_aviso <= 0.0:
 			_espera_aviso = 2.5
-			GloboCierre.mostrar(jugador, AVISO, -72.0)
+			if not Dialogo.hay_dialogo():
+				Dialogo.mostrar_texto("Guía", AVISO, [], null, true)   # el mismo balloon que todo el juego
 
 
 ## ¿Está este punto (global) dentro del abismo?

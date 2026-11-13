@@ -8,6 +8,7 @@ script = ExtResource("1_emocion")
 id = "verguenza"
 orden = 7
 nombre = "Vergüenza"
+nombre_bloqueo = "Los espejos tapados"
 descripcion_corta = "Una criatura tímida cubierta con una tela. Se esconde si la miras fijamente, pero se queda si te acercas de lado."
 color = Color(0.788, 0.467, 0.42, 1)
 habilidad_id = "revelar"

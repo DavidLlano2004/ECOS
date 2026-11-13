@@ -9,7 +9,7 @@ if not GameState.guia_conocida
 	Guía: Ya estás en el Pasado. Qué bueno verte.
 	Guía: Te mueves con las flechas o con W, A, S y D.
 	Guía: Cuando alguien o algo esté cerca, pulsa E para hablar.
-	Guía: Los portales y las grietas pequeñas te llevan al Presente. Párate junto a uno y pulsa Q.
+	Guía: Los portales y las grietas pequeñas te llevan al Presente. Párate junto a uno y pulsa E.
 	Guía: Cada emoción que encuentres solo quiere una cosa: que la escuches. No hace falta vencerla.
 	Guía: Ve a tu ritmo. Aquí estaré.
 	$> GameState.marcar_guia_conocida()

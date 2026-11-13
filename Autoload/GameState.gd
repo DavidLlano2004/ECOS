@@ -28,6 +28,9 @@ var estado: Dictionary = {}
 var habilidades: Array[String] = []
 ## id de la habilidad elegida en el HUD ("" = ninguna). Se guarda con la partida.
 var habilidad_seleccionada: String = ""
+## Consejos de las emociones que el jugador ya vio: id de emoción -> índices (de su lista en Resources/Consejos/).
+## Se guardan con la partida para que el diario pueda listarlos.
+var consejos_vistos: Dictionary = {}
 ## ids de los fragmentos de memoria ya recogidos (uno por emoción). Se guardan con la partida.
 var fragmentos: Array[String] = []
 ## true cuando se recogieron todos los fragmentos (se usará en el final).
@@ -155,6 +158,29 @@ func obtener_recuerdo(id: String) -> RecuerdoData:
 	return null
 
 
+## Anota que el jugador vio ese consejo de la emoción (sin repetir).
+func marcar_consejo_visto(id: String, indice: int) -> void:
+	if not _datos.has(id) or indice < 0:
+		return
+	var lista: Array = consejos_vistos.get(id, [])
+	if not lista.has(indice):
+		lista.append(indice)
+		lista.sort()
+	consejos_vistos[id] = lista
+
+
+## Los índices de los consejos ya vistos de una emoción (ordenados).
+func consejos_vistos_de(id: String) -> Array:
+	return consejos_vistos.get(id, []).duplicate()
+
+
+func cantidad_consejos_vistos() -> int:
+	var total := 0
+	for id in consejos_vistos:
+		total += consejos_vistos[id].size()
+	return total
+
+
 func tiene_fragmento(id: String) -> bool:
 	return fragmentos.has(id)
 
@@ -215,6 +241,7 @@ func nueva_partida() -> void:
 	habilidades.clear()
 	habilidad_seleccionada = ""
 	fragmentos.clear()
+	consejos_vistos.clear()
 	recuerdos_completos = false
 	tiene_posicion = false
 	restaurar_posicion = false
@@ -234,6 +261,7 @@ func guardar() -> bool:
 		"habilidades": habilidades,
 		"habilidad_seleccionada": habilidad_seleccionada,
 		"fragmentos": fragmentos,
+		"consejos_vistos": consejos_vistos,
 		"recuerdos_completos": recuerdos_completos,
 		"respuestas_inicio": respuestas_inicio,
 		"respuestas_final": respuestas_final,
@@ -308,6 +336,14 @@ func cargar() -> bool:
 		if _datos.has(str(f)) and not fragmentos.has(str(f)):
 			fragmentos.append(str(f))
 	_actualizar_recuerdos_completos()
+	# Consejos ya vistos: solo emociones que existen e índices enteros no negativos
+	var vistos: Variant = lectura.get("consejos_vistos", {})
+	if typeof(vistos) == TYPE_DICTIONARY:
+		for id in vistos:
+			if _datos.has(str(id)) and typeof(vistos[id]) == TYPE_ARRAY:
+				for indice in vistos[id]:
+					if (typeof(indice) == TYPE_FLOAT or typeof(indice) == TYPE_INT) and int(indice) >= 0:
+						marcar_consejo_visto(str(id), int(indice))
 	# JSON devuelve los números como float, se pasan a int
 	for r in _lista(lectura, "respuestas_inicio"):
 		if typeof(r) == TYPE_FLOAT or typeof(r) == TYPE_INT:

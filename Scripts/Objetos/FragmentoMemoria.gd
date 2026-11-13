@@ -76,7 +76,7 @@ func _recoger() -> void:
 	var recuerdo := GameState.obtener_recuerdo(id)
 	if recuerdo != null and not recuerdo.lineas.is_empty():
 		await get_tree().create_timer(0.35).timeout
-		await Dialogo.mostrar_texto("", Array(recuerdo.lineas))
+		await Dialogo.mostrar_texto("Recuerdo", Array(recuerdo.lineas))
 	queue_free()
 
 

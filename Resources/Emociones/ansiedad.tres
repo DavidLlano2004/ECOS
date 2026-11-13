@@ -8,6 +8,7 @@ script = ExtResource("1_emocion")
 id = "ansiedad"
 orden = 6
 nombre = "Ansiedad"
+nombre_bloqueo = "El reloj sin parar"
 descripcion_corta = "Una criatura inquieta que se mueve a ráfagas y vibra cuando te acercas. Siempre va un paso adelante de lo que todavía no pasó."
 color = Color(1, 0.18, 0.55, 1)
 habilidad_id = "pausa"

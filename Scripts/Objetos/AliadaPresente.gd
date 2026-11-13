@@ -11,13 +11,8 @@ const VELOCIDAD := 15.0
 const RADIO_PASEO := 100.0
 const DIST_JUGADOR := 50.0
 const DIST_PORTAL := 64.0
-const TITULO_DESPUES := "aliada_despues"
-const FRASES_DESPUES := 4
 
 var datos: EmocionData
-## Frase del diálogo "aliada_despues" (la lee el .dialogue).
-var frase_despues := 0
-var _ultima_frase := -1
 var _ya_hablo := false
 var _sprite: AnimatedSprite2D
 var _luz: PointLight2D
@@ -141,23 +136,16 @@ func puede_interactuar() -> bool:
 	return not _ocupada and not Dialogo.hay_dialogo()
 
 
-## La primera vez dice su mensaje de aliada; después, frases cortas distintas cada vez (sin repetir la anterior).
+## La primera vez dice su mensaje de aliada; después, un consejo distinto cada vez (ver Consejos).
 func interactuar() -> void:
 	if not puede_interactuar():
 		return
 	_ocupada = true
-	var resultado := -1
-	var ruta := "res://Dialogos/%s.dialogue" % datos.id
-	if _ya_hablo and ResourceLoader.exists(ruta):
-		var nueva := randi() % FRASES_DESPUES
-		while nueva == _ultima_frase:
-			nueva = randi() % FRASES_DESPUES
-		_ultima_frase = nueva
-		frase_despues = nueva
-		resultado = await Dialogo.mostrar(load(ruta), TITULO_DESPUES, [self])
+	if _ya_hablo:
+		await Consejos.charlar(datos)
 	else:
-		resultado = await Dialogo.mostrar_texto(datos.nombre, [datos.mensaje_presente_aliada])
+		await Dialogo.mostrar_texto(datos.nombre, datos.mensaje_presente_aliada)
+		if Dialogo.cancelada:
+			await Dialogo.despedida(datos.nombre, datos.frase_cierre)
 	_ya_hablo = true
-	if resultado == Dialogo.CANCELADO:
-		GloboCierre.mostrar(self, datos.frase_cierre, -84.0)
 	_ocupada = false

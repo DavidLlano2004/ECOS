@@ -99,6 +99,24 @@ func _ready() -> void:
 	_revisar_catalogo()
 	_conectar_senales()
 	_crear_panel()
+	get_tree().auto_accept_quit = false   # al cerrar la ventana se sale con calma (ver salir())
+
+
+func _notification(que: int) -> void:
+	if que == NOTIFICATION_WM_CLOSE_REQUEST:
+		salir()
+
+
+## Cierra el juego con calma: para el audio y espera un instante antes de salir. Si el programa se cierra
+## con un sonido a medias, el motor avisa en la consola de recursos "aún en uso".
+func salir() -> void:
+	_detener(_musica, 0.05)
+	_detener(_ambiente, 0.05)
+	_portal.stop()
+	for v in _voces:
+		v.stop()
+	await get_tree().create_timer(0.2, true, false, true).timeout
+	get_tree().quit()
 
 
 ## Al cerrar el juego se sueltan los audios (si no, el motor avisa de recursos "aún en uso").

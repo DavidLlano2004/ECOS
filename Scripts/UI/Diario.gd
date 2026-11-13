@@ -427,6 +427,7 @@ func _crear_progreso() -> void:
 	var total := GameState.ids_emociones().size()
 	columna.add_child(_linea_progreso("Emociones integradas %d/%d" % [GameState.cantidad_integradas(), total]))
 	columna.add_child(_linea_progreso("Recuerdos %d/%d" % [GameState.cantidad_fragmentos(), total]))
+	columna.add_child(_linea_progreso("Consejos de las emociones %d/%d" % [GameState.cantidad_consejos_vistos(), Consejos.total()]))
 
 	# Un punto por emoción, con el color de su estado
 	var puntos := Control.new()

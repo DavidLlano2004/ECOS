@@ -8,6 +8,7 @@ script = ExtResource("1_emocion")
 id = "culpa"
 orden = 5
 nombre = "Culpa"
+nombre_bloqueo = "El puente roto"
 descripcion_corta = "Una sombra que te sigue siempre a la misma distancia. Recuerda cada error, aunque ya haya pasado."
 color = Color(0.31, 0.353, 0.137, 1)
 habilidad_id = "reparacion"

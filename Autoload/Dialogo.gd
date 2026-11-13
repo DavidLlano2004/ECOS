@@ -2,7 +2,7 @@ extends Node
 ## Punto único para mostrar diálogos en ECOS (usa Dialogue Manager por debajo).
 ##
 ##   await Dialogo.mostrar(load("res://Dialogos/rabia.dialogue"), "start")
-##   var elegida: int = await Dialogo.preguntar("¿Qué haces?", ["Opción A", "Opción B"])
+##   var elegida: int = await Dialogo.mostrar_texto("Rabia", "¿Qué haces?", ["Opción A", "Opción B"])
 ##
 ## Una escena puede pasarse a sí misma como estado extra para que el .dialogue llame a sus funciones:
 ##   await Dialogo.mostrar(recurso, "start", [self])   # y en el .dialogue:  $> mostrar_emocion("rabia")
@@ -27,6 +27,12 @@ signal respuesta_elegida
 signal cancelado_por_jugador
 
 const BALLOON := preload("res://Scenes/UI/DialogoBalloon.tscn")
+
+## Segundos que tarda en escribirse cada letra: UNA sola velocidad para todo el juego (el balloon la usa).
+const SEGUNDOS_POR_LETRA := 0.03
+
+## true si la última conversación terminó porque el jugador canceló (ESC o "Ahora no"). Se actualiza en mostrar().
+var cancelada := false
 
 ## Retratos opcionales por nombre de personaje, para que el balloon los muestre a la izquierda.
 ## Ejemplo: Dialogo.retratos["Guía"] = textura. (Quien lo registre debe quitarlo al terminar.)
@@ -74,6 +80,7 @@ func mostrar(recurso_dialogo: DialogueResource, titulo: String = "start", estado
 		dialogo_abierto.emit()
 	balloon.start(recurso_dialogo, titulo, estados_extra)
 	var elegida: int = await balloon.terminado
+	cancelada = elegida == CANCELADO
 	if not cancelable:
 		_sin_cancelar -= 1
 	_abiertos -= 1
@@ -82,29 +89,50 @@ func mostrar(recurso_dialogo: DialogueResource, titulo: String = "start", estado
 	return elegida
 
 
-## Muestra unas líneas de texto sin archivo .dialogue y espera a que el jugador las lea.
-## personaje: quién habla ("" = narrador). Evita ":" en las líneas del narrador y [ ], {{ }} en cualquiera.
-## Devuelve Dialogo.CANCELADO si el jugador salió con ESC.
-func mostrar_texto(personaje: String, lineas: Array) -> int:
+## Muestra un texto con el mismo balloon que todo el juego (misma velocidad de escritura, mismo blip por
+## letra, misma etiqueta de nombre y mismo aviso "Mantén ESC para salir"). Es la forma de mostrar cualquier
+## mensaje que no venga de un archivo .dialogue.
+##
+##   await Dialogo.mostrar_texto("Rabia", "Hola.")                          un texto
+##   await Dialogo.mostrar_texto("Guía", ["Primera.", "Segunda."])          varias páginas seguidas
+##   var i := await Dialogo.mostrar_texto("Rabia", "¿Y ahora?", ["Otro", "Gracias"])   con opciones
+##
+## nombre: lo que sale en la etiqueta ("" = narrador, sin etiqueta). texto: un String o una lista de páginas.
+## opciones: botones de respuesta (aparecen tras el último texto). retrato: imagen opcional a la izquierda.
+## automatico: el texto se cierra solo tras leerse (para despedidas y pistas breves; no con opciones).
+## Devuelve el índice de la opción elegida (0, 1...) o -1 si no se eligió nada o se canceló (ESC o "Ahora no").
+## Para distinguir cancelar de terminar, mira Dialogo.cancelada justo después de esperar.
+func mostrar_texto(nombre: String, texto: Variant, opciones: Array = [], retrato: Texture2D = null, automatico: bool = false) -> int:
+	var paginas: Array = texto if texto is Array else [texto]
 	var guion := "~ start\n"
-	for linea in lineas:
-		guion += ("%s: %s\n" % [personaje, linea]) if personaje != "" else "%s\n" % linea
+	for pagina in paginas:
+		var linea := _limpiar(str(pagina))
+		if nombre != "":
+			linea = "%s: %s" % [nombre, linea]
+		if automatico and opciones.is_empty():
+			linea += " [next=auto]"
+		guion += linea + "\n"
+	for opcion in opciones:
+		guion += "- %s\n" % _limpiar(str(opcion))
 	var recurso: DialogueResource = DialogueManager.create_resource_from_text(guion)
 	if recurso == null:
 		push_error("Dialogo.mostrar_texto: no se pudo crear el diálogo con ese texto.")
 		return -1
-	return await mostrar(recurso, "start")
+	var puso_retrato := retrato != null and nombre != ""
+	if puso_retrato:
+		retratos[nombre] = retrato
+	var elegida := await mostrar(recurso, "start")
+	if puso_retrato:
+		retratos.erase(nombre)
+	return elegida if elegida >= 0 else -1
 
 
-## Pregunta rápida sin archivo .dialogue: muestra un texto y botones.
-## Devuelve el índice de la opción elegida (0, 1, 2...).
-## Evita usar [ ], {{ }} o empezar con "-" o "=>" en los textos (son sintaxis de Dialogue Manager).
-func preguntar(mensaje: String, opciones: Array) -> int:
-	var guion := "~ start\n%s\n" % mensaje
-	for opcion in opciones:
-		guion += "- %s\n" % str(opcion)
-	var recurso: DialogueResource = DialogueManager.create_resource_from_text(guion)
-	if recurso == null:
-		push_error("Dialogo.preguntar: no se pudo crear el diálogo con ese texto.")
-		return -1
-	return await mostrar(recurso, "start")
+## Despedida breve (frase_cierre) cuando el jugador cancela una conversación: el mismo balloon, que se cierra solo.
+func despedida(nombre: String, frase: String) -> void:
+	if frase != "":
+		await mostrar_texto(nombre, frase, [], null, true)
+
+
+## Quita lo que Dialogue Manager entendería como sintaxis: [ ], {{ }} y los saltos de línea.
+func _limpiar(texto: String) -> String:
+	return texto.replace("{{", "{").replace("}}", "}").replace("[", "(").replace("]", ")").replace("\n", " ").strip_edges()

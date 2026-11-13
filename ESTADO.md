@@ -14,16 +14,16 @@ Godot 4.7.2, GDScript. Todo en español. Un commit por tarea y **sin líneas de 
 
 ## Qué está hecho
 
-- **Base:** autoloads `GameState`, `Dialogo` (Dialogue Manager 4.2.0), `Notificacion`; `Player` (8 direcciones, interacción, cámara, tecla Q); 7 criaturas con su comportamiento (`Emocion.gd`) y sus `.dialogue`; guardado JSON (`user://ecos_save.json`); finales bueno, difícil y neutro calculados en `GameState.calcular_final()`.
+- **Base:** autoloads `GameState`, `Dialogo` (Dialogue Manager 4.2.0), `Notificacion`; `Player` (8 direcciones, interacción, cámara); 7 criaturas con su comportamiento (`Emocion.gd`) y sus `.dialogue`; guardado JSON (`user://ecos_save.json`); finales bueno, difícil y neutro calculados en `GameState.calcular_final()`.
 - **Flujo:** pantalla de título -> onboarding cinematográfico (Guía, 7 preguntas, portal) -> `Scenes/Mundo/Mundo.tscn`. "Continuar" también va a `Mundo.tscn`. `PruebaEmociones.tscn` se conserva como escena de pruebas (F6; F3 panel, F4 reinicio).
 - **Mundo (96x54 tiles, 32 px):** dos épocas con la misma forma. Mapa en `Resources/Mundo/mapa.txt`, generado por `tools/generar_mapa.py` (caminos curvos, zonas orgánicas, límite natural con franja de árboles `T`, mesetas de Soledad y Rabia con anillo de acantilado, río de Culpa con puente roto y un paso de tierra, muros solo en tramos de 3 o más). Tileset por código (`tools/generar_tileset.py` + `construir_tileset.gd`). Capas creadas por código: `Sombras`, `DetallesSuelo` (16x16), `Tono` (shader de hierba clara y oscura). Todo el agua es sólida.
 - **Props:** `Prop` (8 tipos, escala por tipo ±8 %, colisión en la base, luces solo en el Pasado) colocados por `Decorador.gd`. Solo el nodo `Objetos` ordena en Y (ninguna entidad activa `y_sort_enabled` en su raíz).
 - **Ambiente:** `CanvasModulate` por época, luciérnagas (Pasado) y ceniza (Presente), viñeta, transición de épocas con shader de ondas (`Mundo.viajar()`), shader de saturación del Presente según emociones integradas.
-- **Portales:** `Portal.tscn` (principal en `Spawn_Hub` y una grieta por zona; E o Q, Q solo dentro de su zona).
+- **Portales:** `Portal.tscn` (principal en `Spawn_Hub` y una grieta por zona; se viaja con E).
 - **Guía:** `Guia.tscn` junto al portal, con `Dialogos/guia.dialogue` que cambia según el progreso.
 - **Presente reactivo:** `BloqueoPresente` por zona (integrada, atacada, ignorada, pendiente, con mensajes y forma aliada que deambula). `PuertaReflejo` en `Zona_Final`.
 - **Cancelar conversaciones:** "Ahora no" y ESC (mantener durante el texto), globo de despedida (`frase_cierre`), el onboarding no se puede cancelar. Cancelar nunca cambia estados.
-- **Emociones integradas:** siguen vivas (deambulan, se pueden volver a hablar con 4 frases rotadas en `despues` y `aliada_despues`).
+- **Emociones integradas:** siguen vivas (deambulan, se les puede volver a hablar y dan un consejo distinto cada vez, ver `Consejos`).
 - **Git:** repo `https://github.com/DavidLlano2004/ECOS.git`. Se reescribió el historial para quitar la coautoría de Claude y se subió con force-with-lease. Rama local `backup-antes-de-limpiar`. `.claude/settings.json` tiene la atribución vacía.
 
 ## Qué puede faltar (por orden aproximado)

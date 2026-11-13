@@ -20,8 +20,6 @@ const VELOCIDAD_CALMA := 14.0
 const DIST_ACERCAR_CALMA := 130.0   # si el jugador se queda a menos de esto, se acerca un poco
 const DIST_MINIMA_CALMA := 56.0     # pero nunca más cerca de esto
 const DIST_APARTARSE_CALMA := 40.0  # y si el jugador está encima, se aparta
-const TITULO_DESPUES := "despues"
-const FRASES_DESPUES := 4
 
 # Distancias de cada comportamiento (en píxeles)
 const DIST_PERSEGUIR := 28.0
@@ -76,9 +74,6 @@ var _tween_alpha: Tween
 var _tween_flotar: Tween
 var _calma_caminando := false
 var _calma_tiempo := 0.0
-## Frase que dirá el diálogo "despues" (la elige _elegir_frase_despues; el .dialogue la lee).
-var frase_despues := 0
-var _ultima_frase_despues := -1
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var temporizador: Timer = $Temporizador
@@ -505,16 +500,17 @@ func interactuar() -> void:
 		jugador.bloquear()
 
 	var estado_antes: String = GameState.estado.get(datos.id, "pendiente")
-	var resultado := await _abrir_dialogo()
 	if estado_antes == "integrada":
-		# Charla de después: no se vuelve a conceder la habilidad ni a repetir el efecto de integración
-		if resultado == Dialogo.CANCELADO:
-			GloboCierre.mostrar(self, datos.frase_cierre, -72.0)
-	elif resultado == Dialogo.CANCELADO and GameState.estado.get(datos.id, "pendiente") == estado_antes:
-		# "Ahora no": no es una decisión. Nada cambia, reanuda su vida y se despide con una frase breve
-		GloboCierre.mostrar(self, datos.frase_cierre, -72.0)
+		# Charla de después: un consejo distinto cada vez (ver Consejos). No se vuelve a conceder la
+		# habilidad ni a repetir el efecto de integración.
+		await Consejos.charlar(datos)
 	else:
-		_reaccionar_al_resultado()
+		var resultado := await _abrir_dialogo()
+		if resultado == Dialogo.CANCELADO and GameState.estado.get(datos.id, "pendiente") == estado_antes:
+			# "Ahora no": no es una decisión. Nada cambia, reanuda su vida y se despide con una frase breve
+			await Dialogo.despedida(datos.nombre, datos.frase_cierre)
+		else:
+			_reaccionar_al_resultado()
 
 	_ocupada = false
 	if jugador != null and is_instance_valid(jugador) and jugador.has_method("liberar"):
@@ -522,35 +518,21 @@ func interactuar() -> void:
 
 
 func _abrir_dialogo() -> int:
+	# El diálogo de decisión solo se abre con emociones pendientes, atacadas o ignoradas
 	var ruta := ruta_dialogo if ruta_dialogo != "" else RUTA_DIALOGO % datos.id
-	if GameState.estado.get(datos.id, "pendiente") == "integrada":
-		# El diálogo de decisión solo se abre con emociones pendientes, atacadas o ignoradas
-		if not ResourceLoader.exists(ruta):
-			return -1
-		_elegir_frase_despues()
-		return await Dialogo.mostrar(load(ruta), TITULO_DESPUES, [self])
 	if ResourceLoader.exists(ruta):
 		return await Dialogo.mostrar(load(ruta), CUE_DIALOGO)
 	return await _dialogo_provisional()
 
 
-## Elige la frase de la charla de después al azar, sin repetir la anterior.
-func _elegir_frase_despues() -> void:
-	var nueva := randi() % FRASES_DESPUES
-	while nueva == _ultima_frase_despues:
-		nueva = randi() % FRASES_DESPUES
-	_ultima_frase_despues = nueva
-	frase_despues = nueva
-
-
 ## Diálogo de emergencia si todavía no existe el .dialogue de esta emoción.
 func _dialogo_provisional() -> int:
 	var opciones := ["Atacarla", "Ignorarla", "Escucharla"]
-	var elegida: int = await Dialogo.preguntar("%s te mira en silencio. ¿Qué haces?" % datos.nombre, opciones)
+	var elegida: int = await Dialogo.mostrar_texto(datos.nombre, "Te mira en silencio. ¿Qué haces?", opciones)
 	var resultados := ["atacada", "ignorada", "integrada"]
 	if elegida >= 0 and elegida < resultados.size():
 		GameState.resolver(datos.id, resultados[elegida])
-	return elegida
+	return Dialogo.CANCELADO if Dialogo.cancelada else elegida
 
 
 func _reaccionar_al_resultado() -> void:
