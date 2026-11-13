@@ -197,7 +197,8 @@ func usar(player: Player) -> void:
 	var habilidad: HabilidadBase = _habilidades.get(id, null)
 	if habilidad == null or not habilidad.puede_usar(player):
 		return
-	habilidad.ejecutar(player)
+	if not habilidad.ejecutar(player):
+		return  # no se usó (ej. Reparar sin nada cerca): ni cooldown ni señal
 	habilidad_usada.emit(id)
 	if habilidad.duracion > 0.0:
 		_activas[id] = habilidad.duracion

@@ -44,9 +44,26 @@ var interactuables: Array[Node] = []
 ## El objeto con el que se interactuaría ahora (el más cercano que lo permita).
 var activo: Node = null
 
+## true mientras dura el Impulso (dash).
+var impulsando: bool:
+	get:
+		return _impulso_restante > 0.0
+
 var _bloqueado := false
 var _dialogo_abierto := false
 var _tiempo_rebote := 0.0
+
+# Impulso (dash)
+const SEPARACION_ESTELA := 0.03   # segundos entre imágenes fantasma
+const SEPARACION_POLVO := 0.05
+var _impulso_restante := 0.0
+var _impulso_direccion := Vector2.ZERO
+var _impulso_velocidad := 0.0
+var _impulso_color := Color.WHITE
+var _impulso_excepciones: Array[PhysicsBody2D] = []  # lo que se rompió: no estorba el resto del dash
+var _impulso_rotos: Array[Node] = []
+var _tiempo_estela := 0.0
+var _tiempo_polvo := 0.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var zona: Area2D = $ZonaInteraccion
@@ -78,6 +95,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Durante el Impulso el jugador va en línea recta y no se controla
+	if _impulso_restante > 0.0:
+		_paso_impulso(delta)
+		return
 	if can_move:
 		var direccion := Input.get_vector("IZQUIERDA", "DERECHA", "ARRIBA", "ABAJO")
 		if direccion != Vector2.ZERO:
@@ -133,6 +154,92 @@ func liberar() -> void:
 ## la seleccionada (desbloqueo, espera, diálogos, transiciones) y la ejecuta.
 func usar_habilidad() -> void:
 	Habilidades.usar(self)
+
+
+## Impulso (Rabia): empieza un dash de `distancia` px en la dirección `facing` durante `segundos`.
+## No hace daño. Lo llama HabilidadImpulso.
+func iniciar_impulso(distancia: float, segundos: float, color: Color) -> void:
+	if _impulso_restante > 0.0:
+		return
+	_impulso_direccion = facing.normalized() if facing != Vector2.ZERO else Vector2.DOWN
+	_impulso_velocidad = distancia / segundos
+	_impulso_restante = segundos
+	_impulso_color = color
+	_impulso_rotos.clear()
+	_tiempo_estela = 0.0
+	_tiempo_polvo = 0.0
+	velocity = Vector2.ZERO
+	EfectosHabilidades.polvo(self, global_position, 8)
+	EfectosHabilidades.temblor_camara(self, 2.5, 0.25)
+
+
+## Termina el Impulso (también se llama sola al acabar el tiempo). Se puede llamar varias veces.
+func terminar_impulso() -> void:
+	if _impulso_restante <= 0.0 and _impulso_excepciones.is_empty():
+		return
+	_impulso_restante = 0.0
+	for cuerpo in _impulso_excepciones:
+		if is_instance_valid(cuerpo):
+			remove_collision_exception_with(cuerpo)
+	_impulso_excepciones.clear()
+	velocity = Vector2.ZERO
+	EfectosHabilidades.polvo(self, global_position, 5)
+
+
+## Un paso del Impulso con move_and_collide: no atraviesa muros, agua ni objetos sólidos.
+## Lo que sea del grupo "rompible" recibe romper() y deja pasar; no afecta a las emociones.
+func _paso_impulso(delta: float) -> void:
+	var paso := minf(delta, _impulso_restante)
+	var choque := move_and_collide(_impulso_direccion * _impulso_velocidad * paso)
+	var intentos := 0
+	while choque != null and intentos < 3:
+		intentos += 1
+		var cuerpo := choque.get_collider()
+		var rompible := _como_rompible(cuerpo)
+		if rompible != null:
+			if not _impulso_rotos.has(rompible):
+				_impulso_rotos.append(rompible)
+				rompible.romper()
+			if cuerpo is PhysicsBody2D:
+				add_collision_exception_with(cuerpo)
+				_impulso_excepciones.append(cuerpo)
+			choque = move_and_collide(choque.get_remainder())
+		else:
+			# De frente contra una pared se termina; en diagonal se desliza por ella
+			if choque.get_normal().dot(_impulso_direccion) < -0.9:
+				_impulso_restante = 0.0
+				break
+			choque = move_and_collide(choque.get_remainder().slide(choque.get_normal()))
+			if choque != null:
+				_impulso_restante = 0.0
+				break
+
+	# Estela de fantasmas y polvo
+	_tiempo_estela -= delta
+	if _tiempo_estela <= 0.0:
+		_tiempo_estela = SEPARACION_ESTELA
+		EfectosHabilidades.fantasma(self, _impulso_color)
+	_tiempo_polvo -= delta
+	if _tiempo_polvo <= 0.0:
+		_tiempo_polvo = SEPARACION_POLVO
+		EfectosHabilidades.polvo(self, global_position, 2)
+	_actualizar_animacion(true, delta)
+
+	_impulso_restante -= delta
+	if _impulso_restante <= 0.0:
+		terminar_impulso()
+
+
+## El nodo del grupo "rompible" que corresponde a lo que se tocó (el propio cuerpo o su padre), o null.
+func _como_rompible(objeto: Object) -> Node:
+	if objeto is Node:
+		var nodo := objeto as Node
+		if nodo.is_in_group("rompible") and nodo.has_method("romper"):
+			return nodo
+		var padre := nodo.get_parent()
+		if padre != null and padre.is_in_group("rompible") and padre.has_method("romper"):
+			return padre
+	return null
 
 
 # --- Cámara ---

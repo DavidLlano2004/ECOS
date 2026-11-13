@@ -161,6 +161,24 @@ Reglas de cada bloqueo (para la tarea 3.3):
 - **Emoción integrada:** sigue viva. En el Pasado deambula despacio con la animación `calma` dentro de su `radio_zona`, se acerca un poco si el jugador se queda cerca y nunca lo empuja. En el Presente la aliada deambula a menos de 100 px de su bloqueo, sin atravesar muros ni pegarse al jugador o a un portal.
 - **Seguir hablando:** una integrada siempre puede interactuar. Abre el título `despues` (Pasado) o `aliada_despues` (Presente) de `Dialogos/<id>.dialogue`: 4 frases por emoción, elegidas al azar sin repetir la anterior (`frase_despues` en la escena). No concede nada ni repite el efecto. El diálogo de decisión (`start`) solo se abre con pendientes, atacadas o ignoradas.
 
+## Habilidades
+
+- **Sistema** (4.1): autoload `Habilidades` (catálogo desde los `EmocionData`, selección, cooldowns, `factor_tiempo`), `HabilidadBase` + una subclase por habilidad en `Scripts/Habilidades/`, HUD en `Scenes/UI/HUD.tscn` (capa 5). Teclas: ESPACIO usa, 1-7 y rueda eligen, R/F anterior y siguiente. `HabilidadBase.ejecutar(player)` devuelve `bool`: `false` = no se usó (sin cooldown ni señal `habilidad_usada`). Regla de diseño: ninguna habilidad hace daño y el camino principal nunca exige una; abren acertijos opcionales.
+- **Impulso** (Rabia): dash de 140 px en 0.18 s en la dirección `facing`, cooldown 0.8 s. Lo mueve `Player.iniciar_impulso()` con `move_and_collide` (no atraviesa muros, agua ni objetos sólidos; contra una pared de frente se detiene y en diagonal desliza). Estela de fantasmas, polvo y temblor de cámara (`EfectosHabilidades`). No afecta a las emociones.
+- **Calma** (Tristeza): anillo azul que se expande hasta 90 px en 0.6 s (`EfectoCalma`, dibujado con `_draw`), cooldown 3 s. Cada nodo "calmable" del radio recibe `calmar()` cuando el anillo lo alcanza. `Emocion.calmar()`: si está atacada o ignorada, recupera su velocidad normal 8 s y deja de huir (tinte azul mientras dura); en otro estado no hace nada.
+- **Reparar** (Culpa): mantener ESPACIO 1.2 s a menos de 48 px de un nodo "reparable" (`EfectoReparar`: anillo dorado en el suelo, cinta en espiral y partículas). Al completarse llama a `reparar()`. Soltar antes, alejarse más de 56 px o cambiar de habilidad cancela sin penalización. Sin nada cerca muestra "No hay nada que reparar aquí" y no gasta nada. Sin cooldown propio.
+
+### Grupos e interfaces (los objetos del mundo los implementan; los usará el prompt 4.4)
+
+| Grupo | Método | Quién lo llama | Notas |
+|-------|--------|----------------|-------|
+| `rompible` | `romper()` | Impulso, al tocarlo durante el dash | Debe ser un cuerpo sólido (capa 1 `mundo`) o tener un hijo sólido; el jugador lo atraviesa tras romperlo. Debe quitarse o desactivar su colisión al romperse. |
+| `calmable` | `calmar()` | Calma, al llegar el anillo (radio 90 px) | `Emocion` ya está en este grupo. El nodo debe ser `Node2D`. |
+| `reparable` | `reparar()` | Reparar, al completar 1.2 s | El nodo debe ser `Node2D`. Propiedad opcional `radio_reparar` (px) para el tamaño del anillo. Al repararse debe salir del grupo. |
+
+- Pendiente: los grupos de las habilidades de 4.3 (Vínculo, Pausa y Revelar) se añadirán a esta tabla cuando se implementen.
+- **Arena de pruebas:** `Scenes/Mundo/PruebaHabilidades.tscn` (F6, no es la principal): muro, roca rompible, planta seca, objeto roto, Rabia y Miedo. En depuración: **F9** desbloquea las 7 habilidades (sin tocar las emociones), **F10** pone a Rabia como atacada y a Miedo como ignorada, **F7** reinicia los objetos. (F5 y F8 se evitan: son atajos del editor.)
+
 ## Atribución en git
 
 Los mensajes de commit nunca llevan líneas `Co-Authored-By`, `Claude-Session` ni "Generated with Claude Code", y los pull requests tampoco llevan texto de atribución. Solo debe aparecer el perfil del usuario como autor.

@@ -20,10 +20,13 @@ func puede_usar(_player: Player) -> bool:
 	return true
 
 
-## Hace el efecto. Las subclases lo sobrescriben.
-func ejecutar(player: Player) -> void:
+## Hace el efecto. Las subclases lo sobrescriben. Devuelve true si la habilidad se usó de verdad
+## (entonces se gasta el cooldown y se emite habilidad_usada) y false si no pasó nada
+## (por ejemplo, Reparar sin nada cerca: no se gasta cooldown).
+func ejecutar(player: Player) -> bool:
 	print("Habilidad '%s' usada (todavía sin efecto)." % id)
 	_destello(player)
+	return true
 
 
 ## Se llama cuando acaba la duración (si duracion > 0). Las subclases lo sobrescriben.

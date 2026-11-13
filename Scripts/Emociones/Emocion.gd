@@ -35,6 +35,10 @@ const TIEMPO_QUIETO_SOLEDAD := 1.5
 const RAFAGA_ERRATICA := 0.3
 const PAUSA_ERRATICA := 0.4
 
+# Calma (habilidad del jugador): una emoción agitada recupera su velocidad normal este tiempo
+const SEGUNDOS_CALMADA := 8.0
+const TINTE_CALMADA := Color(0.72, 0.86, 1.0)
+
 const ALPHA_ESCONDIDA := 0.35
 const SEGUNDOS_HUIDA := 3.0
 const ANIMACION_IDLE := &"idle"
@@ -56,6 +60,9 @@ var _integrada := false
 var _oculta := false           # Vergüenza: se esconde porque la miran
 var _factor_velocidad := 1.0   # sube un poco si la ignoran
 var _huyendo := 0.0            # segundos que le quedan de huida (tras ser atacada)
+var _calmada := 0.0            # segundos que le quedan de calma (por la habilidad Calma)
+var _modulate_antes := Color.WHITE
+var _tween_calmada: Tween
 var _temblor := 0.0            # intensidad de la vibración de este fotograma (px)
 var _sacudida := 0.0           # segundos que le quedan de sacudida fuerte
 var _fuerza_sacudida := 0.0
@@ -79,6 +86,7 @@ var _ultima_frase_despues := -1
 
 func _ready() -> void:
 	add_to_group("emociones")
+	add_to_group("calmable")  # interfaz de la habilidad Calma: calmar()
 	y_sort_enabled = false  # solo Objetos ordena en Y; la criatura se ordena como un todo por sus pies
 	punto_origen = global_position
 	temporizador.one_shot = true
@@ -102,6 +110,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_temblor = 0.0
+	if _calmada > 0.0:
+		_calmada -= delta
+		if _calmada <= 0.0:
+			_terminar_calmada()
 	if _ocupada:
 		velocity = Vector2.ZERO
 		_aplicar_vibracion(delta)
@@ -169,8 +181,44 @@ func _reproducir(animacion: StringName) -> void:
 
 
 ## Velocidad actual (la de los datos, más lo que haya subido por ser ignorada).
+## Mientras está calmada por la habilidad Calma, es la normal.
 func _velocidad() -> float:
+	if _calmada > 0.0:
+		return datos.velocidad
 	return datos.velocidad * _factor_velocidad
+
+
+# --- Calma (habilidad del jugador) ---
+
+## Interfaz del grupo "calmable". Si la emoción está agitada (atacada o ignorada) recupera su
+## velocidad normal durante 8 s (y deja de huir), así es más fácil de alcanzar. No hace nada más.
+func calmar() -> void:
+	if datos == null or _integrada:
+		return
+	var estado: String = GameState.estado.get(datos.id, "pendiente")
+	if estado != "atacada" and estado != "ignorada":
+		return
+	if _calmada <= 0.0:
+		_modulate_antes = sprite.modulate
+		if _tween_calmada != null:
+			_tween_calmada.kill()
+		_tween_calmada = create_tween()
+		_tween_calmada.tween_property(sprite, "modulate", _modulate_antes.lerp(TINTE_CALMADA, 0.6), 0.3)
+	_calmada = SEGUNDOS_CALMADA
+	_huyendo = 0.0
+	_sacudida = 0.0
+
+
+## Segundos que le quedan de calma por la habilidad (0 = ninguna).
+func segundos_de_calma() -> float:
+	return maxf(_calmada, 0.0)
+
+
+func _terminar_calmada() -> void:
+	if _tween_calmada != null:
+		_tween_calmada.kill()
+	_tween_calmada = create_tween()
+	_tween_calmada.tween_property(sprite, "modulate", _modulate_antes, 0.5)
 
 
 # --- Información del jugador ---
