@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Objetos/NieblaSombra.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://Resources/Mundo/frames_objeto_niebla_sombra.tres" id="2_frames"]
+
+[node name="NieblaSombra" type="StaticBody2D"]
+collision_mask = 0
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.92, 0.92)
+sprite_frames = ExtResource("2_frames")
+animation = &"inicial"
+centered = false
+offset = Vector2(-64, -126)
+
+[node name="Forma" type="CollisionShape2D" parent="."]

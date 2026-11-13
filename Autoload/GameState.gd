@@ -6,12 +6,16 @@ extends Node
 signal epoca_cambiada(epoca: String)
 signal emocion_resuelta(id: String, resultado: String)
 signal habilidad_desbloqueada(habilidad_id: String)
+## Se recogió un fragmento de memoria (id = el de la emoción a la que pertenece, ej. "rabia").
+signal fragmento_recogido(id: String)
 ## Se emiten al reiniciar la partida y al cargar una guardada (las habilidades y el HUD se actualizan).
 signal partida_reiniciada
 signal partida_cargada
 
 const CARPETA_EMOCIONES := "res://Resources/Emociones"
 const RUTA_GUARDADO := "user://ecos_save.json"
+## Los recuerdos de los fragmentos de memoria (se editan sin tocar código).
+const RUTA_RECUERDOS := "res://Resources/Recuerdos.tres"
 const RESULTADOS := ["pendiente", "atacada", "ignorada", "integrada"]
 ## Con cuántas emociones atacadas o ignoradas el final es "difícil".
 const MINIMO_FINAL_DIFICIL := 4
@@ -24,6 +28,10 @@ var estado: Dictionary = {}
 var habilidades: Array[String] = []
 ## id de la habilidad elegida en el HUD ("" = ninguna). Se guarda con la partida.
 var habilidad_seleccionada: String = ""
+## ids de los fragmentos de memoria ya recogidos (uno por emoción). Se guardan con la partida.
+var fragmentos: Array[String] = []
+## true cuando se recogieron todos los fragmentos (se usará en el final).
+var recuerdos_completos: bool = false
 var respuestas_inicio: Array[int] = []
 var respuestas_final: Array[int] = []
 ## Mensajes capturados: [{"id": "rabia", "texto": "..."}]
@@ -129,6 +137,45 @@ func cantidad_pendientes() -> int:
 	return total
 
 
+## Los datos de un recuerdo (título y líneas), o null si no existe.
+func obtener_recuerdo(id: String) -> RecuerdoData:
+	if not ResourceLoader.exists(RUTA_RECUERDOS):
+		return null
+	var coleccion := load(RUTA_RECUERDOS) as ColeccionRecuerdos
+	if coleccion == null:
+		return null
+	for recuerdo in coleccion.recuerdos:
+		if recuerdo != null and recuerdo.id == id:
+			return recuerdo
+	return null
+
+
+func tiene_fragmento(id: String) -> bool:
+	return fragmentos.has(id)
+
+
+func cantidad_fragmentos() -> int:
+	return fragmentos.size()
+
+
+## Registra un fragmento de memoria y guarda su recuerdo en el diario. Devuelve false si ya estaba
+## recogido (o no existe esa emoción). Si con este se completan todos, recuerdos_completos pasa a true.
+func recoger_fragmento(id: String) -> bool:
+	if not _datos.has(id) or fragmentos.has(id):
+		return false
+	fragmentos.append(id)
+	var recuerdo := obtener_recuerdo(id)
+	if recuerdo != null:
+		_guardar_en_diario("recuerdo_" + id, "%s. %s" % [recuerdo.titulo, " ".join(recuerdo.lineas)])
+	_actualizar_recuerdos_completos()
+	fragmento_recogido.emit(id)
+	return true
+
+
+func _actualizar_recuerdos_completos() -> void:
+	recuerdos_completos = not _datos.is_empty() and fragmentos.size() >= _datos.size()
+
+
 func marcar_guia_conocida() -> void:
 	guia_conocida = true
 
@@ -162,6 +209,8 @@ func nueva_partida() -> void:
 		estado[id] = "pendiente"
 	habilidades.clear()
 	habilidad_seleccionada = ""
+	fragmentos.clear()
+	recuerdos_completos = false
 	respuestas_inicio.clear()
 	respuestas_final.clear()
 	diario.clear()
@@ -175,6 +224,8 @@ func guardar() -> void:
 		"estado": estado,
 		"habilidades": habilidades,
 		"habilidad_seleccionada": habilidad_seleccionada,
+		"fragmentos": fragmentos,
+		"recuerdos_completos": recuerdos_completos,
 		"respuestas_inicio": respuestas_inicio,
 		"respuestas_final": respuestas_final,
 		"diario": diario,
@@ -213,6 +264,11 @@ func cargar() -> bool:
 	for h in lectura.get("habilidades", []):
 		habilidades.append(str(h))
 	habilidad_seleccionada = str(lectura.get("habilidad_seleccionada", ""))
+	# Solo se aceptan fragmentos de emociones que existen, sin repetir
+	for f in lectura.get("fragmentos", []):
+		if _datos.has(str(f)) and not fragmentos.has(str(f)):
+			fragmentos.append(str(f))
+	_actualizar_recuerdos_completos()
 	# JSON devuelve los números como float, se pasan a int
 	for r in lectura.get("respuestas_inicio", []):
 		respuestas_inicio.append(int(r))

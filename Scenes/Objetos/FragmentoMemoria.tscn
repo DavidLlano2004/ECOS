@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Objetos/FragmentoMemoria.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://Resources/Mundo/frames_objeto_fragmento.tres" id="2_frames"]
+
+[node name="FragmentoMemoria" type="Area2D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.5, 0.5)
+sprite_frames = ExtResource("2_frames")
+animation = &"inicial"
+centered = false
+offset = Vector2(-64, -122)
+
+[node name="Forma" type="CollisionShape2D" parent="."]

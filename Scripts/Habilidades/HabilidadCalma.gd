@@ -25,8 +25,8 @@ func ejecutar(player: Player) -> bool:
 	efecto.global_position = player.global_position + Vector2(0, -10)
 
 	for nodo in player.get_tree().get_nodes_in_group("calmable"):
-		if not (nodo is Node2D) or not nodo.has_method("calmar"):
-			continue
+		if not (nodo is Node2D) or not nodo.has_method("calmar") or not nodo.is_visible_in_tree():
+			continue  # lo de la época oculta no se ve ni se toca
 		var distancia := player.global_position.distance_to(nodo.global_position)
 		if distancia > RADIO:
 			continue

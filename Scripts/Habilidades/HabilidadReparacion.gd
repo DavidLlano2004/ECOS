@@ -39,8 +39,8 @@ func _buscar_objetivo(player: Player) -> Node2D:
 	var mejor: Node2D = null
 	var mejor_distancia := DISTANCIA
 	for nodo in player.get_tree().get_nodes_in_group("reparable"):
-		if not (nodo is Node2D) or not nodo.has_method("reparar"):
-			continue
+		if not (nodo is Node2D) or not nodo.has_method("reparar") or not nodo.is_visible_in_tree():
+			continue  # lo de la época oculta no se ve ni se toca
 		var distancia := player.global_position.distance_to(nodo.global_position)
 		if distancia <= mejor_distancia:
 			mejor_distancia = distancia

@@ -48,6 +48,9 @@ const ARBOLES_DE_ZONA := {
 
 const TIPO_DE_GRUPO := {"rocas": "roca", "faroles": "farol_poste", "bancos": "banco"}
 
+## Zonas (px) que no se decoran: los recintos de los acertijos. Las pone Mundo antes de generar().
+static var reservadas: Array[Rect2] = []
+
 var _filas: PackedStringArray
 var _zonas: Dictionary  # nombre -> posición (px)
 var _puestos: Array[Dictionary] = []  # {"tipo": String, "pos": Vector2}
@@ -167,6 +170,9 @@ func _es_valido(tipo: String, pos: Vector2) -> bool:
 		return false
 	if not SUELOS.contains(_filas[celda.y][celda.x]):
 		return false
+	for reservada in reservadas:
+		if reservada.has_point(pos):
+			return false
 	# Nada alrededor que estorbe; los caminos solo se dejan libres si el objeto no es un farol
 	for dy in range(-1, 2):
 		for dx in range(-1, 2):

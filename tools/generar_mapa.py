@@ -16,6 +16,9 @@ import random
 import sys
 from collections import deque
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import acertijos_mapa
+
 W, H = 96, 54
 TILE = 32
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -425,6 +428,9 @@ def construir():
                     for (a, b) in comp:
                         m.g[b][a] = "a" if base_plaza(m, a, b) else "."
 
+    # 11. acertijos de habilidad: recintos cerrados con un fragmento de memoria (ver acertijos_mapa.py)
+    m.acertijos = acertijos_mapa.estampar(m, ZONAS, W, H, dentro, transitable)
+
     # 10. los centros de zona y el hub deben ser transitables
     for (cx, cy) in centros:
         if m.g[cy][cx] in BLOQUEA or m.g[cy][cx] == "w":
@@ -488,6 +494,50 @@ def verificar(m):
     return ok and not estrechos
 
 
+def verificar_acertijos(m):
+    """Con la rejilla: sin habilidades el camino principal y las 7 zonas se alcanzan y ningún fragmento;
+    resolviendo cada acertijo, su fragmento se alcanza y se puede volver al hub."""
+    hub = ZONAS["Hub"]
+    todos = set()
+    for s in m.acertijos:
+        todos |= {tuple(c) for c in s["bloqueo"]}
+
+    def alc(origen, bloqueados):
+        visto = {origen}
+        cola = deque([origen])
+        while cola:
+            x, y = cola.popleft()
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                n = (x + dx, y + dy)
+                if n not in visto and n not in bloqueados and transitable(m, *n):
+                    visto.add(n)
+                    cola.append(n)
+        return visto
+
+    ok = True
+    base = alc(hub, todos)
+    perdidas = [n for n, (x, y) in ZONAS.items() if (x, y) not in base]
+    print("  sin habilidades se llega a todas las zonas y a la Puerta del Reflejo:", "SI" if not perdidas else "NO " + str(perdidas))
+    ok &= not perdidas
+    for s in m.acertijos:
+        f = (int(s["fragmento"][0] // TILE), int(s["fragmento"][1] // TILE))
+        sin = f in base
+        propios = {tuple(c) for c in s["bloqueo"]}
+        con_acertijo = alc(hub, todos - propios)
+        con = f in con_acertijo
+        vuelve = hub in alc(f, todos - propios)
+        # el recinto debe ser cerrado: desde el fragmento, sin resolver, solo se alcanza su interior
+        encerrado = alc(f, todos)
+        x, y, w, h = s["rect"]
+        fuera = [c for c in encerrado if not (x <= c[0] < x + w and y <= c[1] < y + h)]
+        bien = (not sin) and con and vuelve and not fuera
+        print("  %-9s %-10s fragmento en %s: sin habilidad %s, con ella %s, vuelve al hub %s, recinto cerrado %s"
+              % (s["emocion"], s["habilidad"], f, "ALCANZABLE (mal)" if sin else "no", "si" if con else "NO (mal)",
+                 "si" if vuelve else "NO (mal)", "si" if not fuera else "NO (mal)"))
+        ok &= bien
+    return ok
+
+
 def escribir_vista(m, ruta):
     from PIL import Image
     colores = {".": (150, 150, 80), "f": (190, 150, 170), "d": (200, 180, 100), "r": (170, 80, 60), "v": (70, 50, 70),
@@ -520,6 +570,8 @@ def main():
     m = construir()
     print("Comprobando que el mapa sea transitable...")
     bien = verificar(m)
+    print("Comprobando los acertijos de habilidad...")
+    bien = verificar_acertijos(m) and bien
     filas = ["".join(f) for f in m.g]
     assert all(len(f) == W for f in filas) and len(filas) == H
     ruta = os.path.join(RAIZ, "Resources", "Mundo", "mapa.txt")
@@ -527,6 +579,9 @@ def main():
     with open(ruta, "w", encoding="utf-8", newline="\n") as f:
         f.write(LEYENDA + "\n".join(filas) + "\n")
     print("Mapa escrito:", ruta)
+    ruta_acertijos = os.path.join(RAIZ, "Resources", "Mundo", "acertijos.json")
+    acertijos_mapa.escribir_json(m.acertijos, ruta_acertijos)
+    print("Acertijos escritos:", ruta_acertijos)
     if "--vista" in args:
         escribir_vista(m, args[args.index("--vista") + 1])
     if not bien:

@@ -209,6 +209,29 @@ Reglas de cada bloqueo (para la tarea 3.3):
 - **Orden de dibujo:** los objetos de pie (roca, planta, portón, niebla, fragmento) tienen el origen en la base. Los planos o sobre los que se camina (placa, plataforma, camino) lo tienen en su borde de arriba, para que el jugador (cuyo origen son los pies) siempre se dibuje por encima.
 - **Colisión de la plataforma:** solo en el disco de arriba, no en el abismo.
 
+## Acertijos de habilidad y fragmentos de memoria (solo en el Presente)
+
+- **Idea:** cada habilidad abre un acertijo OPCIONAL que custodia un fragmento de memoria. El camino principal (hub, las 7 zonas y la Puerta del Reflejo) nunca se bloquea con un acertijo: no hay softlock. Sin habilidades se llega a todo el mapa menos a los 7 fragmentos.
+- **Dónde:** `tools/generar_mapa.py` (fase 11, módulo `tools/acertijos_mapa.py`) excava 7 recintos cerrados (muro de acantilado `C` de 2 tiles) en sitios libres, cada uno en la zona más cercana que NO sea la de la emoción que da su habilidad, con UNA sola entrada tapada por el acertijo y una rama lateral de camino hasta un camino principal. Escribe `Resources/Mundo/acertijos.json` (objetos, abismos, fragmento y zona reservada de cada uno). `Mundo.colocar_acertijos()` los crea solo en `Presente/Objetos` (los abismos, como capa entre el suelo y los objetos) y `Decorador.reservadas` deja libres los recintos. En el Pasado los recintos existen pero están vacíos. La receta del mapa no cambia: `python tools/generar_mapa.py` (ahora también escribe `acertijos.json`) y regenerar las vistas previas.
+- **Objetos** (`Scenes/Objetos/`, con su sprite de `Resources/Mundo/frames_objeto_*.tres` y las escalas de la sección de arte):
+
+| Escena | Grupo / interfaz | Cómo funciona |
+|--------|------------------|---------------|
+| `RocaRompible` | `rompible` → `romper()` | Tapa un nicho (sólida). El Impulso la rompe y deja de bloquear. |
+| `PlantaMarchita` | `calmable` → `calmar()` | Tres juntas tapan la entrada de un jardín. Al calmarlas florecen, dejan una luz rosada y dejan de bloquear. |
+| `PlacaDoble` + `PuertaPlacas` | `placa_doble`; la puerta se une a sus placas por `id_mecanismo` | La puerta exige TODAS sus placas ocupadas a la vez (una el jugador y otra el compañero) y se queda abierta. La puerta es arte temporal (dibujada por código). |
+| `PortonRoto` | `reparable` → `reparar()` | Cierra un recinto. Reparado se ve entero con su lazo dorado, se abre y deja de bloquear. |
+| `PlataformaMovil` + `Abismo` | `tiempo` y `soporte` | Va de lado a lado sobre un abismo que no se cruza a pie. A velocidad normal (150 px/s) NO deja subirse (límite `VELOCIDAD_ABORDAJE` 90 px/s); con Pausa (x0.25) sí, y una vez a bordo te lleva aunque la Pausa termine. El abismo es una regla (sin apoyo vuelves al último punto seguro, sin daño), dibujado por código (arte temporal). |
+| `CaminoOculto` | `oculto` → `revelar(segundos)` y `soporte` | Puente sobre una ravina. Fantasma y no pisable hasta que Revelar lo activa; mientras dura (6 s) se ve sólido y se pisa. |
+| `NieblaSombra` | `sombra` → `visionar(activa)` | Llena la entrada de una cueva. La Visión la disipa (quedan jirones lila y una luz cálida) y deja de bloquear; con `permanente = true` (lo normal) ya no vuelve, así nadie queda encerrado. |
+| `FragmentoMemoria` | grupo `fragmentos` | Se recoge con INTERACTUAR o tocándolo: destello, `GameState.recoger_fragmento(id)` y el recuerdo en un globo de diálogo. |
+
+- **Interfaz `soporte`:** un nodo con `sostiene(punto_global) -> bool`; los `Abismo` no dejan pisar su zona sin un soporte que lo diga.
+- **Sin quedar atrapado:** todo bloqueo se abre para siempre (roca, plantas, portón, niebla, puerta de placas). Las dos únicas excepciones son temporales y se recuperan: el puente (se vuelve a revelar tras los 12 s de cooldown) y la plataforma (se vuelve a usar Pausa tras su cooldown de 10 s); ambas cruzan siempre con la habilidad, que nunca se pierde.
+- **Colisiones y épocas:** un objeto que apaga su colisión debe usar `Colisiones.apagar(forma, apagada)`; así `Mundo` no la vuelve a encender al viajar y volver. Las habilidades solo actúan sobre nodos visibles (`is_visible_in_tree()`), para no tocar objetos de la época oculta.
+- **Datos de los fragmentos:** `GameState.fragmentos` (ids de emoción, se guardan y se cargan), `GameState.recuerdos_completos` (true con los 7; se usará en el final), señal `GameState.fragmento_recogido(id)`. Cada recogida escribe una entrada `recuerdo_<id>` en el diario. Los 7 recuerdos (título y páginas del globo; 2 o 3 frases, primera persona, sin `:` ni `[ ]`) están en `Resources/Recuerdos.tres` (`ColeccionRecuerdos` y `RecuerdoData`), editables sin tocar código.
+- **Dónde quedó cada uno** (puede cambiar si cambia el mapa): rabia/Impulso en la zona de Vergüenza, miedo/Visión en Vergüenza, tristeza/Calma en Ansiedad, soledad/Vínculo en Miedo, culpa/Reparar en Soledad, ansiedad/Pausa en Rabia, vergüenza/Revelar en Tristeza.
+
 ## Atribución en git
 
 Los mensajes de commit nunca llevan líneas `Co-Authored-By`, `Claude-Session` ni "Generated with Claude Code", y los pull requests tampoco llevan texto de atribución. Solo debe aparecer el perfil del usuario como autor.

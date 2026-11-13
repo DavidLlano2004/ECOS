@@ -30,8 +30,8 @@ func ejecutar(player: Player) -> bool:
 	var arbol := player.get_tree()
 	# Lo oculto se revela cuando la onda lo alcanza
 	for nodo in arbol.get_nodes_in_group("oculto"):
-		if not (nodo is Node2D) or not nodo.has_method("revelar"):
-			continue
+		if not (nodo is Node2D) or not nodo.has_method("revelar") or not nodo.is_visible_in_tree():
+			continue  # lo de la época oculta no se ve ni se toca
 		var distancia := player.global_position.distance_to(nodo.global_position)
 		if distancia > RADIO:
 			continue

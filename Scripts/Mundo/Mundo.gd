@@ -38,6 +38,10 @@ const PORTAL := preload("res://Scenes/Objetos/Portal.tscn")
 const GUIA := preload("res://Scenes/Personajes/Guia.tscn")
 const BLOQUEO := preload("res://Scenes/Objetos/BloqueoPresente.tscn")
 const PUERTA_REFLEJO := preload("res://Scenes/Objetos/PuertaReflejo.tscn")
+## Acertijos de habilidad del Presente (los escribe tools/generar_mapa.py junto con el mapa).
+const RUTA_ACERTIJOS := "res://Resources/Mundo/acertijos.json"
+const ESCENA_ACERTIJO := "res://Scenes/Objetos/%s.tscn"
+const FRAGMENTO := preload("res://Scenes/Objetos/FragmentoMemoria.tscn")
 ## Zonas con emoción: en la entrada de cada una hay una grieta, y su criatura vive en el Pasado.
 const ZONAS_EMOCION := ["Rabia", "Miedo", "Tristeza", "Soledad", "Culpa", "Ansiedad", "Verguenza"]
 ## Saturación del Presente: 0.25 sin ninguna emoción integrada, 1.0 con todas.
@@ -87,6 +91,7 @@ func reconstruir_todo() -> void:
 	colocar_props()
 	construir_detalles()
 	colocar_entidades()
+	colocar_acertijos()
 	_crear_ambiente()
 	_crear_particulas()
 	_preparar_saturacion()
@@ -241,6 +246,7 @@ func colocar_props() -> int:
 		for marcador in marcadores_de(grupo):
 			posiciones.append(to_local(marcador.global_position))
 		marcadores[grupo] = posiciones
+	Decorador.reservadas = _reservas_acertijos()   # los recintos de los acertijos quedan libres
 	var puestos := Decorador.generar(filas, zonas, marcadores)
 	_puestos = puestos
 	for epoca in ["Pasado", "Presente"]:
@@ -732,6 +738,67 @@ func colocar_entidades() -> void:
 					continue
 				var criatura := (load(ruta) as PackedScene).instantiate() as Node2D
 				_poner_entidad(objetos, criatura, id.capitalize(), posicion_zona(id.capitalize()))
+
+
+# --- Acertijos de habilidad y fragmentos de memoria (solo en el Presente) ---
+
+## Lee Resources/Mundo/acertijos.json: la lista de acertijos (vacía si no existe).
+func _leer_acertijos() -> Array:
+	if not FileAccess.file_exists(RUTA_ACERTIJOS):
+		return []
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_ACERTIJOS))
+	if typeof(datos) != TYPE_DICTIONARY:
+		return []
+	return datos.get("acertijos", [])
+
+
+## Rectángulos (px) que el Decorador debe dejar libres: los recintos de los acertijos y su entrada.
+func _reservas_acertijos() -> Array[Rect2]:
+	var reservas: Array[Rect2] = []
+	for acertijo in _leer_acertijos():
+		var t: Array = acertijo["reservada"]
+		reservas.append(Rect2(t[0] * TAMANO_TILE, t[1] * TAMANO_TILE, t[2] * TAMANO_TILE, t[3] * TAMANO_TILE))
+	return reservas
+
+
+## Crea los acertijos de habilidad y sus fragmentos de memoria SOLO en la época Presente. Cada uno
+## cierra un recinto con una sola entrada (ver tools/acertijos_mapa.py) y guarda un fragmento.
+## Los abismos van como una capa entre el suelo y los objetos (así se dibujan bajo el jugador).
+## Un fragmento ya recogido no vuelve a aparecer.
+func colocar_acertijos() -> void:
+	if Engine.is_editor_hint():
+		return
+	var presente := get_node_or_null("Presente")
+	var objetos := get_node_or_null("Presente/Objetos")
+	if presente == null or objetos == null:
+		return
+	for padre in [presente, objetos]:
+		for viejo in padre.get_children():
+			if viejo.is_in_group("acertijo"):
+				viejo.free()
+	for acertijo in _leer_acertijos():
+		for zona in acertijo["abismos"]:
+			var abismo := (load(ESCENA_ACERTIJO % "Abismo") as PackedScene).instantiate() as Abismo
+			abismo.zona = Rect2(zona[0], zona[1], zona[2], zona[3])
+			abismo.add_to_group("acertijo")
+			abismo.name = "Abismo_%s" % acertijo["emocion"]
+			presente.add_child(abismo)
+			presente.move_child(abismo, objetos.get_index())   # sobre el suelo y bajo los objetos
+		for objeto in acertijo["objetos"]:
+			var nodo := (load(ESCENA_ACERTIJO % objeto["escena"]) as PackedScene).instantiate() as Node2D
+			for clave in objeto["props"]:
+				nodo.set(clave, objeto["props"][clave])   # antes de añadirlo, para que _ready los vea
+			nodo.position = Vector2(objeto["pos"][0], objeto["pos"][1])
+			nodo.add_to_group("acertijo")
+			nodo.name = "%s_%s" % [objeto["escena"], acertijo["emocion"]]
+			objetos.add_child(nodo)
+		if not GameState.tiene_fragmento(acertijo["emocion"]):
+			var fragmento := FRAGMENTO.instantiate() as FragmentoMemoria
+			fragmento.id = acertijo["emocion"]
+			fragmento.position = Vector2(acertijo["fragmento"][0], acertijo["fragmento"][1])
+			fragmento.add_to_group("acertijo")
+			fragmento.name = "Fragmento_%s" % acertijo["emocion"]
+			objetos.add_child(fragmento)
 
 
 func _poner_portal(objetos: Node, nombre: String, pos: Vector2, es_grieta: bool) -> void:

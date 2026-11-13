@@ -113,8 +113,8 @@ func _physics_process(delta: float) -> void:
 ## Abre las zonas cercanas y cierra las que quedaron lejos (si el jugador no está dentro).
 func _actualizar_zonas() -> void:
 	for nodo in get_tree().get_nodes_in_group("sombra"):
-		if not (nodo is Node2D) or not nodo.has_method("visionar"):
-			continue
+		if not (nodo is Node2D) or not nodo.has_method("visionar") or not nodo.is_visible_in_tree():
+			continue  # lo de la época oculta no se ve ni se toca
 		var cerca := _alcance_a(nodo) <= 0.0
 		if cerca and not _abiertas.has(nodo):
 			nodo.visionar(true)

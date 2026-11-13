@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="ColeccionRecuerdos" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Datos/ColeccionRecuerdos.gd" id="1_coleccion"]
+[ext_resource type="Script" path="res://Scripts/Datos/RecuerdoData.gd" id="2_recuerdo"]
+
+[sub_resource type="Resource" id="Resource_rabia"]
+script = ExtResource("2_recuerdo")
+id = "rabia"
+titulo = "La cometa"
+lineas = PackedStringArray("Tenía seis años cuando un chico más grande rompió mi cometa a propósito. Sentí un calor enorme en el pecho y le grité que parara.", "Hoy sé que ese calor me cuidaba, porque la rabia aparece cuando algo que quiero necesita defensa.")
+
+[sub_resource type="Resource" id="Resource_miedo"]
+script = ExtResource("2_recuerdo")
+id = "miedo"
+titulo = "El camino oscuro"
+lineas = PackedStringArray("Recuerdo el camino de vuelta a casa, ya de noche, y mi corazón latiendo fuerte. Me quedé quieto y miré bien dónde pisaba.", "Ese susto no era mi enemigo, me avisaba para que llegara sano y salvo.")
+
+[sub_resource type="Resource" id="Resource_tristeza"]
+script = ExtResource("2_recuerdo")
+id = "tristeza"
+titulo = "Mi perro"
+lineas = PackedStringArray("El día que mi perro se quedó dormido para siempre, lloré abrazado a la almohada hasta que no me quedaron lágrimas.", "Después el pecho me pesaba menos, porque estar triste me dejó soltar poco a poco lo que ya no podía quedarse.")
+
+[sub_resource type="Resource" id="Resource_soledad"]
+script = ExtResource("2_recuerdo")
+id = "soledad"
+titulo = "La tarde de lluvia"
+lineas = PackedStringArray("Una tarde de lluvia nadie vino a jugar, y me senté junto a la ventana a mirar la calle vacía.", "Cuando mi abuela se sentó a mi lado sin decir nada, la tarde cambió. La soledad solo me pedía un poco de compañía.")
+
+[sub_resource type="Resource" id="Resource_culpa"]
+script = ExtResource("2_recuerdo")
+id = "culpa"
+titulo = "El jarrón"
+lineas = PackedStringArray("Una vez rompí sin querer el jarrón favorito de mamá y lo escondí detrás del sofá, y esa noche no pude dormir.", "Al día siguiente se lo conté y juntos pegamos los pedazos. Sentirme mal fue una invitación a reparar lo que rompí.")
+
+[sub_resource type="Resource" id="Resource_ansiedad"]
+script = ExtResource("2_recuerdo")
+id = "ansiedad"
+titulo = "El primer día de escuela"
+lineas = PackedStringArray("La noche antes de mi primer día de escuela revisé la mochila tres veces, con el estómago lleno de mariposas.", "Esas mariposas me hicieron preparar el lápiz, el cuaderno y mi mejor sonrisa. La ansiedad me ayudó a llegar listo para lo que venía.")
+
+[sub_resource type="Resource" id="Resource_verguenza"]
+script = ExtResource("2_recuerdo")
+id = "verguenza"
+titulo = "El escenario"
+lineas = PackedStringArray("En la fiesta del colegio me tropecé en el escenario y todos se rieron, y me puse rojo.", "Esa vergüenza era un cuidado, porque me importaba cómo me veían. Con el tiempo aprendí a reírme conmigo y seguir bailando.")
+
+[resource]
+script = ExtResource("1_coleccion")
+recuerdos = Array[ExtResource("2_recuerdo")]([SubResource("Resource_rabia"), SubResource("Resource_miedo"), SubResource("Resource_tristeza"), SubResource("Resource_soledad"), SubResource("Resource_culpa"), SubResource("Resource_ansiedad"), SubResource("Resource_verguenza")])
