@@ -1,0 +1,25 @@
+{
+ "nota": "Zonas libres de props (árboles, arbustos, rocas, tocones, postes de luz y bancos). Radios en píxeles alrededor de cada punto importante, en las dos épocas. Se editan sin tocar código; las usa Decorador.gd (Mundo.colocar_props arma la lista de puntos).",
+ "radios": {
+  "portal_hub": 200,
+  "guia": 180,
+  "puerta_reflejo": 220,
+  "grieta": 90,
+  "bloqueo": 140,
+  "aliada": 140,
+  "cofre": 140,
+  "altar": 140,
+  "compuerta": 140,
+  "acertijo": 120,
+  "fragmento": 120,
+  "aparicion_jugador": 160,
+  "emocion": 100
+ },
+ "altos": ["arbol_dorado", "cerezo", "arbol_redondo", "farol_poste"],
+ "margen_vertical_altos": 140,
+ "offsets": {
+  "guia": [-72, -8],
+  "aparicion_jugador": [0, 56],
+  "cofre_distancia_al_centro": 54
+ }
+}

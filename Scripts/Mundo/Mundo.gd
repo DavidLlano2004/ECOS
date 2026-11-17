@@ -44,6 +44,7 @@ const ESCENA_ACERTIJO := "res://Scenes/Objetos/%s.tscn"
 const FRAGMENTO := preload("res://Scenes/Objetos/FragmentoMemoria.tscn")
 const RUTA_COMPUERTAS := "res://Resources/Mundo/compuertas.json"
 const RUTA_SANTUARIOS := "res://Resources/Mundo/santuarios.json"
+const RUTA_ZONAS_LIBRES := "res://Resources/zonas_libres.json"
 const COMPUERTA := preload("res://Scenes/Objetos/Compuerta.tscn")
 ## Zonas con emoción: en la entrada de cada una hay una grieta, y su criatura vive en el Pasado.
 const ZONAS_EMOCION := ["Rabia", "Miedo", "Tristeza", "Soledad", "Culpa", "Ansiedad", "Verguenza"]
@@ -81,6 +82,7 @@ func _ready() -> void:
 	add_to_group("mundo")   # el audio le pregunta qué suelo hay bajo los pies (suelo_en)
 	GameState.epoca_cambiada.connect(mostrar_epoca)
 	add_child(AyudaPistas.new())   # aviso suave y brújula (G)
+	add_child(OclusionProps.new())   # los árboles y postes se vuelven transparentes si tapan a alguien
 	var jugador := _jugador()
 	if jugador != null:
 		jugador.global_position = posicion_zona("Hub") + Vector2(0, 56)  # delante del portal
@@ -273,6 +275,7 @@ func colocar_props() -> int:
 			posiciones.append(to_local(marcador.global_position))
 		marcadores[grupo] = posiciones
 	Decorador.reservadas = _reservas_acertijos() + _reservas_compuertas()   # recintos y compuertas quedan libres
+	_preparar_zonas_libres(filas)
 	var puestos := Decorador.generar(filas, zonas, marcadores)
 	_puestos = puestos
 	for epoca in ["Pasado", "Presente"]:
@@ -772,6 +775,61 @@ func colocar_entidades() -> void:
 					continue
 				var criatura := (load(ruta) as PackedScene).instantiate() as Node2D
 				_poner_entidad(objetos, criatura, id.capitalize(), posicion_zona(id.capitalize()))
+
+
+# --- Zonas libres de props ---
+
+## Arma la lista de zonas donde no puede haber árboles, arbustos, rocas, tocones, postes ni bancos (en las dos épocas),
+## con los radios de Resources/zonas_libres.json alrededor de cada punto importante.
+func _preparar_zonas_libres(filas: PackedStringArray) -> void:
+	var cfg: Dictionary = {}
+	if FileAccess.file_exists(RUTA_ZONAS_LIBRES):
+		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_ZONAS_LIBRES))
+		if typeof(d) == TYPE_DICTIONARY:
+			cfg = d
+	var radios: Dictionary = cfg.get("radios", {})
+	var offsets: Dictionary = cfg.get("offsets", {})
+	var libres: Array[Dictionary] = []
+	var poner := func(clave: String, pos: Vector2) -> void:
+		libres.append({"pos": pos, "r": float(radios.get(clave, 100.0))})
+	var hub := posicion_zona("Hub")
+	poner.call("portal_hub", hub)
+	var o_guia: Array = offsets.get("guia", [-72, -8])
+	poner.call("guia", hub + Vector2(o_guia[0], o_guia[1]))
+	var o_spawn: Array = offsets.get("aparicion_jugador", [0, 56])
+	poner.call("aparicion_jugador", hub + Vector2(o_spawn[0], o_spawn[1]))
+	poner.call("puerta_reflejo", posicion_zona("Final"))
+	for zona in ZONAS_EMOCION:
+		poner.call("emocion", posicion_zona(zona))        # donde empieza cada criatura
+		poner.call("grieta", _entrada_de_zona(zona, filas))
+	var distancia_cofre := float(offsets.get("cofre_distancia_al_centro", 54.0))
+	for s in _leer_santuarios():
+		var centro := Vector2(s["centro"][0], s["centro"][1])
+		var dentro := Vector2(s["direccion"][0], s["direccion"][1])
+		poner.call("bloqueo", Vector2(s["abertura"][0], s["abertura"][1]))
+		poner.call("aliada", centro + Vector2(0, -20))
+		poner.call("altar", centro)
+		poner.call("cofre", centro + dentro * distancia_cofre)
+	for c in _leer_compuertas():
+		var minimo := Vector2(INF, INF)
+		var maximo := Vector2(-INF, -INF)
+		for celda in c["celdas"]:
+			minimo = minimo.min(Vector2(celda[0], celda[1]) * TAMANO_TILE)
+			maximo = maximo.max(Vector2(celda[0] + 1, celda[1] + 1) * TAMANO_TILE)
+		for punto in [(minimo + maximo) / 2.0, minimo, maximo, Vector2(minimo.x, maximo.y), Vector2(maximo.x, minimo.y)]:
+			poner.call("compuerta", punto)
+	for a in _leer_acertijos():
+		for objeto in a["objetos"]:
+			poner.call("acertijo", Vector2(objeto["pos"][0], objeto["pos"][1]))
+		for abismo in a["abismos"]:
+			poner.call("acertijo", Vector2(abismo[0] + abismo[2] / 2.0, abismo[1] + abismo[3] / 2.0))
+		poner.call("fragmento", Vector2(a["fragmento"][0], a["fragmento"][1]))
+	Decorador.libres = libres
+	var altos: Array[String] = []
+	for t in cfg.get("altos", ["arbol_dorado", "cerezo", "arbol_redondo", "farol_poste"]):
+		altos.append(str(t))
+	Decorador.altos = altos
+	Decorador.margen_vertical_altos = float(cfg.get("margen_vertical_altos", 140.0))
 
 
 # --- Santuarios (solo en el Presente) ---

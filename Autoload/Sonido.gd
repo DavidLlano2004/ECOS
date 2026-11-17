@@ -19,7 +19,7 @@ const EXTENSIONES := ["wav", "ogg", "mp3"]
 const CARPETAS := ["Efectos", "Ambiente", "Musica"]
 
 const EFECTOS := [
-	"dialogo_blip", "dialogo_blip_guia", "dialogo_abrir", "dialogo_cerrar", "dialogo_opciones",
+	"dialogo_blip_guia", "dialogo_abrir", "dialogo_cerrar", "dialogo_opciones",
 	"ui_mover", "ui_aceptar", "ui_elegir", "ui_cancelar", "diario_abrir", "diario_cerrar", "guardar",
 	"emo_rabia", "emo_miedo", "emo_tristeza", "emo_soledad", "emo_culpa", "emo_ansiedad", "emo_verguenza",
 	"emo_rabia_integrada", "emo_miedo_integrada", "emo_tristeza_integrada", "emo_soledad_integrada",
@@ -38,7 +38,7 @@ const MUSICAS := ["musica_titulo", "musica_pasado", "musica_presente", "final_bu
 ## VOLUMEN_POR_DEFECTO. Se ajusta aquí, sin tocar el resto del código.
 const VOLUMEN_POR_DEFECTO := -6.0
 const VOLUMEN_DB := {
-	"dialogo_blip": -13.0, "dialogo_blip_guia": -13.0,
+	"dialogo_blip_guia": -13.0,
 	"paso": -9.0, "paso_piedra": -9.0,
 	"ui_mover": -9.0, "ui_aceptar": -6.0, "ui_elegir": -6.0, "ui_cancelar": -6.0,
 	"emo_rabia": -5.0, "emo_miedo": -5.0, "emo_tristeza": -5.0, "emo_soledad": -5.0,
@@ -53,7 +53,9 @@ const SONIDO_DE_HABILIDAD := {
 	"reparacion": "hab_reparar", "pausa": "hab_pausa", "revelar": "hab_revelar",
 }
 const NUMERO_DE_VOCES := 14
-const NOMBRE_GUIA := "Guía"
+## UN SOLO sonido de texto para todos los que hablan (Guía, emociones, aliadas, bloqueos, recuerdos, consejos, cuestionarios...):
+## el blip del Guía, siempre con el mismo volumen y el mismo tono (sin variación por hablante).
+const SONIDO_TEXTO := "dialogo_blip_guia"
 ## Suelos duros (adoquines, ruinas, muros, roca, acantilado): ahí suena paso_piedra.
 const SUELOS_DUROS := "auMRC"
 ## Cada cuántas letras escritas suena un blip del diálogo.
@@ -75,7 +77,8 @@ var _musica := Capa.new()
 var _ambiente := Capa.new()
 var _portal: AudioStreamPlayer
 var _letras := 0
-var _ultimo_blip := 0
+## La voz propia del blip de texto (así se puede cortar cuando el texto se completa de golpe).
+var _voz_blip: AudioStreamPlayer
 var _panel: CanvasLayer
 var _texto_panel: Label
 var _tiempo_panel := 0.0
@@ -93,6 +96,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	for i in NUMERO_DE_VOCES:
 		_voces.append(_crear_jugador("Efectos"))
+	_voz_blip = _crear_jugador("Efectos")
 	for i in 2:
 		_musica.jugadores.append(_crear_jugador("Musica"))
 		_ambiente.jugadores.append(_crear_jugador("Efectos"))
@@ -327,6 +331,7 @@ func _conectar_senales() -> void:
 	Dialogo.respuesta_elegida.connect(func() -> void: efecto("ui_elegir"))
 	Dialogo.cancelado_por_jugador.connect(func() -> void: efecto("ui_cancelar"))
 	Dialogo.letra_escrita.connect(_on_letra)
+	Dialogo.linea_terminada.connect(cortar_blip)   # el texto se completó (solo o de golpe con INTERACTUAR): el blip se corta
 
 
 func _on_emocion_resuelta(id: String, resultado: String) -> void:
@@ -338,16 +343,39 @@ func _on_emocion_resuelta(id: String, resultado: String) -> void:
 			efecto("atacar_ignorar")
 
 
-## Un blip cada pocas letras mientras se escribe el diálogo (distinto el del Guía).
-func _on_letra(personaje: String, letra: String) -> void:
-	if letra.strip_edges() == "":
+## El blip de texto: el MISMO para todos los que hablan. Suena una vez cada 2 letras, no en los espacios ni en la puntuación.
+## Es la única función de sonido de letras del juego: el balloon (Dialogo.mostrar y mostrar_texto) y las etiquetas
+## que se escriben solas (Dialogo.escribir_etiqueta) emiten Dialogo.letra_escrita y llegan aquí.
+func _on_letra(_personaje: String, letra: String) -> void:
+	if not _es_letra_o_cifra(letra):
 		return
 	_letras += 1
-	var ahora := Time.get_ticks_msec()
-	if _letras % LETRAS_POR_BLIP != 0 or ahora - _ultimo_blip < 55:
+	if _letras % LETRAS_POR_BLIP != 0:
 		return
-	_ultimo_blip = ahora
-	efecto("dialogo_blip_guia" if personaje == NOMBRE_GUIA else "dialogo_blip", NAN, 0.07)
+	blip()
+
+
+func _es_letra_o_cifra(letra: String) -> bool:
+	return letra.length() > 0 and (letra.to_lower() != letra.to_upper() or letra.is_valid_int())
+
+
+## Reproduce el blip de texto (mismo archivo, volumen y tono siempre).
+func blip() -> void:
+	var flujo := _cargar(SONIDO_TEXTO)
+	if flujo == null:
+		return
+	_anotar(SONIDO_TEXTO)
+	_voz_blip.stream = flujo
+	_voz_blip.volume_db = float(VOLUMEN_DB.get(SONIDO_TEXTO, VOLUMEN_POR_DEFECTO))
+	_voz_blip.pitch_scale = 1.0
+	_voz_blip.play()
+	efecto_reproducido.emit(SONIDO_TEXTO)
+
+
+## Corta el blip (cuando el texto termina o se completa de golpe).
+func cortar_blip() -> void:
+	if _voz_blip != null and _voz_blip.playing:
+		_voz_blip.stop()
 
 
 # --- Portal: suena más fuerte cuanto más cerca estás ---

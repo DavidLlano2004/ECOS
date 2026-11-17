@@ -50,6 +50,12 @@ const TIPO_DE_GRUPO := {"rocas": "roca", "faroles": "farol_poste", "bancos": "ba
 
 ## Zonas (px) que no se decoran: los recintos de los acertijos. Las pone Mundo antes de generar().
 static var reservadas: Array[Rect2] = []
+## Zonas libres de props: [{"pos": Vector2, "r": float}]. Las arma Mundo desde Resources/zonas_libres.json (portal, Guía,
+## Puerta del Reflejo, grietas, bloqueos, cofres, compuertas, acertijos, aparición del jugador, emociones...).
+static var libres: Array[Dictionary] = []
+## Tipos altos (la copa o el cuerpo sobresale hacia arriba) y su margen vertical extra respecto a esos puntos (px).
+static var altos: Array[String] = ["arbol_dorado", "cerezo", "arbol_redondo", "farol_poste"]
+static var margen_vertical_altos := 140.0
 
 var _filas: PackedStringArray
 var _zonas: Dictionary  # nombre -> posición (px)
@@ -101,6 +107,8 @@ func _poner_franja_de_arboles() -> void:
 				tipo = "arbusto_flores"
 			elif tirada < 0.40 and _zona_mas_cercana(pos) in ["Hub", "Soledad", "Final", "Verguenza", "Tristeza"]:
 				tipo = "cerezo"
+			if _en_zona_libre(tipo, pos):
+				continue   # nada de árboles del borde sobre lo importante (por ejemplo, detrás de la Puerta del Reflejo)
 			_puestos.append({"tipo": tipo, "pos": pos, "borde": true})
 
 
@@ -173,6 +181,8 @@ func _es_valido(tipo: String, pos: Vector2) -> bool:
 	for reservada in reservadas:
 		if reservada.has_point(pos):
 			return false
+	if _en_zona_libre(tipo, pos):
+		return false
 	# Nada alrededor que estorbe; los caminos solo se dejan libres si el objeto no es un farol
 	for dy in range(-1, 2):
 		for dx in range(-1, 2):
@@ -195,6 +205,25 @@ func _es_valido(tipo: String, pos: Vector2) -> bool:
 		if pos.distance_to(puesto["pos"]) < minima:
 			return false
 	return true
+
+
+## ¿Cae la posición dentro de alguna zona libre? Los tipos altos (árboles y postes) tienen además un margen vertical:
+## no pueden quedar a menos de `margen_vertical_altos` px por encima ni por debajo del punto (su copa sobresale).
+static func _en_zona_libre(tipo: String, pos: Vector2) -> bool:
+	var alto := altos.has(tipo)
+	for z in libres:
+		var punto: Vector2 = z["pos"]
+		var radio: float = z["r"]
+		if pos.distance_to(punto) < radio:
+			return true
+		if alto and absf(pos.x - punto.x) < radio and absf(pos.y - punto.y) < margen_vertical_altos:
+			return true
+	return false
+
+
+## ¿Está la posición libre de zonas prohibidas para ese tipo? (para las comprobaciones desde fuera)
+static func zona_libre_ocupada(tipo: String, pos: Vector2) -> bool:
+	return _en_zona_libre(tipo, pos)
 
 
 func _zona_mas_cercana(pos: Vector2) -> String:

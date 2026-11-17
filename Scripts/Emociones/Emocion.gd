@@ -49,6 +49,9 @@ const ANIMACION_CALMA := &"calma"
 @export var radio_zona: float = 220.0
 ## Ruta de un .dialogue propio. Si está vacía se usa Dialogos/<id>.dialogue.
 @export var ruta_dialogo: String = ""
+## Si es true, suena el efecto emo_<id> al abrir la conversación con la criatura. Apagado por defecto: al hablar solo se
+## oye el blip de texto del Guía, igual para todos. (Los sonidos emo_<id>_integrada, al integrarla, se mantienen.)
+@export var reproducir_efecto_al_hablar: bool = false
 
 ## Dónde apareció la criatura (centro de su zona).
 var punto_origen: Vector2 = Vector2.ZERO
@@ -497,7 +500,8 @@ func interactuar() -> void:
 		return
 	_ocupada = true
 	velocity = Vector2.ZERO
-	Sonido.efecto("emo_%s" % datos.id)   # la criatura "responde" cuando le hablas
+	if reproducir_efecto_al_hablar:
+		Sonido.efecto("emo_%s" % datos.id)   # la criatura "responde" cuando le hablas (apagado por defecto)
 	if jugador != null and jugador.has_method("bloquear"):
 		jugador.bloquear()
 

@@ -25,6 +25,7 @@ var _ocupado := false
 
 
 func _ready() -> void:
+	add_to_group("cofres")
 	_sprite.play(&"cerrado")
 	GameState.partida_reiniciada.connect(_leer_estado)
 	GameState.partida_cargada.connect(_leer_estado)

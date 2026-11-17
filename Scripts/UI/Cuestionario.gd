@@ -166,13 +166,11 @@ func _intro(bloque: String) -> void:
 	if fase == "post" and bloque == "trivia":
 		texto = INTRO_POST + "\n\n" + texto
 	_texto_intro.text = texto
-	_texto_intro.visible_ratio = 0.0
+	_texto_intro.visible_characters = 0
 	_boton_seguir.disabled = true
 	_panel_intro.show()
 	_guia.play(&"hablar")
-	var escribir := create_tween()
-	escribir.tween_property(_texto_intro, "visible_ratio", 1.0, maxf(0.6, texto.length() * Dialogo.SEGUNDOS_POR_LETRA))
-	await escribir.finished
+	await Dialogo.escribir_etiqueta(_texto_intro, texto)   # mismo blip que todo el texto del juego
 	_guia.play(&"idle")
 	_boton_seguir.disabled = false
 	_boton_seguir.grab_focus()

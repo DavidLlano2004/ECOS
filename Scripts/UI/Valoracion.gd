@@ -167,7 +167,7 @@ func _intro() -> void:
 	_contenido.add_child(EstiloUI.etiqueta("Guía", 12, EstiloUI.DORADO))
 	var texto := _etiqueta_larga("\n\n".join(INTRO), 15)
 	texto.custom_minimum_size = Vector2(410, 120)
-	texto.visible_ratio = 0.0
+	texto.visible_characters = 0
 	_contenido.add_child(texto)
 	var fila := HBoxContainer.new()
 	fila.alignment = BoxContainer.ALIGNMENT_END
@@ -179,9 +179,7 @@ func _intro() -> void:
 	_contenido.add_child(fila)
 	seguir.disabled = true
 	_guia.play(&"hablar")
-	var t := create_tween()
-	t.tween_property(texto, "visible_ratio", 1.0, maxf(0.6, "\n\n".join(INTRO).length() * Dialogo.SEGUNDOS_POR_LETRA))
-	await t.finished
+	await Dialogo.escribir_etiqueta(texto, "\n\n".join(INTRO))   # mismo blip que todo el texto del juego
 	_guia.play(&"idle")
 	seguir.disabled = false
 	seguir.grab_focus()
@@ -309,16 +307,14 @@ func _gracias() -> void:
 	var texto := GRACIAS + ("\n\n" + GRACIAS_SIN_GUARDAR if not Evaluacion.consentimiento_guardar else "")
 	var e := _etiqueta_larga(texto, 15)
 	e.custom_minimum_size = Vector2(410, 130)
-	e.visible_ratio = 0.0
+	e.visible_characters = 0
 	_contenido.add_child(e)
 	var cerrar := _boton("Cerrar", func() -> void: _avanzar.emit(), 130)
 	cerrar.size_flags_horizontal = Control.SIZE_SHRINK_END
 	cerrar.disabled = true
 	_contenido.add_child(cerrar)
 	_guia.play(&"hablar")
-	var t := create_tween()
-	t.tween_property(e, "visible_ratio", 1.0, maxf(0.6, texto.length() * Dialogo.SEGUNDOS_POR_LETRA))
-	await t.finished
+	await Dialogo.escribir_etiqueta(e, texto)   # mismo blip que todo el texto del juego
 	_guia.play(&"idle")
 	cerrar.disabled = false
 	cerrar.grab_focus()

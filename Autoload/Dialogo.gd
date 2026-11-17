@@ -134,6 +134,22 @@ func mostrar_texto(nombre: String, texto: Variant, opciones: Array = [], retrato
 	return elegida if elegida >= 0 else -1
 
 
+## Escribe un texto en una etiqueta letra por letra, con la misma velocidad (SEGUNDOS_POR_LETRA) y el mismo blip que el
+## balloon. Lo usan las pantallas con texto escrito a mano (cuestionarios, valoración).
+func escribir_etiqueta(etiqueta: Label, texto: String) -> void:
+	etiqueta.text = texto
+	etiqueta.visible_characters = 0
+	for i in texto.length():
+		if not is_instance_valid(etiqueta):
+			return
+		etiqueta.visible_characters = i + 1
+		letra_escrita.emit("", texto[i])
+		await get_tree().create_timer(SEGUNDOS_POR_LETRA, true, false, true).timeout
+	if is_instance_valid(etiqueta):
+		etiqueta.visible_characters = -1
+	linea_terminada.emit()
+
+
 ## Despedida breve (frase_cierre) cuando el jugador cancela una conversación: el mismo balloon, que se cierra solo.
 func despedida(nombre: String, frase: String) -> void:
 	if frase != "":

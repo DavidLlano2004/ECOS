@@ -37,6 +37,13 @@ const DATOS := {
 	"banco": {"cuadro": Vector2i(3, 1), "escala": 0.5, "colision": Rect2(-34, -10, 68, 10), "luces": []},
 }
 
+## Tipos altos: su copa o su cuerpo sobresale hacia arriba y pueden tapar a quien esté detrás (se vuelven transparentes).
+const ALTOS: Array[String] = ["arbol_dorado", "cerezo", "arbol_redondo", "farol_poste"]
+const ALPHA_TAPANDO := 0.45
+const SEGUNDOS_FUNDIDO := 0.15
+## Rectángulo opaco de cada tipo dentro de su cuadro (px del cuadro), para saber qué parte se ve de verdad.
+static var _rectangulos: Dictionary = {}
+
 ## Tipos disponibles (para usarlos desde otros scripts).
 const TIPOS: Array[String] = [
 	"arbol_dorado", "cerezo", "arbol_redondo", "arbusto_flores", "roca", "farol_poste", "tocon", "banco",
@@ -48,6 +55,11 @@ var tipo: String = "arbol_redondo"
 @export var escala: float = 0.0
 ## Falso en los árboles de la franja del borde: ahí la casilla ya es sólida y no hace falta otra colisión.
 @export var con_colision: bool = true
+
+var _factor := 1.0
+var _tapando := false
+var _tween_alpha: Tween
+var _rect_local := Rect2()   # lo que se ve del sprite, relativo a la base y ya escalado
 
 @onready var _sprite: Sprite2D = $Sprite
 @onready var _forma: CollisionShape2D = $Cuerpo/Forma
@@ -76,6 +88,10 @@ func _ready() -> void:
 	_sprite.centered = false
 	_sprite.offset = -APOYO
 	_sprite.scale = Vector2(factor, factor)
+	_factor = factor
+	if ALTOS.has(tipo):
+		add_to_group("props_altos")
+		_rect_local = _rectangulo_visible(tipo, epoca, textura, factor)
 
 	# Colisión pequeña, solo en la base (capa 1 = mundo)
 	var rect: Rect2 = datos["colision"]
@@ -98,6 +114,38 @@ func _ready() -> void:
 		luz.texture_scale = 0.5 * minf(factor, 1.3)
 		if i > 0:
 			add_child(luz)
+
+
+## El rectángulo (global) que ocupa lo visible del sprite. Solo tiene sentido en los tipos altos.
+func rect_visible() -> Rect2:
+	return Rect2(global_position + _rect_local.position, _rect_local.size)
+
+
+## Pone o quita la transparencia (45 % con un fundido de 0.15 s) según tape o no a alguien.
+func poner_tapando(tapa: bool) -> void:
+	if tapa == _tapando:
+		return
+	_tapando = tapa
+	if _tween_alpha != null:
+		_tween_alpha.kill()
+	_tween_alpha = create_tween()
+	_tween_alpha.tween_property(_sprite, "modulate:a", ALPHA_TAPANDO if tapa else 1.0, SEGUNDOS_FUNDIDO)
+
+
+func esta_tapando() -> bool:
+	return _tapando
+
+
+## El rectángulo de píxeles no transparentes del cuadro del tipo (se calcula una vez por tipo y época).
+static func _rectangulo_visible(p_tipo: String, epoca: String, textura: AtlasTexture, factor: float) -> Rect2:
+	var clave := "%s_%s" % [p_tipo, epoca]
+	if not _rectangulos.has(clave):
+		var imagen: Image = textura.atlas.get_image()
+		var recorte := imagen.get_region(Rect2i(textura.region))
+		var usado := recorte.get_used_rect()
+		_rectangulos[clave] = Rect2(usado) if usado.has_area() else Rect2(0, 0, TAMANO_CUADRO, TAMANO_CUADRO)
+	var r: Rect2 = _rectangulos[clave]
+	return Rect2((r.position - APOYO) * factor, r.size * factor)
 
 
 ## "pasado" o "presente", según el ancestro del nodo (si no hay ninguno, "pasado").
