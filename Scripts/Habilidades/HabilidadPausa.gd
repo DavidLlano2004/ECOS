@@ -18,6 +18,12 @@ func _init() -> void:
 	duracion = 5.0
 
 
+## Nivel 2 (cofre de Ansiedad): dura más y se recupera antes.
+func aplicar_nivel(nivel: int) -> void:
+	duracion = 8.0 if nivel >= 2 else 5.0
+	cooldown = 7.0 if nivel >= 2 else 10.0
+
+
 func ejecutar(_player: Player) -> bool:
 	activa = true
 	Habilidades.transicionar_factor(FACTOR, SEGUNDOS_ENTRADA)

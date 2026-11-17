@@ -24,3 +24,7 @@ mensaje_presente_bloqueo = "Un muro de rabia sin atender te cierra el paso. Vuel
 frase_cierre = "No hay prisa. Aquí sigo."
 mensaje_presente_atacada = "Los restos de tu golpe todavía arden aquí. El muro de rabia es más duro que antes."
 mensaje_presente_ignorada = "Nadie la escuchó y la rabia creció en silencio. El muro es enorme y está helado."
+mejora_descripcion = "Impulso II: llegas más lejos (200 px) y rompes también las rocas grandes."
+regalo_nombre = "Una brasa que calienta sin quemar"
+regalo_texto = "Guarda tu fuerza sin hacerte daño. En los días fríos, calienta las manos."
+frase_agradecimiento = "Gracias por escucharme. Ahora mi fuerza tiene un camino."

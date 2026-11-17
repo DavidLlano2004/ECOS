@@ -23,7 +23,9 @@ LIBRES = set(".fdrvbsuaTR")     # suelo donde puede ir un recinto (el muro y el 
 MARGEN_OK = set(".fdrvbsuacTRC")  # el margen de alrededor puede rozar caminos o sólidos, pero no agua
 PARA_RAMA = set(".fdrvbus")     # por donde puede pasar la rama de camino
 MARGEN = 1
-LARGO_MAX_RAMA = 18
+LARGO_MAX_RAMA = 30
+# Recintos que se colocan antes que los demás (los pequeños quedaban sin sitio al final)
+ORDEN_PRIMERO = ("culpa", "soledad")
 
 # emoción (de la que sale el fragmento) -> habilidad, zona donde está el acertijo y forma del recinto
 ACERTIJOS = [
@@ -143,9 +145,27 @@ def estampar(m, zonas, W, H, dentro, transitable):
     usadas = {}       # cuántos acertijos hay ya en cada zona
     centros_emocion = {n: v for n, v in zonas.items() if n not in ("Hub", "Final")}
     # los recintos grandes primero, que son los que más cuesta colocar
-    for a in sorted(ACERTIJOS, key=lambda x: -((x["iw"] + 2 * G) * (x["ih"] + 2 * G))):
+    for a in sorted(ACERTIJOS, key=lambda x: (x["emocion"] not in ORDEN_PRIMERO, -((x["iw"] + 2 * G) * (x["ih"] + 2 * G)))):
         d = disenar(a)
         propia = a["emocion"].capitalize()      # la zona de su propia emoción: ahí NO puede ir
+        mejor = None
+        # Primero con la distancia normal a la zona; si no cabe, se amplía el rango
+        for rango in ((8, 22), (6, 30), (6, 48), (4, 70)):
+            if mejor is not None:
+                break
+            mejor = _buscar_sitio(m, d, a, propia, rango, centros_emocion, zonas, usadas, ocupado, W, H, dentro)
+        if mejor is None:
+            raise SystemExit("No hay sitio para el acertijo de %s (%s)" % (a["emocion"], a["tipo"]))
+        usadas[mejor["cercana"]] = usadas.get(mejor["cercana"], 0) + 1
+        especificacion = aplicar(m, d, a, mejor, ocupado, W, H)
+        especificacion["zona"] = mejor["cercana"]   # la zona donde quedó de verdad
+        especificaciones.append(especificacion)
+    return especificaciones
+
+
+def _buscar_sitio(m, d, a, propia, rango, centros_emocion, zonas, usadas, ocupado, W, H, dentro):
+    """El mejor sitio para un recinto con la distancia a la zona dentro de `rango`, o None."""
+    if True:
         candidatos = []
         for y0 in range(2, H - d["alto"] - 2):
             for x0 in range(2, W - d["ancho"] - 2):
@@ -153,11 +173,11 @@ def estampar(m, zonas, W, H, dentro, transitable):
                 cy = y0 + d["alto"] / 2.0
                 cercana = min(centros_emocion, key=lambda n: math.hypot(cx - centros_emocion[n][0], cy - centros_emocion[n][1]))
                 dist = math.hypot(cx - centros_emocion[cercana][0], cy - centros_emocion[cercana][1])
-                if cercana == propia or dist < 8 or dist > 22:
+                if cercana == propia or dist < rango[0] or dist > rango[1]:
                     continue
                 if math.hypot(cx - zonas["Hub"][0], cy - zonas["Hub"][1]) < 13 or math.hypot(cx - zonas["Final"][0], cy - zonas["Final"][1]) < 11:
                     continue
-                if any(math.hypot(cx - v[0], cy - v[1]) < 8 for v in zonas.values()):
+                if any(math.hypot(cx - v[0], cy - v[1]) < (8 if rango[0] >= 6 else 7) for v in zonas.values()):
                     continue
                 penal = (0.0 if cercana == a["zona"] else 5.0) + 4.0 * usadas.get(cercana, 0)
                 for volteado in (False, True):
@@ -171,13 +191,7 @@ def estampar(m, zonas, W, H, dentro, transitable):
             puntos = base + r["puntos"]
             if mejor is None or puntos < mejor["puntos"]:
                 mejor = dict(r, puntos=puntos, x0=x0, y0=y0, volteado=volteado, cercana=cercana)
-        if mejor is None:
-            raise SystemExit("No hay sitio para el acertijo de %s (%s)" % (a["emocion"], a["tipo"]))
-        usadas[mejor["cercana"]] = usadas.get(mejor["cercana"], 0) + 1
-        especificacion = aplicar(m, d, a, mejor, ocupado, W, H)
-        especificacion["zona"] = mejor["cercana"]   # la zona donde quedó de verdad
-        especificaciones.append(especificacion)
-    return especificaciones
+        return mejor
 
 
 def _celdas_recinto(d, x0, y0):

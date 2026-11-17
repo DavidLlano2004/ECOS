@@ -45,6 +45,7 @@ func _ready() -> void:
 	Habilidades.cooldown_cambiado.connect(_on_cooldown_cambiado)
 	Habilidades.intento_bloqueado.connect(_on_intento_bloqueado)
 	GameState.habilidad_desbloqueada.connect(_on_habilidad_desbloqueada)
+	Habilidades.nivel_cambiado.connect(func(_id: String, _n: int) -> void: _refrescar_casillas())
 	GameState.epoca_cambiada.connect(func(_e: String) -> void: _refrescar_indicadores())
 	GameState.emocion_resuelta.connect(func(_i: String, _r: String) -> void: _refrescar_indicadores())
 	GameState.partida_reiniciada.connect(_on_partida_cambiada)
@@ -163,6 +164,7 @@ func _refrescar_casillas() -> void:
 	for id in _casillas:
 		var casilla: CasillaHabilidad = _casillas[id]
 		casilla.desbloqueada = Habilidades.esta_desbloqueada(id)
+		casilla.nivel = Habilidades.nivel_de(id)
 		casilla.seleccionada = id == Habilidades.habilidad_seleccionada
 		var total := _total_cooldown(id)
 		casilla.espera = Habilidades.cooldown_restante(id) / total if total > 0.0 else 0.0

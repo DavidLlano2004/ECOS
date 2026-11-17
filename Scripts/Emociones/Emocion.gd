@@ -35,6 +35,8 @@ const PAUSA_ERRATICA := 0.4
 
 # Calma (habilidad del jugador): una emoción agitada recupera su velocidad normal este tiempo
 const SEGUNDOS_CALMADA := 8.0
+## Nivel 2 de Calma (cofre de Tristeza): la calma dura más.
+const SEGUNDOS_CALMADA_NIVEL_2 := 12.0
 const TINTE_CALMADA := Color(0.72, 0.86, 1.0)
 
 const ALPHA_ESCONDIDA := 0.35
@@ -212,7 +214,7 @@ func calmar() -> void:
 			_tween_calmada.kill()
 		_tween_calmada = create_tween()
 		_tween_calmada.tween_property(sprite, "modulate", _modulate_antes.lerp(TINTE_CALMADA, 0.6), 0.3)
-	_calmada = SEGUNDOS_CALMADA
+	_calmada = SEGUNDOS_CALMADA_NIVEL_2 if Habilidades.nivel_de("calma") >= 2 else SEGUNDOS_CALMADA
 	_huyendo = 0.0
 	_sacudida = 0.0
 

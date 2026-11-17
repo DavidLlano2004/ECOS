@@ -24,3 +24,7 @@ mensaje_presente_bloqueo = "La oscuridad no te deja pasar. El miedo sigue espera
 frase_cierre = "Tranquilo. Cuando quieras."
 mensaje_presente_atacada = "La oscuridad se encoge y muestra los dientes. Lo que se ataca se esconde mejor."
 mensaje_presente_ignorada = "Nadie encendió una luz y la oscuridad se llenó de ruidos. Aquí casi no se ve nada."
+mejora_descripcion = "Visión II: tu luz llega más lejos (180 px)."
+regalo_nombre = "Una linterna que ya no tiembla"
+regalo_texto = "Su luz es firme. Te recuerda que, con claridad, lo oscuro se puede mirar."
+frase_agradecimiento = "Gracias por mirarme sin salir corriendo. Contigo veo mejor."

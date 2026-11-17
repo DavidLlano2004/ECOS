@@ -18,6 +18,8 @@ signal factor_tiempo_cambiado(factor: float)
 signal uso_denegado(id: String)
 ## El jugador intentó elegir o usar una habilidad que aún no tiene (el HUD hace temblar el candado).
 signal intento_bloqueado(id: String)
+## El nivel de una habilidad cambió (el cofre de memoria de su emoción la mejora a nivel 2).
+signal nivel_cambiado(id: String, nivel: int)
 
 ## Teclas 1 a 7 -> posición en el catálogo.
 const TECLAS_NUMERICAS: Array[Key] = [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7]
@@ -57,6 +59,8 @@ var cooldowns: Dictionary = {}
 
 ## Lo que impide usarlas ahora: motivo -> true (ver bloquear() y liberar()).
 var _bloqueos: Dictionary = {}
+## id de habilidad -> nivel (1 normal, 2 mejorada por el cofre de memoria de su emoción).
+var nivel: Dictionary = {}
 ## id -> instancia de HabilidadBase.
 var _habilidades: Dictionary = {}
 ## id -> segundos que le quedan al efecto activo.
@@ -76,7 +80,9 @@ func _ready() -> void:
 	_construir_catalogo()
 	GameState.habilidad_desbloqueada.connect(_on_habilidad_desbloqueada)
 	GameState.partida_reiniciada.connect(_reiniciar)
+	GameState.cofre_abierto.connect(func(_id: String) -> void: recalcular_niveles())
 	GameState.partida_cargada.connect(_on_partida_cargada)
+	recalcular_niveles()
 	add_child(ESCENA_HUD.instantiate())
 
 
@@ -100,6 +106,26 @@ func _construir_catalogo() -> void:
 		habilidad.id = datos.habilidad_id
 		habilidad.color = datos.color
 		_habilidades[datos.habilidad_id] = habilidad
+
+
+# --- Niveles ---
+
+## El nivel de una habilidad (1 si no está mejorada).
+func nivel_de(id: String) -> int:
+	return int(nivel.get(id, 1))
+
+
+## Lee los cofres abiertos de GameState: la habilidad de cada emoción con cofre abierto pasa a nivel 2.
+func recalcular_niveles() -> void:
+	for entrada in catalogo:
+		var id: String = entrada["id"]
+		var nuevo := 2 if GameState.cofre_esta_abierto(str(entrada["emocion"])) else 1
+		var anterior := nivel_de(id)
+		nivel[id] = nuevo
+		if _habilidades.has(id):
+			_habilidades[id].aplicar_nivel(nuevo)
+		if nuevo != anterior:
+			nivel_cambiado.emit(id, nuevo)
 
 
 # --- Consultas ---
@@ -324,11 +350,13 @@ func _reiniciar() -> void:
 	factor_tiempo = 1.0
 	for habilidad in _habilidades.values():
 		habilidad.reiniciar()  # apaga Visión, Pausa, el compañero, etc.
+	recalcular_niveles()
 	habilidad_seleccionada_cambiada.emit(GameState.habilidad_seleccionada)
 
 
 ## Partida cargada: se comprueba que la elegida siga siendo válida y esté desbloqueada.
 func _on_partida_cargada() -> void:
+	recalcular_niveles()
 	var id := GameState.habilidad_seleccionada
 	if indice_de(id) == -1 or not esta_desbloqueada(id):
 		var primera := ""

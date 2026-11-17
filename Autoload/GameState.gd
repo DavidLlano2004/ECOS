@@ -13,6 +13,8 @@ signal fragmento_recogido(id: String)
 signal compuerta_abierta(id: String)
 ## Llegó una pista nueva (para el diario).
 signal pista_registrada(id: String)
+## Se abrió el cofre de memoria de una emoción (mejora su habilidad y da un regalo). Una vez por emoción.
+signal cofre_abierto(id: String)
 signal partida_reiniciada
 signal partida_cargada
 
@@ -44,6 +46,12 @@ var posicion_jugador: Vector2 = Vector2.ZERO
 var tiene_posicion: bool = false
 ## true justo después de cargar una partida con posición: Mundo coloca al jugador ahí y lo apaga.
 var restaurar_posicion: bool = false
+## id de emoción -> true si ya se abrió su cofre de memoria. Se guarda con la partida.
+var cofres: Dictionary = {}
+## ids de las emociones cuyo regalo ya se tiene (uno por cofre). Se guardan.
+var regalos: Array[String] = []
+## true cuando se tienen los 7 regalos (lo usa el final).
+var regalos_completos: bool = false
 ## id de compuerta -> true si está abierta. UN solo estado para las dos épocas. Se guarda con la partida.
 var compuertas: Dictionary = {}
 ## ids de las compuertas que el jugador ya vio (el diario muestra "???" hasta entonces). Se guardan.
@@ -140,6 +148,32 @@ func _guardar_en_diario(id: String, texto: String) -> void:
 		if entrada["id"] == id:
 			return
 	diario.append({"id": id, "texto": texto})
+
+
+## true si el cofre de memoria de esa emoción ya se abrió.
+func cofre_esta_abierto(id: String) -> bool:
+	return bool(cofres.get(id, false))
+
+
+## Abre el cofre de una emoción para siempre: mejora su habilidad (nivel 2) y guarda su regalo. Solo si la
+## emoción está integrada y solo una vez; devuelve false si no se pudo (o ya estaba abierto).
+func abrir_cofre(id: String) -> bool:
+	if not _datos.has(id) or cofre_esta_abierto(id) or estado.get(id, "pendiente") != "integrada":
+		return false
+	cofres[id] = true
+	if not regalos.has(id):
+		regalos.append(id)
+	_actualizar_regalos_completos()
+	cofre_abierto.emit(id)
+	return true
+
+
+func tiene_regalo(id: String) -> bool:
+	return regalos.has(id)
+
+
+func _actualizar_regalos_completos() -> void:
+	regalos_completos = not _datos.is_empty() and regalos.size() >= _datos.size()
 
 
 ## true si la compuerta está abierta (en las dos épocas a la vez).
@@ -320,6 +354,9 @@ func nueva_partida() -> void:
 	respuestas_final.clear()
 	diario.clear()
 	guia_conocida = false
+	cofres.clear()
+	regalos.clear()
+	regalos_completos = false
 	compuertas.clear()
 	compuertas_vistas.clear()
 	pistas.clear()
@@ -344,6 +381,8 @@ func guardar() -> bool:
 		"diario": diario,
 		"guia_conocida": guia_conocida,
 		"compuertas": compuertas,
+		"cofres": cofres,
+		"regalos": regalos,
 		"compuertas_vistas": compuertas_vistas,
 		"pistas": pistas,
 		"pista_niveles": pista_niveles,
@@ -455,6 +494,17 @@ func cargar() -> bool:
 		for id in niveles:
 			if ids_compuertas.has(str(id)) and (typeof(niveles[id]) == TYPE_FLOAT or typeof(niveles[id]) == TYPE_INT):
 				pista_niveles[str(id)] = clampi(int(niveles[id]), 0, 3)
+
+	# Cofres de memoria y regalos: solo emociones que existen, sin repetir
+	var cofres_guardados: Variant = lectura.get("cofres", {})
+	if typeof(cofres_guardados) == TYPE_DICTIONARY:
+		for id in cofres_guardados:
+			if _datos.has(str(id)) and typeof(cofres_guardados[id]) == TYPE_BOOL and cofres_guardados[id]:
+				cofres[str(id)] = true
+	for r in _lista(lectura, "regalos"):
+		if _datos.has(str(r)) and not regalos.has(str(r)):
+			regalos.append(str(r))
+	_actualizar_regalos_completos()
 
 	var conocida: Variant = lectura.get("guia_conocida", false)
 	guia_conocida = typeof(conocida) == TYPE_BOOL and conocida

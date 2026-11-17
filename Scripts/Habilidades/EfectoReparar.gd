@@ -8,6 +8,8 @@ extends Node2D
 signal terminado(completado: bool)
 
 const SEGUNDOS := 1.2
+## Nivel 2 (cofre de Culpa): se repara en la mitad de tiempo.
+const SEGUNDOS_NIVEL_2 := 0.6
 ## Si el jugador se aleja más de esto del objeto, se cancela (un poco más que los 48 px de inicio).
 const DISTANCIA_MAXIMA := 56.0
 const DORADO := Color("f4c77b")
@@ -22,6 +24,11 @@ var progreso := 0.0
 var _radio := RADIO_POR_DEFECTO
 var _activo := false
 var _particulas: CPUParticles2D
+
+
+## Cuánto hay que mantener ESPACIO según el nivel de Reparar.
+static func segundos_actuales() -> float:
+	return SEGUNDOS_NIVEL_2 if Habilidades.nivel_de("reparacion") >= 2 else SEGUNDOS
 
 
 ## Empieza a reparar `p_objetivo`. Se llama justo después de añadir el nodo al árbol.
@@ -48,7 +55,7 @@ func _process(delta: float) -> void:
 		_cancelar()
 		return
 	global_position = objetivo.global_position
-	progreso = minf(progreso + delta / SEGUNDOS, 1.0)
+	progreso = minf(progreso + delta / segundos_actuales(), 1.0)
 	queue_redraw()
 	if progreso >= 1.0:
 		_completar()

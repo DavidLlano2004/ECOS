@@ -12,6 +12,9 @@ const RADIO_PASEO := 100.0
 const DIST_JUGADOR := 50.0
 const DIST_PORTAL := 64.0
 
+## Si no es INF, la aliada flota alrededor de ese punto (el centro del santuario) en vez de alrededor del bloqueo.
+var centro_fijo := Vector2.INF
+var radio_paseo := RADIO_PASEO
 var datos: EmocionData
 var _ya_hablo := false
 var _sprite: AnimatedSprite2D
@@ -28,7 +31,8 @@ var _forma_consulta := CircleShape2D.new()
 func preparar(emocion: EmocionData) -> void:
 	datos = emocion
 	_forma_consulta.radius = 10.0
-	_centro = get_parent().global_position
+	add_to_group("aliadas_presente")
+	_centro = centro_fijo if centro_fijo != Vector2.INF else get_parent().global_position
 	_destino = global_position
 	_espera = randf_range(0.5, 2.0)
 	# Criatura en calma (animación "calma" de los frames de la emoción)
@@ -98,7 +102,7 @@ func _elegir_destino() -> void:
 	_espera = randf_range(2.5, 5.0)
 	_destino = global_position
 	for _i in 10:
-		var candidato := _centro + Vector2.from_angle(randf() * TAU) * randf_range(35.0, RADIO_PASEO)
+		var candidato := _centro + Vector2.from_angle(randf() * TAU) * randf_range(minf(35.0, radio_paseo * 0.4), radio_paseo)
 		if _es_libre(candidato) and _es_libre(global_position.lerp(candidato, 0.5)):
 			_destino = candidato
 			return
@@ -115,7 +119,7 @@ func _dar_paso(direccion: Vector2, delta: float) -> void:
 
 ## ¿Se puede estar ahí? Sin muros ni obstáculos (capa 1), dentro del radio, y lejos del jugador y de los portales.
 func _es_libre(p: Vector2) -> bool:
-	if p.distance_to(_centro) > RADIO_PASEO:
+	if p.distance_to(_centro) > radio_paseo:
 		return false
 	var consulta := PhysicsShapeQueryParameters2D.new()
 	consulta.shape = _forma_consulta
@@ -130,6 +134,15 @@ func _es_libre(p: Vector2) -> bool:
 		if portal is Node2D and portal.can_process() and p.distance_to(portal.global_position) < DIST_PORTAL:
 			return false
 	return true
+
+
+## Dice su agradecimiento cuando se abre el cofre de memoria de su santuario (mismo balloon de siempre; se cierra solo).
+func agradecer() -> void:
+	if datos == null or datos.frase_agradecimiento == "" or Dialogo.hay_dialogo():
+		return
+	_ocupada = true
+	await Dialogo.mostrar_texto(datos.nombre, datos.frase_agradecimiento, [], null, true)
+	_ocupada = false
 
 
 func puede_interactuar() -> bool:

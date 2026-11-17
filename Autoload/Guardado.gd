@@ -20,6 +20,7 @@ func _ready() -> void:
 	_crear_icono()
 	GameState.emocion_resuelta.connect(func(_id: String, _resultado: String) -> void: _pedir_autoguardado())
 	GameState.fragmento_recogido.connect(func(_id: String) -> void: _pedir_autoguardado())
+	GameState.cofre_abierto.connect(func(_id: String) -> void: _pedir_autoguardado())
 	GameState.compuerta_abierta.connect(func(_id: String) -> void: _pedir_autoguardado())
 	GameState.epoca_cambiada.connect(func(_epoca: String) -> void: _pedir_autoguardado())
 

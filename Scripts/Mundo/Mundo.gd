@@ -43,6 +43,7 @@ const RUTA_ACERTIJOS := "res://Resources/Mundo/acertijos.json"
 const ESCENA_ACERTIJO := "res://Scenes/Objetos/%s.tscn"
 const FRAGMENTO := preload("res://Scenes/Objetos/FragmentoMemoria.tscn")
 const RUTA_COMPUERTAS := "res://Resources/Mundo/compuertas.json"
+const RUTA_SANTUARIOS := "res://Resources/Mundo/santuarios.json"
 const COMPUERTA := preload("res://Scenes/Objetos/Compuerta.tscn")
 ## Zonas con emoción: en la entrada de cada una hay una grieta, y su criatura vive en el Pasado.
 const ZONAS_EMOCION := ["Rabia", "Miedo", "Tristeza", "Soledad", "Culpa", "Ansiedad", "Verguenza"]
@@ -103,6 +104,7 @@ func reconstruir_todo() -> void:
 	colocar_entidades()
 	colocar_acertijos()
 	colocar_compuertas()
+	colocar_santuarios()
 	_crear_ambiente()
 	_crear_particulas()
 	_preparar_saturacion()
@@ -750,6 +752,13 @@ func colocar_entidades() -> void:
 				var bloqueo := BLOQUEO.instantiate() as BloqueoPresente
 				bloqueo.datos = GameState.obtener_datos(id)
 				bloqueo.direccion = (centro - pos_bloqueo).normalized()
+				# Si la zona tiene santuario, el bloqueo cierra su único acceso y sella sus casillas
+				var santuario := _santuario_de(zona)
+				if not santuario.is_empty():
+					pos_bloqueo = Vector2(santuario["abertura"][0], santuario["abertura"][1])
+					bloqueo.direccion = Vector2(santuario["direccion"][0], santuario["direccion"][1])
+					bloqueo.centro_santuario = Vector2(santuario["centro"][0], santuario["centro"][1])
+					bloqueo.celdas_sello = santuario["celdas"]
 				_poner_entidad(objetos, bloqueo, "Bloqueo_%s" % zona, pos_bloqueo)
 		# La Guía, cerca del portal
 		var guia := GUIA.instantiate() as Node2D
@@ -763,6 +772,62 @@ func colocar_entidades() -> void:
 					continue
 				var criatura := (load(ruta) as PackedScene).instantiate() as Node2D
 				_poner_entidad(objetos, criatura, id.capitalize(), posicion_zona(id.capitalize()))
+
+
+# --- Santuarios (solo en el Presente) ---
+
+## Lee Resources/Mundo/santuarios.json (lo escribe tools/generar_mapa.py): la lista de santuarios.
+func _leer_santuarios() -> Array:
+	if not FileAccess.file_exists(RUTA_SANTUARIOS):
+		return []
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_SANTUARIOS))
+	if typeof(datos) != TYPE_DICTIONARY:
+		return []
+	return datos.get("santuarios", [])
+
+
+## Los datos del santuario de una zona ({} si no tiene).
+func _santuario_de(zona: String) -> Dictionary:
+	for s in _leer_santuarios():
+		if s["zona"] == zona:
+			return s
+	return {}
+
+
+## Crea el santuario de cada emoción en el Presente: flores a ras de suelo (entre el suelo y los objetos) y,
+## en Objetos, el altar, las luces y el cofre de memoria. El acceso lo cierra el bloqueo de la emoción.
+func colocar_santuarios() -> void:
+	if Engine.is_editor_hint():
+		return
+	var presente := get_node_or_null("Presente")
+	var objetos := get_node_or_null("Presente/Objetos")
+	if presente == null or objetos == null:
+		return
+	for padre in [presente, objetos]:
+		for viejo in padre.get_children():
+			if viejo.is_in_group("santuario_mundo"):
+				viejo.free()
+	for s in _leer_santuarios():
+		var datos := GameState.obtener_datos(str(s["id"]))
+		if datos == null:
+			continue
+		var centro := Vector2(s["centro"][0], s["centro"][1])
+		var direccion := Vector2(s["direccion"][0], s["direccion"][1])
+		var suelo := SantuarioSuelo.new()
+		suelo.datos = datos
+		suelo.direccion = direccion
+		suelo.position = centro
+		suelo.name = "SantuarioSuelo_%s" % datos.id
+		suelo.add_to_group("santuario_mundo")
+		presente.add_child(suelo)
+		presente.move_child(suelo, objetos.get_index())   # sobre el suelo y bajo los objetos
+		var santuario := Santuario.new()
+		santuario.datos = datos
+		santuario.direccion = direccion
+		santuario.position = centro
+		santuario.name = "Santuario_%s" % datos.id
+		santuario.add_to_group("santuario_mundo")
+		objetos.add_child(santuario)
 
 
 # --- Compuertas de habilidad (en las dos épocas) ---
@@ -897,7 +962,7 @@ func _entrada_de_zona(zona: String, filas: PackedStringArray) -> Vector2:
 	var centro := posicion_zona(zona)
 	var direccion := (posicion_zona("Hub") - centro).normalized()
 	# La grieta queda antes (más lejos del centro) que el bloqueo del Presente, para no saltárselo
-	for distancia in [170.0, 190.0, 150.0, 210.0, 130.0, 110.0, 90.0]:
+	for distancia in [190.0, 200.0, 210.0, 180.0, 230.0, 250.0, 170.0]:
 		for lado in [0.0, 24.0, -24.0]:
 			var pos: Vector2 = centro + direccion * distancia + direccion.orthogonal() * lado
 			var celda := Vector2i((pos / TAMANO_TILE).floor())

@@ -68,7 +68,11 @@ func lineas_de_dialogo() -> Array:
 		return ["El espejo está empañado. Aún falta algo por atender."]
 	# TEMPORAL: resultado provisional del final; la secuencia final llegará más adelante
 	var final := GameState.calcular_final()
-	return ["TEMPORAL - Aquí irá la secuencia final.", "Tu final sería «%s»." % final]
+	var lineas := ["TEMPORAL - Aquí irá la secuencia final.", "Tu final sería «%s»." % final]
+	# Epílogo: con los 7 regalos de los santuarios
+	if GameState.regalos_completos:
+		lineas.append("En tus manos brillan los siete regalos: la brasa, la linterna, la gota, la luciérnaga, la cinta, el reloj y el espejo. Los guardaste todos.")
+	return lineas
 
 
 func interactuar() -> void:

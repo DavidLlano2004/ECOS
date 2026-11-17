@@ -24,3 +24,7 @@ mensaje_presente_bloqueo = "Un muro de espejos cubiertos con telas te esconde el
 frase_cierre = "Está bien. Vuelve cuando quieras."
 mensaje_presente_atacada = "Las telas están rasgadas y los espejos, torcidos. La vergüenza se esconde todavía más."
 mensaje_presente_ignorada = "Las telas lo cubren todo y hasta los espejos callan. Nadie se acercó a mirar con cariño."
+mejora_descripcion = "Revelar II: la onda llega a 320 px y lo revelado dura 10 s."
+regalo_nombre = "Un espejo amable"
+regalo_texto = "Te devuelve tu imagen sin juzgarla. Mostrarte no es un riesgo: es un regalo."
+frase_agradecimiento = "Gracias por mirarme con cariño. Ya no tengo que esconderme."

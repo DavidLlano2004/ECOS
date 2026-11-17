@@ -16,6 +16,8 @@ func _init() -> void:
 
 
 func ejecutar(player: Player) -> bool:
+	if _efecto != null and is_instance_valid(_efecto) and not _efecto.encendida:
+		_efecto.set_radio(EfectoVision.radio_luz())   # por si subió de nivel desde la última vez
 	if _efecto == null or not is_instance_valid(_efecto):
 		_efecto = EfectoVision.new()
 		_efecto.jugador = player

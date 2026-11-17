@@ -17,6 +17,12 @@ var duracion: float = 0.0
 var activa: bool = false
 
 
+## Se llama cuando cambia el nivel de la habilidad (1 o 2, ver Habilidades.nivel_de). Las subclases ajustan
+## aquí su cooldown o su duración; lo demás lo leen directamente de Habilidades.nivel_de(id).
+func aplicar_nivel(_nivel: int) -> void:
+	pass
+
+
 ## Apaga todo lo que haya en marcha (se llama al empezar una nueva partida).
 func reiniciar() -> void:
 	activa = false

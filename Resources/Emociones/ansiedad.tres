@@ -24,3 +24,7 @@ mensaje_presente_bloqueo = "Un torbellino de relojes y engranajes gira sin parar
 frase_cierre = "Respira. No hace falta correr."
 mensaje_presente_atacada = "Los engranajes chirrían y sueltan chispas. La ansiedad gira más rápido cada vez que la empujan."
 mensaje_presente_ignorada = "Los relojes corren sin freno y el torbellino casi tapa el camino. Nadie le pidió ir más despacio."
+mejora_descripcion = "Pausa II: dura 8 s y se recupera en 7 s."
+regalo_nombre = "Un reloj que descansa"
+regalo_texto = "Sus manecillas se paran cuando respiras hondo. Hay tiempo."
+frase_agradecimiento = "Gracias por esperarme. Respiro mejor desde que me escuchas."

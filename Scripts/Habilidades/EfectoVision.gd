@@ -9,6 +9,8 @@ extends Node2D
 ## el jugador salga: se le empuja con suavidad al punto libre más cercano sin atravesar muros.
 
 const RADIO_LUZ := 120.0
+## Nivel 2 (cofre de Miedo): la luz llega más lejos.
+const RADIO_LUZ_NIVEL_2 := 180.0
 const TAMANO_TEXTURA := 256
 const ENERGIA_LUZ := 0.85
 const COLOR_LUZ := Color(0.78, 0.65, 1.0)
@@ -42,10 +44,15 @@ var fuerza := 0.0:
 			_rect.visible = valor > 0.001
 
 
+## El radio de la luz según el nivel de la Visión.
+static func radio_luz() -> float:
+	return RADIO_LUZ_NIVEL_2 if Habilidades.nivel_de("vision") >= 2 else RADIO_LUZ
+
+
 func _ready() -> void:
 	_luz = PointLight2D.new()
 	_luz.texture = Atmosfera.crear_textura_luz(TAMANO_TEXTURA)
-	_luz.texture_scale = RADIO_LUZ * 2.0 / TAMANO_TEXTURA
+	_luz.texture_scale = radio_luz() * 2.0 / TAMANO_TEXTURA
 	_luz.color = COLOR_LUZ
 	_luz.position = Vector2(0, -16)
 	_luz.visible = false
@@ -97,6 +104,12 @@ func _animar_fuerza(destino: float, segundos: float) -> void:
 		_tween.kill()
 	_tween = create_tween()
 	_tween.tween_property(self, "fuerza", destino, segundos)
+
+
+## Cambia el radio de la luz (por si la Visión sube de nivel con el efecto ya creado).
+func set_radio(radio: float) -> void:
+	if _luz != null:
+		_luz.texture_scale = radio * 2.0 / TAMANO_TEXTURA
 
 
 func _physics_process(delta: float) -> void:

@@ -24,3 +24,7 @@ mensaje_presente_bloqueo = "Hay mecanismos que no se mueven con una sola persona
 frase_cierre = "Te espero aquí, sin prisa."
 mensaje_presente_atacada = "Las puertas están marcadas con arañazos. La soledad se cerró todavía más al ser apartada."
 mensaje_presente_ignorada = "Las puertas llevan mucho tiempo cerradas y el polvo cubre a las luciérnagas. Nadie llamó."
+mejora_descripcion = "Vínculo II: tu compañera puede alejarse hasta 500 px y brilla más."
+regalo_nombre = "Una luciérnaga amiga"
+regalo_texto = "Brilla cuando la necesitas. Para sentirte acompañado no hace falta estar siempre con alguien."
+frase_agradecimiento = "Gracias por buscarme. Ya no me siento tan sola."

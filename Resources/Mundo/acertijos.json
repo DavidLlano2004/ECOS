@@ -1,6 +1,167 @@
 {
  "acertijos": [
   {
+   "emocion": "soledad",
+   "habilidad": "vinculo",
+   "zona": "Miedo",
+   "tipo": "placas",
+   "rect": [
+    31,
+    44,
+    8,
+    6
+   ],
+   "volteado": true,
+   "interior": [
+    33,
+    46,
+    4,
+    2
+   ],
+   "objetos": [
+    {
+     "escena": "PuertaPlacas",
+     "pos": [
+      1120.0,
+      1440
+     ],
+     "props": {
+      "ancho": 64,
+      "id_mecanismo": "soledad"
+     }
+    },
+    {
+     "escena": "PlacaDoble",
+     "pos": [
+      1056.0,
+      1376
+     ],
+     "props": {
+      "id_mecanismo": "soledad"
+     }
+    },
+    {
+     "escena": "PlacaDoble",
+     "pos": [
+      1184.0,
+      1376
+     ],
+     "props": {
+      "id_mecanismo": "soledad"
+     }
+    }
+   ],
+   "abismos": [],
+   "fragmento": [
+    1120.0,
+    1512.0
+   ],
+   "bloqueo": [
+    [
+     34,
+     45
+    ],
+    [
+     34,
+     44
+    ],
+    [
+     35,
+     45
+    ],
+    [
+     35,
+     44
+    ]
+   ],
+   "rama": [
+    [
+     35,
+     43
+    ],
+    [
+     35,
+     42
+    ]
+   ],
+   "reservada": [
+    30,
+    40,
+    10,
+    11
+   ]
+  },
+  {
+   "emocion": "culpa",
+   "habilidad": "reparacion",
+   "zona": "Ansiedad",
+   "tipo": "porton",
+   "rect": [
+    62,
+    36,
+    8,
+    6
+   ],
+   "volteado": false,
+   "interior": [
+    64,
+    38,
+    4,
+    2
+   ],
+   "objetos": [
+    {
+     "escena": "PortonRoto",
+     "pos": [
+      2112.0,
+      1312
+     ],
+     "props": {
+      "ancho_colision": 64
+     }
+    }
+   ],
+   "abismos": [],
+   "fragmento": [
+    2112.0,
+    1240.0
+   ],
+   "bloqueo": [
+    [
+     65,
+     40
+    ],
+    [
+     65,
+     41
+    ],
+    [
+     66,
+     40
+    ],
+    [
+     66,
+     41
+    ]
+   ],
+   "rama": [
+    [
+     65,
+     42
+    ],
+    [
+     65,
+     43
+    ]
+   ],
+   "reservada": [
+    61,
+    35,
+    10,
+    10
+   ]
+  },
+  {
    "emocion": "verguenza",
    "habilidad": "revelar",
    "zona": "Tristeza",
@@ -323,18 +484,18 @@
   {
    "emocion": "tristeza",
    "habilidad": "calma",
-   "zona": "Ansiedad",
+   "zona": "Verguenza",
    "tipo": "plantas",
    "rect": [
-    62,
-    36,
+    19,
+    20,
     9,
     6
    ],
    "volteado": false,
    "interior": [
-    64,
-    38,
+    21,
+    22,
     5,
     2
    ],
@@ -342,72 +503,72 @@
     {
      "escena": "PlantaMarchita",
      "pos": [
-      2096.0,
-      1312
+      720.0,
+      800
      ],
      "props": {}
     },
     {
      "escena": "PlantaMarchita",
      "pos": [
-      2128.0,
-      1312
+      752.0,
+      800
      ],
      "props": {}
     },
     {
      "escena": "PlantaMarchita",
      "pos": [
-      2160.0,
-      1312
+      784.0,
+      800
      ],
      "props": {}
     }
    ],
    "abismos": [],
    "fragmento": [
-    2128.0,
-    1240.0
+    752.0,
+    728.0
    ],
    "bloqueo": [
     [
-     65,
-     40
+     22,
+     24
     ],
     [
-     65,
-     41
+     22,
+     25
     ],
     [
-     66,
-     40
+     23,
+     24
     ],
     [
-     66,
-     41
+     23,
+     25
     ],
     [
-     67,
-     40
+     24,
+     24
     ],
     [
-     67,
-     41
+     24,
+     25
     ]
    ],
    "rama": [
     [
-     65,
-     42
+     22,
+     26
     ],
     [
-     65,
-     43
+     22,
+     27
     ]
    ],
    "reservada": [
-    61,
-    35,
+    18,
+    19,
     11,
     10
    ]
@@ -418,15 +579,15 @@
    "zona": "Verguenza",
    "tipo": "roca",
    "rect": [
-    23,
-    16,
+    30,
+    18,
     8,
     6
    ],
    "volteado": true,
    "interior": [
-    25,
-    18,
+    32,
+    20,
     4,
     2
    ],
@@ -434,8 +595,8 @@
     {
      "escena": "RocaRompible",
      "pos": [
-      864.0,
-      544
+      1088.0,
+      608
      ],
      "props": {
       "ancho_colision": 64
@@ -444,257 +605,40 @@
    ],
    "abismos": [],
    "fragmento": [
-    864.0,
-    616.0
+    1088.0,
+    680.0
    ],
    "bloqueo": [
     [
-     26,
+     33,
+     19
+    ],
+    [
+     33,
+     18
+    ],
+    [
+     34,
+     19
+    ],
+    [
+     34,
+     18
+    ]
+   ],
+   "rama": [
+    [
+     34,
      17
     ],
     [
-     26,
-     16
-    ],
-    [
-     27,
-     17
-    ],
-    [
-     27,
+     34,
      16
     ]
    ],
-   "rama": [
-    [
-     26,
-     15
-    ],
-    [
-     26,
-     14
-    ]
-   ],
    "reservada": [
-    22,
-    13,
-    10,
-    10
-   ]
-  },
-  {
-   "emocion": "soledad",
-   "habilidad": "vinculo",
-   "zona": "Miedo",
-   "tipo": "placas",
-   "rect": [
-    33,
-    45,
-    8,
-    6
-   ],
-   "volteado": true,
-   "interior": [
-    35,
-    47,
-    4,
-    2
-   ],
-   "objetos": [
-    {
-     "escena": "PuertaPlacas",
-     "pos": [
-      1184.0,
-      1472
-     ],
-     "props": {
-      "ancho": 64,
-      "id_mecanismo": "soledad"
-     }
-    },
-    {
-     "escena": "PlacaDoble",
-     "pos": [
-      1120.0,
-      1408
-     ],
-     "props": {
-      "id_mecanismo": "soledad"
-     }
-    },
-    {
-     "escena": "PlacaDoble",
-     "pos": [
-      1248.0,
-      1408
-     ],
-     "props": {
-      "id_mecanismo": "soledad"
-     }
-    }
-   ],
-   "abismos": [],
-   "fragmento": [
-    1184.0,
-    1544.0
-   ],
-   "bloqueo": [
-    [
-     36,
-     46
-    ],
-    [
-     36,
-     45
-    ],
-    [
-     37,
-     46
-    ],
-    [
-     37,
-     45
-    ]
-   ],
-   "rama": [
-    [
-     36,
-     44
-    ],
-    [
-     36,
-     43
-    ],
-    [
-     36,
-     42
-    ]
-   ],
-   "reservada": [
-    32,
-    41,
-    10,
-    11
-   ]
-  },
-  {
-   "emocion": "culpa",
-   "habilidad": "reparacion",
-   "zona": "Tristeza",
-   "tipo": "porton",
-   "rect": [
-    5,
-    35,
-    8,
-    6
-   ],
-   "volteado": true,
-   "interior": [
-    7,
-    37,
-    4,
-    2
-   ],
-   "objetos": [
-    {
-     "escena": "PortonRoto",
-     "pos": [
-      288.0,
-      1152
-     ],
-     "props": {
-      "ancho_colision": 64
-     }
-    }
-   ],
-   "abismos": [],
-   "fragmento": [
-    288.0,
-    1224.0
-   ],
-   "bloqueo": [
-    [
-     8,
-     36
-    ],
-    [
-     8,
-     35
-    ],
-    [
-     9,
-     36
-    ],
-    [
-     9,
-     35
-    ]
-   ],
-   "rama": [
-    [
-     9,
-     34
-    ],
-    [
-     10,
-     34
-    ],
-    [
-     11,
-     34
-    ],
-    [
-     12,
-     34
-    ],
-    [
-     13,
-     34
-    ],
-    [
-     13,
-     35
-    ],
-    [
-     13,
-     36
-    ],
-    [
-     13,
-     37
-    ],
-    [
-     13,
-     38
-    ],
-    [
-     13,
-     39
-    ],
-    [
-     13,
-     40
-    ],
-    [
-     13,
-     41
-    ],
-    [
-     14,
-     41
-    ],
-    [
-     15,
-     41
-    ],
-    [
-     15,
-     42
-    ]
-   ],
-   "reservada": [
-    4,
-    32,
+    29,
+    15,
     10,
     10
    ]

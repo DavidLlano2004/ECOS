@@ -10,7 +10,7 @@ extends CanvasLayer
 
 signal cerrado
 
-const SECCIONES := ["Emociones", "Habilidades", "Recuerdos", "Conexiones", "Pistas", "Progreso"]
+const SECCIONES := ["Emociones", "Habilidades", "Recuerdos", "Regalos", "Conexiones", "Pistas", "Progreso"]
 const RUTA_ICONOS := "res://Assets/UI/iconos_habilidades.png"
 const TAMANO_LIBRO := Vector2(580, 316)
 const COLOR_ESTADO := {
@@ -162,7 +162,7 @@ func _construir() -> void:
 	_libro.add_child(cabecera)
 	cabecera.add_child(_boton("<", 26, func() -> void: cambiar_seccion(-1)))
 	for i in SECCIONES.size():
-		var b := _boton(SECCIONES[i], 76, ir_a_seccion.bind(i))
+		var b := _boton(SECCIONES[i], 64, ir_a_seccion.bind(i))
 		_botones.append(b)
 		cabecera.add_child(b)
 	cabecera.add_child(_boton(">", 26, func() -> void: cambiar_seccion(1)))
@@ -186,7 +186,7 @@ func _boton(texto: String, ancho: int, accion: Callable) -> Button:
 	b.text = texto
 	b.custom_minimum_size = Vector2(ancho, 22)
 	b.focus_mode = Control.FOCUS_NONE
-	b.add_theme_font_size_override("font_size", 12)
+	b.add_theme_font_size_override("font_size", 10 if ancho < 70 else 12)
 	b.pressed.connect(accion)
 	return b
 
@@ -221,10 +221,12 @@ func _mostrar_seccion() -> void:
 		2:
 			_crear_recuerdos()
 		3:
-			_crear_conexiones()
+			_crear_regalos()
 		4:
-			_crear_pistas()
+			_crear_conexiones()
 		5:
+			_crear_pistas()
+		6:
 			_crear_progreso()
 	for i in _botones.size():
 		var activa := i == seccion
@@ -326,8 +328,13 @@ func _crear_habilidades() -> void:
 		var textos := VBoxContainer.new()
 		textos.add_theme_constant_override("separation", -1)
 		textos.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		textos.add_child(EstiloUI.etiqueta(entrada["nombre"] if desbloqueada else "???", 12, EstiloUI.DORADO if desbloqueada else EstiloUI.GRIS))
-		textos.add_child(EstiloUI.etiqueta(entrada["descripcion"] if desbloqueada else "???", 9, Color("d9cfe8") if desbloqueada else EstiloUI.GRIS))
+		var mejorada := desbloqueada and Habilidades.nivel_de(entrada["id"]) >= 2
+		textos.add_child(EstiloUI.etiqueta(("%s  ·  nivel %d" % [entrada["nombre"], Habilidades.nivel_de(entrada["id"])]) if desbloqueada else "???", 12, EstiloUI.DORADO if desbloqueada else EstiloUI.GRIS))
+		var descripcion: String = entrada["descripcion"] if desbloqueada else "???"
+		if mejorada:
+			var emocion := GameState.obtener_datos(str(entrada["emocion"]))
+			descripcion = emocion.mejora_descripcion if emocion != null and emocion.mejora_descripcion != "" else descripcion
+		textos.add_child(EstiloUI.etiqueta(descripcion, 9, Color("d9cfe8") if desbloqueada else EstiloUI.GRIS))
 		linea.add_child(textos)
 		linea.add_child(EstiloUI.etiqueta("Tecla %d" % (numero + 1), 10, EstiloUI.DORADO if desbloqueada else EstiloUI.GRIS))
 		lista.add_child(fila)
@@ -418,6 +425,34 @@ func _elegir_recuerdo(indice: int) -> void:
 	else:
 		_detalle_titulo.text = "???"
 		_detalle_texto.text = "Un recuerdo aún sin encontrar"
+
+
+# Regalos ---------------------------------------------------------------
+
+## Los objetos de memoria de los cofres: uno por emoción. Los que aún no se tienen salen como "???".
+func _crear_regalos() -> void:
+	var rejilla := GridContainer.new()
+	rejilla.columns = 2
+	rejilla.add_theme_constant_override("h_separation", 6)
+	rejilla.add_theme_constant_override("v_separation", 5)
+	rejilla.size = _contenido.size
+	_contenido.add_child(rejilla)
+	for id in GameState.ids_emociones():
+		var datos := GameState.obtener_datos(id)
+		var tiene := GameState.tiene_regalo(id)
+		var tarjeta := PanelContainer.new()
+		tarjeta.custom_minimum_size = Vector2(_contenido.size.x / 2.0 - 4.0, 50)
+		tarjeta.add_theme_stylebox_override("panel", EstiloUI.caja(Color("1e1b2e"), Color(datos.color, 0.7) if tiene else Color("3a3358"), 1, 5, 3))
+		var columna := VBoxContainer.new()
+		columna.add_theme_constant_override("separation", 1)
+		tarjeta.add_child(columna)
+		columna.add_child(EstiloUI.etiqueta(datos.regalo_nombre if tiene else "???", 11, datos.color.lightened(0.3) if tiene else EstiloUI.GRIS))
+		var texto := EstiloUI.etiqueta(datos.regalo_texto if tiene else "Un regalo aún sin encontrar", 9, Color("d9cfe8") if tiene else EstiloUI.GRIS)
+		texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		texto.max_lines_visible = 3
+		texto.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		columna.add_child(texto)
+		rejilla.add_child(tarjeta)
 
 
 # Conexiones ------------------------------------------------------------

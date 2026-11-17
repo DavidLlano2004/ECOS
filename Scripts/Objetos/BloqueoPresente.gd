@@ -32,6 +32,11 @@ const INVITACION := {
 @export var datos: EmocionData
 ## Hacia dónde sigue el camino (hacia el centro de la zona). La barrera se coloca de lado a esa dirección.
 @export var direccion: Vector2 = Vector2.UP
+## El centro del santuario que cierra este bloqueo (posición global): la forma aliada flota ahí. INF = sin santuario.
+@export var centro_santuario: Vector2 = Vector2.INF
+## Casillas (tile [x, y]) del acceso al santuario: mientras el bloqueo no esté abierto se sellan con colisión,
+## así el santuario no se alcanza ni rodeando la barrera.
+var celdas_sello: Array = []
 
 ## Estado que se está mostrando: "" (aún ninguno), "pendiente", "atacada", "ignorada" o "integrada".
 var estado_mostrado: String = ""
@@ -43,6 +48,7 @@ var estado_mostrado: String = ""
 @onready var _niebla: CPUParticles2D = $Niebla
 
 var _aliada: Node2D
+var _formas_sello: Array[CollisionShape2D] = []
 var _ocupado := false
 var _tiempo := 0.0
 var _vibra := false
@@ -70,6 +76,16 @@ func _ready() -> void:
 	_forma.shape = barrera
 	_forma.position = Vector2(0, -8)
 	_forma.rotation = direccion.angle() + PI / 2.0
+
+	# Sello del acceso al santuario (capa 1): una forma por casilla del acceso
+	for c in celdas_sello:
+		var forma := CollisionShape2D.new()
+		var cuadro := RectangleShape2D.new()
+		cuadro.size = Vector2(32, 32)
+		forma.shape = cuadro
+		forma.position = Vector2(c[0] + 0.5, c[1] + 0.5) * 32.0 - position
+		add_child(forma)
+		_formas_sello.append(forma)
 
 	# Zona de interacción (capa 2)
 	var circulo := CircleShape2D.new()
@@ -194,6 +210,10 @@ func _poner_colision(activa: bool) -> void:
 	_forma.set_meta("ecos_apagada", not activa)
 	if can_process():
 		_forma.set_deferred("disabled", not activa)
+	for forma in _formas_sello:
+		forma.set_meta("ecos_apagada", not activa)
+		if can_process():
+			forma.set_deferred("disabled", not activa)
 
 
 func _aparecer_aliada(con_animacion: bool) -> void:
@@ -201,6 +221,11 @@ func _aparecer_aliada(con_animacion: bool) -> void:
 	_aliada = AliadaPresente.new()
 	_aliada.name = "Aliada"
 	_aliada.position = lado * 62.0
+	if centro_santuario != Vector2.INF:
+		# Flota en el centro del santuario, sobre el altar
+		_aliada.centro_fijo = centro_santuario + Vector2(0, -20)
+		_aliada.radio_paseo = 16.0
+		_aliada.position = _aliada.centro_fijo - global_position
 	add_child(_aliada)
 	_aliada.preparar(datos)
 	if con_animacion:

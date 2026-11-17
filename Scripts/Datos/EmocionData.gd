@@ -45,6 +45,15 @@ enum Comportamiento {
 ## Lo que dice el bloqueo del Presente si la ignoraste (refleja el abandono).
 @export_multiline var mensaje_presente_ignorada: String = ""
 
+@export_group("Santuario")
+## Lo que mejora el cofre de memoria de esta emoción (nivel 2 de su habilidad): se muestra en el aviso y en el diario.
+@export_multiline var mejora_descripcion: String = ""
+## El regalo del cofre: un objeto de memoria con nombre y un texto breve (sección "Regalos" del diario).
+@export var regalo_nombre: String = ""
+@export_multiline var regalo_texto: String = ""
+## Lo que dice la forma aliada cuando se abre el cofre.
+@export_multiline var frase_agradecimiento: String = ""
+
 @export_group("Sprite")
 ## Animaciones de la criatura ("idle" y "calma"). Ver Resources/Emociones/frames_*.tres.
 @export var frames: SpriteFrames

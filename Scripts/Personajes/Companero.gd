@@ -15,6 +15,8 @@ enum Estado { SIGUE, VUELA_A_PLACA, POSADO }
 
 const DISTANCIA_SEGUIR := 40.0
 const DISTANCIA_MAXIMA_PLACA := 300.0
+## Nivel 2 (cofre de Soledad): se puede mandar más lejos y brilla más.
+const DISTANCIA_MAXIMA_PLACA_NIVEL_2 := 500.0
 const ALTURA_VUELO := 30.0
 const ALTURA_POSADO := 9.0
 const COLOR_CUERPO := Color("ffe08a")
@@ -39,6 +41,11 @@ var posado: bool:
 		return estado == Estado.POSADO
 
 
+## Hasta dónde puede estar el jugador de la placa donde se posó el compañero, según el nivel de Vínculo.
+static func distancia_maxima_placa() -> float:
+	return DISTANCIA_MAXIMA_PLACA_NIVEL_2 if Habilidades.nivel_de("vinculo") >= 2 else DISTANCIA_MAXIMA_PLACA
+
+
 func _ready() -> void:
 	add_to_group("companero")
 	# Explícito para seguir funcionando aunque la época donde nació quede desactivada (hasta que se mueva)
@@ -48,9 +55,10 @@ func _ready() -> void:
 		_luz = PointLight2D.new()
 		add_child(_luz)
 	_luz.texture = Atmosfera.crear_textura_luz(TAMANO_TEXTURA)
-	_luz.texture_scale = RADIO_LUZ * 2.0 / TAMANO_TEXTURA
+	var mejorado := Habilidades.nivel_de("vinculo") >= 2
+	_luz.texture_scale = RADIO_LUZ * (1.5 if mejorado else 1.0) * 2.0 / TAMANO_TEXTURA
 	_luz.color = COLOR_LUZ
-	_luz.energy = 0.7
+	_luz.energy = 1.2 if mejorado else 0.7
 	_chispas = get_node_or_null("Chispas")
 	if _chispas == null:
 		_chispas = CPUParticles2D.new()
@@ -84,7 +92,7 @@ func _process(delta: float) -> void:
 					estado = Estado.POSADO
 		Estado.POSADO:
 			if not is_instance_valid(placa) \
-					or jugador.global_position.distance_to(placa.global_position) > DISTANCIA_MAXIMA_PLACA:
+					or jugador.global_position.distance_to(placa.global_position) > distancia_maxima_placa():
 				volver_con_jugador()
 			else:
 				_volar_hacia(placa.global_position, 8.0, ALTURA_POSADO, delta)

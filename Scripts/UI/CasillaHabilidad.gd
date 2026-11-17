@@ -24,6 +24,11 @@ var desbloqueada := false:
 	set(valor):
 		desbloqueada = valor
 		queue_redraw()
+## Nivel de la habilidad (2 = mejorada por el cofre de memoria): se marca con una estrella pequeña.
+var nivel := 1:
+	set(valor):
+		nivel = valor
+		queue_redraw()
 var seleccionada := false:
 	set(valor):
 		if valor == seleccionada:
@@ -114,9 +119,25 @@ func _draw() -> void:
 	if activa:
 		var pulso := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 5.0)
 		draw_rect(rect.grow(1.0), Color(color, 0.35 + 0.45 * pulso), false, 2.0)
+	# Estrella de la mejora (nivel 2)
+	if desbloqueada and nivel >= 2:
+		_dibujar_estrella(Vector2(TAMANO.x - 8.0, 8.0))
 	# Borde
 	var borde := COLOR_DORADO if seleccionada else (COLOR_BORDE if desbloqueada else gris.darkened(0.3))
 	draw_rect(rect, borde, false, 2.0 if seleccionada else 1.0)
+
+
+## Estrella pequeña de cinco puntas (la mejora de la habilidad).
+func _dibujar_estrella(centro: Vector2) -> void:
+	var puntos := PackedVector2Array()
+	for i in 10:
+		var radio := 6.0 if i % 2 == 0 else 2.6
+		var angulo := -PI / 2.0 + i * PI / 5.0
+		puntos.append(centro + Vector2(cos(angulo), sin(angulo)) * radio)
+	draw_colored_polygon(puntos, Color(COLOR_DORADO.lightened(0.2), 1.0))
+	var contorno := puntos.duplicate()
+	contorno.append(puntos[0])
+	draw_polyline(contorno, Color("1e1b2e"), 1.0)
 
 
 func _dibujar_icono(centro: Vector2, candado: bool) -> void:

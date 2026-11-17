@@ -235,12 +235,19 @@ func _paso_impulso(delta: float) -> void:
 func _como_rompible(objeto: Object) -> Node:
 	if objeto is Node:
 		var nodo := objeto as Node
-		if nodo.is_in_group("rompible") and nodo.has_method("romper"):
+		if _puede_romper(nodo):
 			return nodo
 		var padre := nodo.get_parent()
-		if padre != null and padre.is_in_group("rompible") and padre.has_method("romper"):
+		if padre != null and _puede_romper(padre):
 			return padre
 	return null
+
+
+## ¿Es rompible y el Impulso tiene el nivel que pide? Las rocas grandes piden `nivel_requerido` 2 (cofre de Rabia).
+func _puede_romper(nodo: Node) -> bool:
+	if not nodo.is_in_group("rompible") or not nodo.has_method("romper"):
+		return false
+	return Habilidades.nivel_de("impulso") >= int(nodo.get("nivel_requerido") if "nivel_requerido" in nodo else 1)
 
 
 # --- Cámara ---

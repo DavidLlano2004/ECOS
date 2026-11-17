@@ -24,3 +24,7 @@ mensaje_presente_bloqueo = "Todo está seco y quieto. La tristeza necesita que a
 frase_cierre = "Tómate tu tiempo."
 mensaje_presente_atacada = "La lluvia cae con furia sobre un estanque lleno de grietas. Lo que se aparta a la fuerza duele más."
 mensaje_presente_ignorada = "El estanque se secó del todo y la nube nunca se va. Nadie se sentó a su lado."
+mejora_descripcion = "Calma II: el anillo llega más lejos (140 px) y la calma dura 12 s."
+regalo_nombre = "Una gota que no se seca"
+regalo_texto = "Es agua de las lágrimas que dejaste salir. Llorar también es cuidarse."
+frase_agradecimiento = "Gracias por quedarte a mi lado mientras lloraba."

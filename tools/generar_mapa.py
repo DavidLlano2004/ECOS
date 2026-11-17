@@ -19,6 +19,7 @@ from collections import deque
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import acertijos_mapa
 import compuertas_mapa
+import santuarios_mapa
 
 W, H = 96, 54
 TILE = 32
@@ -429,6 +430,9 @@ def construir():
                     for (a, b) in comp:
                         m.g[b][a] = "a" if base_plaza(m, a, b) else "."
 
+    # 13. santuarios: un claro cerrado en el centro de cada zona de emoción (ver santuarios_mapa.py)
+    m.santuarios = santuarios_mapa.estampar(m, ZONAS, W, H, TILE)
+
     # 12. compuertas de habilidad: tres zonas cercadas con un hueco tapado (ver compuertas_mapa.py)
     m.compuertas = compuertas_mapa.estampar(m, W, H, TILE)
 
@@ -578,6 +582,8 @@ def main():
     bien = verificar_acertijos(m) and bien
     print("Comprobando las compuertas de habilidad (físico, cada 8 px)...")
     bien = compuertas_mapa.verificar(m, W, H, TILE, ZONAS, m.compuertas) and bien
+    print("Comprobando los santuarios (físico, cada 8 px)...")
+    bien = santuarios_mapa.verificar(m, W, H, TILE, ZONAS, m.compuertas, m.santuarios) and bien
     filas = ["".join(f) for f in m.g]
     assert all(len(f) == W for f in filas) and len(filas) == H
     ruta = os.path.join(RAIZ, "Resources", "Mundo", "mapa.txt")
@@ -591,6 +597,9 @@ def main():
     ruta_comp = os.path.join(RAIZ, "Resources", "Mundo", "compuertas.json")
     compuertas_mapa.escribir_json(m.compuertas, ruta_comp)
     print("Compuertas escritas:", ruta_comp)
+    ruta_sant = os.path.join(RAIZ, "Resources", "Mundo", "santuarios.json")
+    santuarios_mapa.escribir_json(m.santuarios, ruta_sant)
+    print("Santuarios escritos:", ruta_sant)
     if "--vista" in args:
         escribir_vista(m, args[args.index("--vista") + 1])
     if not bien:

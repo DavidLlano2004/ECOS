@@ -24,3 +24,7 @@ mensaje_presente_bloqueo = "Puentes y puertas rotas te cierran el paso. La culpa
 frase_cierre = "Cuando estés listo, aquí estaré."
 mensaje_presente_atacada = "Las tablas del puente están rotas a golpes. Cada intento de aplastar la culpa lo dejó peor."
 mensaje_presente_ignorada = "El puente se pudrió de tanto esperar. Lo roto siguió roto y nadie lo miró."
+mejora_descripcion = "Reparar II: arreglas en la mitad de tiempo (0,6 s)."
+regalo_nombre = "Una cinta dorada"
+regalo_texto = "Une lo que se rompió sin esconder la marca. Reparar también es querer."
+frase_agradecimiento = "Gracias por perdonarte conmigo. Seguimos reparando juntos."
