@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bx3wv5ox15dtf"
+
+[deps]
+
+files=["res://docs/analisis/_PRUEBA/salida/resumen.titulo.translation", "res://docs/analisis/_PRUEBA/salida/resumen.participantes.translation", "res://docs/analisis/_PRUEBA/salida/resumen.pre.translation", "res://docs/analisis/_PRUEBA/salida/resumen.pre.translation", "res://docs/analisis/_PRUEBA/salida/resumen.post.translation", "res://docs/analisis/_PRUEBA/salida/resumen.post.translation", "res://docs/analisis/_PRUEBA/salida/resumen.dif.translation", "res://docs/analisis/_PRUEBA/salida/resumen.dif.translation", "res://docs/analisis/_PRUEBA/salida/resumen.ganancia.translation", "res://docs/analisis/_PRUEBA/salida/resumen.n.translation", "res://docs/analisis/_PRUEBA/salida/resumen.wilcoxon.translation", "res://docs/analisis/_PRUEBA/salida/resumen.n.translation"]
+
+source_file="res://docs/analisis/_PRUEBA/salida/resumen.csv"
+dest_files=["res://docs/analisis/_PRUEBA/salida/resumen.titulo.translation", "res://docs/analisis/_PRUEBA/salida/resumen.participantes.translation", "res://docs/analisis/_PRUEBA/salida/resumen.pre.translation", "res://docs/analisis/_PRUEBA/salida/resumen.pre.translation", "res://docs/analisis/_PRUEBA/salida/resumen.post.translation", "res://docs/analisis/_PRUEBA/salida/resumen.post.translation", "res://docs/analisis/_PRUEBA/salida/resumen.dif.translation", "res://docs/analisis/_PRUEBA/salida/resumen.dif.translation", "res://docs/analisis/_PRUEBA/salida/resumen.ganancia.translation", "res://docs/analisis/_PRUEBA/salida/resumen.n.translation", "res://docs/analisis/_PRUEBA/salida/resumen.wilcoxon.translation", "res://docs/analisis/_PRUEBA/salida/resumen.n.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

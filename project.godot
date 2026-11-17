@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="ECOS"
+config/version="1.0.0"
 run/main_scene="res://Scenes/UI/PantallaTitulo.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
@@ -28,6 +29,7 @@ Guardado="*res://Autoload/Guardado.gd"
 Menus="*res://Autoload/Menus.gd"
 Evaluacion="*res://Autoload/Evaluacion.gd"
 Depuracion="*res://Autoload/Depuracion.gd"
+Reportes="*res://Autoload/Reportes.gd"
 
 [dialogue_manager]
 

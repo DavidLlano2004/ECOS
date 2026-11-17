@@ -37,6 +37,8 @@ var _scroll: ScrollContainer
 var _estado: Label
 var _boton_exportar: Button
 var _boton_carpeta: Button
+var _boton_opinion: Button
+var _boton_creditos: Button
 var _botones: Array[Button] = []
 var _barras: Array[BarraRes] = []
 var _cerrando := false
@@ -153,10 +155,9 @@ func _construir() -> void:
 	fila.alignment = FlowContainer.ALIGNMENT_CENTER
 	v.add_child(fila)
 	_boton_exportar = _boton(fila, "Exportar mis resultados" if Evaluacion.consentimiento_guardar else "Los datos no se guardaron porque elegiste jugar sin guardar", _exportar)
-	_boton_carpeta = _boton(fila, "Abrir carpeta", _abrir_carpeta)
-	_boton_carpeta.hide()
-	_botones.erase(_boton_carpeta)
-	_boton(fila, "Ver créditos", _ver_creditos)
+	_boton_opinion = _boton(fila, "Opinión enviada" if Evaluacion.valoracion_enviada() else "Dar mi opinión sobre el juego", _dar_opinion)
+	_boton_carpeta = _boton(fila, "Abrir carpeta de datos", _abrir_carpeta)
+	_boton_creditos = _boton(fila, "Ver créditos", _ver_creditos)
 	_boton(fila, "Jugar de nuevo", _jugar_de_nuevo)
 	_boton(fila, "Salir", _salir)
 
@@ -357,21 +358,33 @@ func _exportar() -> void:
 		return
 	var r := Exportacion.exportar_a_documentos()
 	if r["ok"]:
-		_boton_carpeta.hide()
 		_decir("Listo. Tus resultados quedaron en: %s" % r["ruta"])
 	else:
-		_boton_carpeta.show()
-		_decir("No pude copiarlos a Documentos. Están en esta carpeta: %s" % r["ruta_usuario"])
+		_decir("No pude copiarlos a Documentos. Están en esta carpeta (usa \"Abrir carpeta de datos\"): %s" % r["ruta_usuario"])
 
 
+## Abre la carpeta de datos del juego y muestra su ruta en pantalla.
 func _abrir_carpeta() -> void:
-	OS.shell_open(ProjectSettings.globalize_path("user://"))
+	var ruta := ProjectSettings.globalize_path("user://")
+	_decir("Carpeta de datos: %s" % ruta)
+	OS.shell_open(ruta)
+
+
+## Abre la valoración (opcional). Si ya se envió, el botón no hace nada.
+func _dar_opinion() -> void:
+	if Evaluacion.valoracion_enviada():
+		_decir("Ya recibimos tu opinión. ¡Gracias!")
+		return
+	var enviada := await Valoracion.mostrar(get_tree())
+	if is_instance_valid(_boton_opinion):
+		_boton_opinion.text = "Opinión enviada" if enviada else "Dar mi opinión sobre el juego"
+		_boton_opinion.grab_focus()
 
 
 func _ver_creditos() -> void:
 	await Creditos.mostrar(get_tree())
-	if is_instance_valid(_botones[1]):
-		_botones[1].grab_focus()   # vuelve al botón de créditos
+	if is_instance_valid(_boton_creditos):
+		_boton_creditos.grab_focus()
 
 
 func _jugar_de_nuevo() -> void:

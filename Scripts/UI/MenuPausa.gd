@@ -24,6 +24,7 @@ const CONTROLES := [
 	["ESPACIO", "Usar la habilidad elegida (Reparar: mantenlo pulsado; Visión: enciende y apaga)"],
 	["1 a 7 y rueda del ratón", "Elegir habilidad (también R y F)"],
 	["G", "Brújula: una flecha hacia donde te sugiere la Guía (tras pedirle una pista)"],
+	["F8", "Reportar un problema (si juegas desde el editor de Godot, la tecla Y)"],
 	["TAB", "Diario"],
 	["ESC", "Pausa"],
 ]
@@ -45,6 +46,7 @@ var _slider_musica: HSlider
 var _slider_efectos: HSlider
 var _casilla_pantalla: CheckButton
 var _casilla_avisos: CheckButton
+var _etiqueta_carpeta: Label
 var _sincronizando := false
 var _silenciar_foco := false   # true mientras el foco se pone por código (al cambiar de pantalla)
 
@@ -216,6 +218,16 @@ func _construir_controles() -> VBoxContainer:
 		que.custom_minimum_size = Vector2(170, 0)
 		rejilla.add_child(que)
 	v.add_child(rejilla)
+	# Dónde están los datos del juego (partida, resultados y reportes), con un botón para abrir la carpeta
+	_etiqueta_carpeta = EstiloUI.etiqueta("", 9, EstiloUI.GRIS)
+	_etiqueta_carpeta.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
+	_etiqueta_carpeta.custom_minimum_size = Vector2(330, 0)
+	var carpeta := _boton("Abrir carpeta de datos", func() -> void:
+		var ruta := ProjectSettings.globalize_path("user://")
+		_etiqueta_carpeta.text = "Carpeta de datos: %s" % ruta
+		OS.shell_open(ruta))
+	v.add_child(carpeta)
+	v.add_child(_etiqueta_carpeta)
 	var volver := _boton("Volver", func() -> void: _ir_a(Pagina.PRINCIPAL), "ui_cancelar")
 	v.add_child(volver)
 	_primer_foco[Pagina.CONTROLES] = volver

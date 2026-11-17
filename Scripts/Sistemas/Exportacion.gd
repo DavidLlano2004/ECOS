@@ -33,6 +33,10 @@ static func columnas() -> Array[String]:
 			if bloque != "escala":
 				c.append("pre_ok_" + str(p["id"]))
 				c.append("post_ok_" + str(p["id"]))
+	# La valoración del jugador (vacías si no la envió)
+	for u in Valoracion.USABILIDAD:
+		c.append("val_" + u[0])
+	c.append_array(["val_nota", "val_frecuencia", "val_sus", "val_gusto", "val_mejorar", "val_error"])
 	return c
 
 
@@ -64,6 +68,16 @@ static func fila() -> Dictionary:
 				if bloque != "escala":
 					var punto := Evaluacion.puntaje_de(fase, id)
 					f["%s_ok_%s" % [fase, id]] = punto if punto >= 0 else ""
+	var v: Dictionary = Evaluacion.valoracion
+	var respuestas_v: Dictionary = v.get("respuestas", {})
+	for u in Valoracion.USABILIDAD:
+		f["val_" + u[0]] = int(respuestas_v[u[0]]) if respuestas_v.has(u[0]) else ""
+	f["val_nota"] = int(v["nota"]) if v.has("nota") else ""
+	f["val_frecuencia"] = str(v.get("frecuencia", ""))
+	f["val_sus"] = snappedf(float(v["sus_puntaje"]), 0.1) if float(v.get("sus_puntaje", -1.0)) >= 0.0 else ""
+	f["val_gusto"] = str(v.get("gusto", ""))
+	f["val_mejorar"] = str(v.get("mejorar", ""))
+	f["val_error"] = str(v.get("error", ""))
 	return f
 
 
@@ -126,6 +140,54 @@ static func agregar_fila() -> String:
 	return ruta
 
 
+## Cuando el jugador envía su valoración (después de terminar el "post"): reemplaza las columnas val_* de su fila
+## en el CSV (el resto de la fila se queda igual) y reescribe el JSON de sesión. Si la fila no existe, la agrega.
+## Los comentarios libres se escriben bien aunque tengan comas, comillas o saltos de línea.
+static func actualizar_con_valoracion() -> String:
+	if not Evaluacion.consentimiento_guardar or not Evaluacion.valido:
+		return ""
+	var cols := columnas()
+	var encabezado := linea(cols)
+	var ruta := ruta_para(encabezado)
+	if not FileAccess.file_exists(ruta):
+		return agregar_fila()
+	var lectura := FileAccess.open(ruta, FileAccess.READ)
+	if lectura == null:
+		return ""
+	lectura.get_csv_line()   # el encabezado
+	var filas: Array = []
+	while not lectura.eof_reached():
+		var campos := lectura.get_csv_line()
+		if campos.size() > 1 or (campos.size() == 1 and campos[0] != ""):
+			filas.append(campos)
+	lectura.close()
+	var f := fila()
+	var primera_val := cols.find("val_" + Valoracion.USABILIDAD[0][0])
+	var encontrada := false
+	for i in filas.size():
+		if str(filas[i][0]) == Evaluacion.participante_id and filas[i].size() == cols.size():
+			var nueva: Array = []
+			for j in cols.size():
+				nueva.append(filas[i][j] if j < primera_val else f.get(cols[j], ""))
+			filas[i] = nueva
+			encontrada = true
+	if not encontrada:
+		var valores: Array = []
+		for c in cols:
+			valores.append(f.get(c, ""))
+		filas.append(valores)
+	var escritura := FileAccess.open(ruta, FileAccess.WRITE)
+	if escritura == null:
+		return ""
+	escritura.store_line(encabezado)
+	for fila_guardada in filas:
+		escritura.store_line(linea(fila_guardada))
+	escritura.close()
+	ultima_ruta = ruta
+	_escribir_sesion(f)
+	return ruta
+
+
 ## El JSON detallado de la sesión: user://sesiones/<id>.json
 static func _escribir_sesion(f: Dictionary) -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CARPETA_SESIONES))
@@ -140,6 +202,7 @@ static func _escribir_sesion(f: Dictionary) -> void:
 		"pre": Evaluacion.pre,
 		"post": Evaluacion.post,
 		"comparacion": Evaluacion.comparar(),
+		"valoracion": Evaluacion.valoracion,
 	}
 	var archivo := FileAccess.open("%s/%s.json" % [CARPETA_SESIONES, Evaluacion.participante_id], FileAccess.WRITE)
 	if archivo != null:

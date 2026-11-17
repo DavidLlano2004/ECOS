@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ddc7mkrkea7rk"
+
+[deps]
+
+files=["res://docs/analisis/_PRUEBA/salida/preguntas.bloque.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.emocion.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.pre.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.post.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.pct.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.pct.translation"]
+
+source_file="res://docs/analisis/_PRUEBA/salida/preguntas.csv"
+dest_files=["res://docs/analisis/_PRUEBA/salida/preguntas.bloque.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.emocion.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.pre.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.post.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.pct.translation", "res://docs/analisis/_PRUEBA/salida/preguntas.pct.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

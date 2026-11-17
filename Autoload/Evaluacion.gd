@@ -39,6 +39,9 @@ var momento_inicio_juego := 0.0
 ## true mientras hay un cuestionario en pantalla (el diario, la pausa y las habilidades no se abren).
 var cuestionario_activo := false
 
+## La valoración del jugador sobre el juego (ver Valoracion): {id_participante, fecha_iso, version_juego, respuestas,
+## nota, frecuencia, sus, sus_puntaje, gusto, mejorar, error}. Vacía si no la envió.
+var valoracion: Dictionary = {}
 var _semillas: Dictionary = {}
 ## true cuando la fila de esta partida ya se agregó al CSV (así no se repite).
 var _exportado := false
@@ -132,6 +135,7 @@ func reiniciar() -> void:
 	cuestionario_activo = false
 	_semillas.clear()
 	_exportado = false
+	valoracion = {}
 
 
 func _fase_vacia() -> Dictionary:
@@ -181,6 +185,19 @@ func _on_fase_terminada(fase: String) -> void:
 	if fase == "post" and post_completo() and not _exportado:
 		_exportado = true
 		Exportacion.agregar_fila()
+
+
+## true si el jugador ya envió su opinión sobre el juego.
+func valoracion_enviada() -> bool:
+	return not valoracion.is_empty()
+
+
+## Guarda la valoración. Con consentimiento entra también en el CSV y en el JSON de sesión (si el "post" ya está
+## hecho; si no, se exporta junto con su fila). Sin consentimiento NO se escribe nada.
+func guardar_valoracion(datos: Dictionary) -> void:
+	valoracion = datos
+	if consentimiento_guardar and post_completo():
+		Exportacion.actualizar_con_valoracion()
 
 
 # --- Preguntas ---
@@ -309,6 +326,8 @@ func a_diccionario() -> Dictionary:
 		d["pre"] = pre
 		d["post"] = post
 		d["momento_inicio_juego"] = momento_inicio_juego
+		if not valoracion.is_empty():
+			d["valoracion"] = valoracion
 	return d
 
 
@@ -325,6 +344,8 @@ func desde_diccionario(d: Variant) -> void:
 		pre = _fase_limpia(d.get("pre", null))
 		post = _fase_limpia(d.get("post", null))
 		momento_inicio_juego = float(d.get("momento_inicio_juego", 0.0)) if typeof(d.get("momento_inicio_juego", 0.0)) in [TYPE_INT, TYPE_FLOAT] else 0.0
+		if typeof(d.get("valoracion", null)) == TYPE_DICTIONARY:
+			valoracion = d["valoracion"]
 	elif typeof(d.get("pre_completo", false)) == TYPE_BOOL and d["pre_completo"]:
 		# Sin consentimiento no hay respuestas guardadas, pero se recuerda que el "pre" ya se hizo
 		pre = _fase_vacia()
