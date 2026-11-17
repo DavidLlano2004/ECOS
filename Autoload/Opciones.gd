@@ -66,7 +66,9 @@ func poner_avisos_pistas(activos: bool) -> void:
 func _aplicar_todo() -> void:
 	_aplicar_volumen(BUS_MUSICA, volumen_musica)
 	_aplicar_volumen(BUS_EFECTOS, volumen_efectos)
-	_aplicar_pantalla()
+	# En la web la pantalla completa solo se puede pedir tras un clic o una tecla: nunca al empezar
+	if not OS.has_feature("web"):
+		_aplicar_pantalla()
 
 
 func _aplicar_volumen(bus: String, valor: float) -> void:
@@ -102,5 +104,5 @@ func cargar() -> void:
 		return
 	volumen_musica = clampf(float(config.get_value("audio", "musica", VOLUMEN_POR_DEFECTO)), 0.0, 1.0)
 	volumen_efectos = clampf(float(config.get_value("audio", "efectos", VOLUMEN_POR_DEFECTO)), 0.0, 1.0)
-	pantalla_completa = bool(config.get_value("pantalla", "completa", false))
+	pantalla_completa = bool(config.get_value("pantalla", "completa", false)) and not OS.has_feature("web")
 	avisos_pistas = bool(config.get_value("ayuda", "avisos_pistas", true))

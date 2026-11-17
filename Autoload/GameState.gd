@@ -386,13 +386,18 @@ func guardar() -> bool:
 	}
 	if tiene_posicion:
 		contenido["posicion"] = [posicion_jugador.x, posicion_jugador.y]
-	var temporal := RUTA_GUARDADO + ".tmp"
+	# En la web se escribe directo al archivo final: el almacenamiento del navegador (IndexedDB) se sincroniza al
+	# cerrar el archivo, y un renombrado posterior no lo dispararía. En escritorio se usa el archivo temporal.
+	var en_web := OS.has_feature("web")
+	var temporal := RUTA_GUARDADO if en_web else RUTA_GUARDADO + ".tmp"
 	var archivo := FileAccess.open(temporal, FileAccess.WRITE)
 	if archivo == null:
 		push_error("GameState: no se pudo guardar (error %d)." % FileAccess.get_open_error())
 		return false
 	archivo.store_string(JSON.stringify(contenido, "	"))
 	archivo.close()
+	if en_web:
+		return true
 	var error := DirAccess.rename_absolute(ProjectSettings.globalize_path(temporal), ProjectSettings.globalize_path(RUTA_GUARDADO))
 	if error != OK:
 		push_error("GameState: no se pudo terminar de guardar (error %d)." % error)

@@ -226,6 +226,11 @@ func _construir_controles() -> VBoxContainer:
 		var ruta := ProjectSettings.globalize_path("user://")
 		_etiqueta_carpeta.text = "Carpeta de datos: %s" % ruta
 		OS.shell_open(ruta))
+	if OS.has_feature("web"):
+		# En la web no hay carpeta que abrir: la partida vive en el almacenamiento de este navegador
+		carpeta.hide()
+		_etiqueta_carpeta.text = "En la web, tu partida se guarda en este navegador."
+		_etiqueta_carpeta.add_theme_color_override("font_color", EstiloUI.DORADO)
 	v.add_child(carpeta)
 	v.add_child(_etiqueta_carpeta)
 	var volver := _boton("Volver", func() -> void: _ir_a(Pagina.PRINCIPAL), "ui_cancelar")

@@ -128,7 +128,9 @@ func enviar() -> void:
 	cerrar(true)
 	if ruta != "":
 		var detalle := ""
-		if not Evaluacion.consentimiento_guardar:
+		if OS.has_feature("web"):
+			detalle = "Se descargó en tu navegador. Si quieres, compártelo."
+		elif not Evaluacion.consentimiento_guardar:
 			detalle = "Está en tu computador: %s. Si quieres, compártelo." % ProjectSettings.globalize_path(CARPETA)
 		Notificacion.mostrar("Gracias, quedó guardado", detalle)
 
@@ -181,6 +183,11 @@ func guardar(texto: String, captura: Image = null) -> String:
 	archivo.store_string(JSON.stringify(datos, "  "))
 	archivo.close()
 	ultimo_reporte = ruta_json
+	# En la web no hay carpeta a la vista: el reporte y su captura se descargan en el navegador
+	if OS.has_feature("web"):
+		Exportacion.descargar(ruta_json, "%s.json" % nombre, "application/json;charset=utf-8")
+		if datos["captura"] != "":
+			Exportacion.descargar("%s/%s" % [CARPETA, datos["captura"]], datos["captura"], "image/png")
 	return ruta_json
 
 

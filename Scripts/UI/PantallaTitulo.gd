@@ -365,7 +365,27 @@ func _saltar_intro() -> void:
 
 # --- Menú ---
 
+## true en un móvil o con una pantalla táctil pequeña (en la web): ECOS se juega con teclado.
+static func es_movil() -> bool:
+	if OS.has_feature("web_android") or OS.has_feature("web_ios"):
+		return true
+	return OS.has_feature("web") and DisplayServer.is_touchscreen_available() and DisplayServer.screen_get_size().x <= 1100
+
+
 func _preparar_menu() -> void:
+	# En la web no se puede cerrar la pestaña desde el juego
+	if OS.has_feature("web"):
+		boton_salir.visible = false
+	if es_movil():
+		var aviso := Label.new()
+		aviso.text = "ECOS se juega con teclado, ábrelo en un computador"
+		aviso.add_theme_font_size_override("font_size", 9)
+		aviso.add_theme_color_override("font_color", Color("f4c77b"))
+		aviso.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		aviso.position = Vector2(0, 342)   # (el título es un Node2D: sin anclas)
+		aviso.size = Vector2(640, 14)
+		aviso.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(aviso)
 	boton_continuar.visible = GameState.hay_partida_guardada()
 	for boton in [boton_comenzar, boton_continuar, boton_salir]:
 		boton.focus_entered.connect(_on_foco_cambiado.bind(boton))

@@ -210,9 +210,34 @@ static func _escribir_sesion(f: Dictionary) -> void:
 		archivo.close()
 
 
+## Descarga un archivo de user:// en el navegador (solo en la web, con JavaScriptBridge). Devuelve true si lo pidió.
+static func descargar(ruta_usuario: String, nombre: String, mime: String) -> bool:
+	if not OS.has_feature("web") or not FileAccess.file_exists(ruta_usuario):
+		return false
+	var bytes := FileAccess.get_file_as_bytes(ruta_usuario)
+	JavaScriptBridge.download_buffer(bytes, nombre, mime)
+	return true
+
+
+## En la web no hay carpeta Documentos: el botón DESCARGA el CSV (ECOS_resultados.csv) y el JSON de la sesión.
+static func _exportar_descargando() -> Dictionary:
+	var resultado := {"ok": false, "ruta": "", "ruta_usuario": ""}
+	var origen := ultima_ruta if ultima_ruta != "" else RUTA_CSV
+	if not Evaluacion.consentimiento_guardar or not FileAccess.file_exists(origen):
+		return resultado
+	if descargar(origen, NOMBRE_EXPORTADO, "text/csv;charset=utf-8"):
+		resultado["ok"] = true
+		resultado["ruta"] = "descargas de tu navegador (%s)" % NOMBRE_EXPORTADO
+		var sesion := "%s/%s.json" % [CARPETA_SESIONES, Evaluacion.participante_id]
+		descargar(sesion, "ECOS_sesion_%s.json" % Evaluacion.participante_id, "application/json;charset=utf-8")
+	return resultado
+
+
 ## Copia el CSV a la carpeta Documentos del usuario como ECOS_resultados.csv. Devuelve
 ## {ok, ruta (donde quedó), ruta_usuario (la carpeta de user:// en el disco)}.
 static func exportar_a_documentos() -> Dictionary:
+	if OS.has_feature("web"):
+		return _exportar_descargando()
 	var origen := ultima_ruta if ultima_ruta != "" else RUTA_CSV
 	var carpeta_usuario := ProjectSettings.globalize_path("user://")
 	var resultado := {"ok": false, "ruta": "", "ruta_usuario": carpeta_usuario}

@@ -157,9 +157,13 @@ func _construir() -> void:
 	_boton_exportar = _boton(fila, "Exportar mis resultados" if Evaluacion.consentimiento_guardar else "Los datos no se guardaron porque elegiste jugar sin guardar", _exportar)
 	_boton_opinion = _boton(fila, "Opinión enviada" if Evaluacion.valoracion_enviada() else "Dar mi opinión sobre el juego", _dar_opinion)
 	_boton_carpeta = _boton(fila, "Abrir carpeta de datos", _abrir_carpeta)
+	if OS.has_feature("web"):
+		_boton_carpeta.hide()   # en la web no hay carpeta que abrir: los datos se descargan
+		_botones.erase(_boton_carpeta)
 	_boton_creditos = _boton(fila, "Ver créditos", _ver_creditos)
 	_boton(fila, "Jugar de nuevo", _jugar_de_nuevo)
-	_boton(fila, "Salir", _salir)
+	if not OS.has_feature("web"):   # en la web no se puede cerrar la pestaña desde el juego
+		_boton(fila, "Salir", _salir)
 
 
 func _texto(texto: String, tamano: int, color: Color) -> Label:
@@ -358,9 +362,9 @@ func _exportar() -> void:
 		return
 	var r := Exportacion.exportar_a_documentos()
 	if r["ok"]:
-		_decir("Listo. Tus resultados quedaron en: %s" % r["ruta"])
+		_decir(("Listo. Tus resultados quedaron en: %s" if not OS.has_feature("web") else "Listo. Se descargó en: %s") % r["ruta"])
 	else:
-		_decir("No pude copiarlos a Documentos. Están en esta carpeta (usa \"Abrir carpeta de datos\"): %s" % r["ruta_usuario"])
+		_decir("No pude copiarlos a Documentos. Están en esta carpeta (usa \"Abrir carpeta de datos\"): %s" % r["ruta_usuario"] if not OS.has_feature("web") else "No pude descargar el archivo. Prueba de nuevo.")
 
 
 ## Abre la carpeta de datos del juego y muestra su ruta en pantalla.
