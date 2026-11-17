@@ -85,7 +85,7 @@ func _mostrar_aviso(texto: String) -> void:
 	if texto == "":
 		return
 	_etiqueta.text = texto
-	Sonido.efecto("pista")
+	Sonido.pista()
 	if _tween_aviso != null:
 		_tween_aviso.kill()
 	_tween_aviso = create_tween()

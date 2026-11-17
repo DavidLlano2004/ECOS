@@ -229,6 +229,8 @@ func interactuar() -> void:
 		return
 	GameState.marcar_compuerta_vista(id)
 	var datos := Progresion.compuerta(id)
+	if not GameState.tiene_habilidad(habilidad_requerida):
+		Sonido.pista()   # la pista de un obstáculo cerrado sin la habilidad
 	await Dialogo.mostrar_texto(str(datos.get("nombre", "")), GameState.pista_de_compuerta(id))
 
 

@@ -230,6 +230,7 @@ func texto_siguiente_paso() -> String:
 func registrar_pista_guia() -> void:
 	if paso_guia.is_empty():
 		paso_guia = Progresion.siguiente_paso()
+	Sonido.pista()   # la respuesta de "¿Qué hago ahora?"
 	registrar_pista("guia|" + str(paso_guia["texto"]).sha1_text().substr(0, 8), "La Guía", str(paso_guia["texto"]))
 
 

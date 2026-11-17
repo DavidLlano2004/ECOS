@@ -175,6 +175,20 @@ func _cargar(nombre: String) -> AudioStream:
 
 # --- Efectos ---
 
+## El sonido de una pista suave (el aviso junto a una compuerta, la pista al interactuar con ella y la respuesta
+## de la Guía): -6 dB, tono +-5 % y como mucho una vez cada 5 s (se repite mucho).
+const SEGUNDOS_ENTRE_PISTAS := 5.0
+var _ultima_pista := -INF
+
+
+func pista() -> void:
+	var ahora := Time.get_ticks_msec() / 1000.0
+	if ahora - _ultima_pista < SEGUNDOS_ENTRE_PISTAS:
+		return
+	_ultima_pista = ahora
+	efecto("pista", -6.0, 0.05)
+
+
 ## Reproduce un efecto. volumen_db sobreescribe el de VOLUMEN_DB; variacion = cuánto cambia el tono al azar
 ## (0.05 = un 5 % arriba o abajo). Dos veces el mismo efecto en menos de 40 ms cuentan como una.
 func efecto(nombre: String, volumen_db: float = NAN, variacion: float = 0.0, retraso: float = 0.0) -> void:
@@ -302,8 +316,8 @@ func _conectar_senales() -> void:
 	GameState.emocion_resuelta.connect(_on_emocion_resuelta)
 	GameState.habilidad_desbloqueada.connect(func(_id: String) -> void: efecto("habilidad_desbloqueada"))
 	GameState.fragmento_recogido.connect(func(_id: String) -> void: efecto("fragmento_recogido"))
-	# Mejora de habilidad: suena un poco después del cofre (cuando sale el aviso de la mejora)
-	GameState.cofre_abierto.connect(func(_id: String) -> void: efecto("mejora_habilidad", NAN, 0.0, 0.7))
+	# Mejora de habilidad: suena 0.9 s después del cofre, justo cuando sale la tarjeta de la mejora
+	GameState.cofre_abierto.connect(func(_id: String) -> void: efecto("mejora_habilidad", NAN, 0.0, 0.9))
 	GameState.compuerta_abierta.connect(func(_id: String) -> void: efecto("compuerta_abre"))
 	Habilidades.habilidad_usada.connect(func(id: String) -> void: efecto(SONIDO_DE_HABILIDAD.get(id, "")))
 	Habilidades.uso_denegado.connect(func(_id: String) -> void: efecto("hab_denegada"))
