@@ -9,6 +9,7 @@ Godot 4.7.2, GDScript. Todo en español. Un commit por tarea y **sin líneas de 
 
 ## Lo hecho en la última etapa (commits, de más nuevo a más viejo)
 
+- Sistema de evaluación y final (prompts 5.1 y 5.2): ver `CLAUDE.md`, sección "Evaluación y final del juego". La pantalla de resultados es TEMPORAL (falta el prompt 5.3).
 - Santuarios, cofres y mejoras de habilidad (prompt 4.6): ver `CLAUDE.md`, sección "Santuarios, cofres de memoria y mejoras". El cofre ya está colocado en cada santuario.
 - Compuertas de habilidad, progresión y pistas (prompt 4.5): ver `CLAUDE.md`, sección "Compuertas de habilidad y progresión". Antes, "Sprite del cofre de memoria" (`CofreMemoria.tscn`, `frames_cofre.tres`).
 
