@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Objetos/CofreMemoria.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://Resources/Mundo/frames_cofre.tres" id="2_frames"]
+[ext_resource type="Texture2D" path="res://Resources/Mundo/luz_calida.tres" id="3_luz"]
+
+[sub_resource type="RectangleShape2D" id="Forma_base"]
+size = Vector2(38, 12)
+
+[node name="CofreMemoria" type="StaticBody2D"]
+collision_layer = 1
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.55, 0.55)
+sprite_frames = ExtResource("2_frames")
+animation = &"cerrado"
+centered = false
+offset = Vector2(-48, -94)
+
+[node name="Forma" type="CollisionShape2D" parent="."]
+position = Vector2(0, -6)
+shape = SubResource("Forma_base")
+
+[node name="LuzGema" type="PointLight2D" parent="."]
+position = Vector2(0, -15)
+color = Color(0.7, 0.4, 1, 1)
+energy = 0.35
+texture = ExtResource("3_luz")
+texture_scale = 0.3
+
+[node name="LuzDorada" type="PointLight2D" parent="."]
+position = Vector2(0, -18)
+color = Color(1, 0.82, 0.4, 1)
+energy = 0.0
+texture = ExtResource("3_luz")
+texture_scale = 0.6

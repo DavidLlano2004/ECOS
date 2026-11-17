@@ -1,0 +1,77 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Mundo/cofre.png" id="1_hoja"]
+
+[sub_resource type="AtlasTexture" id="A0"]
+atlas = ExtResource("1_hoja")
+region = Rect2(0, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="A1"]
+atlas = ExtResource("1_hoja")
+region = Rect2(96, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="A2"]
+atlas = ExtResource("1_hoja")
+region = Rect2(192, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="A3"]
+atlas = ExtResource("1_hoja")
+region = Rect2(288, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="A4"]
+atlas = ExtResource("1_hoja")
+region = Rect2(0, 96, 96, 96)
+
+[sub_resource type="AtlasTexture" id="A5"]
+atlas = ExtResource("1_hoja")
+region = Rect2(96, 96, 96, 96)
+
+[sub_resource type="AtlasTexture" id="A6"]
+atlas = ExtResource("1_hoja")
+region = Rect2(192, 96, 96, 96)
+
+[sub_resource type="AtlasTexture" id="A7"]
+atlas = ExtResource("1_hoja")
+region = Rect2(288, 96, 96, 96)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("A0")
+}, {
+"duration": 1.0,
+"texture": SubResource("A1")
+}, {
+"duration": 1.0,
+"texture": SubResource("A2")
+}, {
+"duration": 1.0,
+"texture": SubResource("A3")
+}],
+"loop": true,
+"name": &"cerrado",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("A4")
+}, {
+"duration": 1.0,
+"texture": SubResource("A5")
+}, {
+"duration": 1.0,
+"texture": SubResource("A6")
+}],
+"loop": false,
+"name": &"abriendo",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("A7")
+}],
+"loop": false,
+"name": &"abierto",
+"speed": 5.0
+}]
