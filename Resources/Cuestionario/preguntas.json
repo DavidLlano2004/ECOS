@@ -1,0 +1,111 @@
+{
+ "version": 1,
+ "nota": "Banco de preguntas de ECOS (evaluación inicial y final). En trivia y situaciones, la opción 0 siempre es la correcta o más sana; en pantalla las opciones se barajan. Se edita sin tocar código (ids únicos; el orden de las emociones es el de EmocionData.orden).",
+ "trivia": [
+  {
+   "id": "t_rabia", "emocion": "rabia",
+   "texto": "¿Para qué suele servir la rabia?",
+   "opciones": ["Para avisarnos de que algo que nos importa se siente amenazado o injusto", "Para castigar a los demás", "Para demostrar que somos fuertes"],
+   "correcta": 0,
+   "explicacion": "La rabia suele aparecer cuando algo que nos importa se siente amenazado o injusto. Escucharla ayuda a entender qué necesitamos."
+  },
+  {
+   "id": "t_miedo", "emocion": "miedo",
+   "texto": "¿Qué función tiene el miedo?",
+   "opciones": ["Avisarnos de un posible peligro para que podamos cuidarnos", "Impedirnos intentar cosas nuevas", "Mostrar que algo está mal en nosotros"],
+   "correcta": 0,
+   "explicacion": "El miedo nos avisa de un posible peligro. Con compañía y paso a paso, se vuelve cuidado en vez de freno."
+  },
+  {
+   "id": "t_tristeza", "emocion": "tristeza",
+   "texto": "Cuando estamos tristes, ¿qué suele ayudar?",
+   "opciones": ["Permitirnos sentirla y compartirla con alguien", "Fingir que no pasa nada", "Distraernos para no pensar nunca en ello"],
+   "correcta": 0,
+   "explicacion": "Sentir la tristeza y compartirla ayuda a soltarla. Taparla o evitarla suele hacer que dure más."
+  },
+  {
+   "id": "t_soledad", "emocion": "soledad",
+   "texto": "Sentir soledad suele ser una señal de...",
+   "opciones": ["Necesitar cercanía y conexión con otras personas", "Ser una persona débil", "Que a nadie le importamos"],
+   "correcta": 0,
+   "explicacion": "La soledad pide cercanía: es una señal de que necesitamos conexión, no de debilidad."
+  },
+  {
+   "id": "t_culpa", "emocion": "culpa",
+   "texto": "¿Qué puede hacer la culpa cuando es sana?",
+   "opciones": ["Invitarnos a reparar el daño y a aprender", "Castigarnos para siempre", "Convencernos de que somos malas personas"],
+   "correcta": 0,
+   "explicacion": "La culpa sana nos invita a reparar y aprender. Castigarnos sin parar no arregla nada."
+  },
+  {
+   "id": "t_ansiedad", "emocion": "ansiedad",
+   "texto": "¿Qué ayuda cuando la ansiedad sube?",
+   "opciones": ["Respirar despacio y hacer una cosa a la vez", "Hacer todo a la vez para terminar ya", "Evitar pensar en lo que nos preocupa"],
+   "correcta": 0,
+   "explicacion": "Respirar y hacer una cosa a la vez baja la urgencia. Acelerarlo todo o evitarlo suele aumentarla."
+  },
+  {
+   "id": "t_verguenza", "emocion": "verguenza",
+   "texto": "¿Qué nos dice la vergüenza?",
+   "opciones": ["Que nos importa cómo nos ven y queremos cuidar nuestros vínculos", "Que debemos escondernos siempre", "Que somos peores que los demás"],
+   "correcta": 0,
+   "explicacion": "La vergüenza muestra que nos importa cómo nos ven y cuidar nuestros vínculos. Hablarla con cariño le quita peso."
+  }
+ ],
+ "situaciones": [
+  {
+   "id": "s_rabia", "emocion": "rabia",
+   "texto": "Cuando sientes rabia, ¿qué sueles hacer?",
+   "opciones": ["Intento entender qué pasó", "La aguanto", "Exploto"],
+   "correcta": 0
+  },
+  {
+   "id": "s_miedo", "emocion": "miedo",
+   "texto": "Cuando algo te da miedo, ¿qué haces?",
+   "opciones": ["Busco apoyo", "Lo evito", "Me obligo a seguir sin pensar"],
+   "correcta": 0
+  },
+  {
+   "id": "s_tristeza", "emocion": "tristeza",
+   "texto": "Cuando estás triste, ¿qué haces?",
+   "opciones": ["Me permito sentirlo o lo hablo", "Me aíslo", "Hago como si nada"],
+   "correcta": 0
+  },
+  {
+   "id": "s_soledad", "emocion": "soledad",
+   "texto": "Cuando te sientes solo o sola, ¿qué haces?",
+   "opciones": ["Busco a alguien y le cuento cómo me siento", "Me aíslo más y hago como si no me importara", "Me ocupo en mil cosas para no sentirlo"],
+   "correcta": 0
+  },
+  {
+   "id": "s_culpa", "emocion": "culpa",
+   "texto": "Cuando sientes culpa por algo que hiciste, ¿qué haces?",
+   "opciones": ["Reconozco lo que pasó y busco cómo repararlo", "Me castigo y me lo repito una y otra vez", "Intento olvidarlo y no pensar en eso"],
+   "correcta": 0
+  },
+  {
+   "id": "s_ansiedad", "emocion": "ansiedad",
+   "texto": "Cuando sientes que todo se te junta y no alcanzas, ¿qué haces?",
+   "opciones": ["Respiro y hago una cosa a la vez", "Me acelero y hago todo a la vez", "Lo dejo para después"],
+   "correcta": 0
+  },
+  {
+   "id": "s_verguenza", "emocion": "verguenza",
+   "texto": "Cuando sientes vergüenza por algo que hiciste o dijiste, ¿qué haces?",
+   "opciones": ["Lo reconozco y dejo que pase", "Me escondo y evito que me vean", "Lo tapo con una broma o hago como si nada"],
+   "correcta": 0
+  }
+ ],
+ "escala": [
+  {
+   "id": "e_entiendo",
+   "texto": "Entiendo lo que siento cuando tengo una emoción difícil.",
+   "minimo": "Nada de acuerdo", "maximo": "Totalmente de acuerdo", "valores": 5
+  },
+  {
+   "id": "e_se_hacer",
+   "texto": "Sé qué hacer para sentirme mejor cuando una emoción me desborda.",
+   "minimo": "Nada de acuerdo", "maximo": "Totalmente de acuerdo", "valores": 5
+  }
+ ]
+}

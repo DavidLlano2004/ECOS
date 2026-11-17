@@ -1,87 +1,14 @@
-# Onboarding: el Guía explica el mundo y hace una pregunta por emoción (7).
-# Cada respuesta se guarda en GameState.respuestas_inicio como 0, 1 o 2
-# (en el mismo orden en que aparecen las opciones). No hay respuestas correctas.
-#
-# Las preguntas siguen el orden de EmocionData.orden (rabia, miedo, tristeza, soledad,
-# culpa, ansiedad, verguenza). Antes de cada pregunta se avisa a la escena
-# (Scenes/Intro/Onboarding.tscn, que se pasa como estado extra) para que muestre a
-# la criatura; al responder se oculta.
+# Onboarding: el Guía explica el mundo. Las preguntas de la evaluación inicial ya no están aquí: viven en
+# Resources/Cuestionario/preguntas.json y las hace Scenes/UI/Cuestionario.tscn (ver Evaluacion).
+# "start" va antes del consentimiento y las preguntas; "despedida", después.
 
 ~ start
 Guía: Este mundo existe en dos tiempos: el Pasado y el Presente.
 Guía: Lo que no se atiende en el Pasado se convierte en el Presente, el mundo en que vives hoy.
-Guía: Antes de empezar, quiero conocerte. No hay respuestas correctas.
+Guía: Antes de empezar, quiero conocerte un poco. Te haré unas preguntas: no es un examen, solo una forma de acompañarte mejor.
+=> END
 
-$> mostrar_emocion("rabia")
-Guía: Cuando sientes rabia, ¿qué sueles hacer?
-- La aguanto
-	$> GameState.respuestas_inicio.append(0)
-- Exploto
-	$> GameState.respuestas_inicio.append(1)
-- Intento entender qué pasó
-	$> GameState.respuestas_inicio.append(2)
-$> ocultar_emocion()
-
-$> mostrar_emocion("miedo")
-Guía: Cuando algo te da miedo, ¿qué haces?
-- Lo evito
-	$> GameState.respuestas_inicio.append(0)
-- Me obligo a seguir sin pensar
-	$> GameState.respuestas_inicio.append(1)
-- Busco apoyo
-	$> GameState.respuestas_inicio.append(2)
-$> ocultar_emocion()
-
-$> mostrar_emocion("tristeza")
-Guía: Cuando estás triste, ¿qué haces?
-- Me aíslo
-	$> GameState.respuestas_inicio.append(0)
-- Hago como si nada
-	$> GameState.respuestas_inicio.append(1)
-- Me permito sentirlo o lo hablo
-	$> GameState.respuestas_inicio.append(2)
-$> ocultar_emocion()
-
-$> mostrar_emocion("soledad")
-Guía: Cuando te sientes solo, ¿qué haces?
-- Me quedo callado y espero a que pase
-	$> GameState.respuestas_inicio.append(0)
-- Me distraigo con cualquier cosa
-	$> GameState.respuestas_inicio.append(1)
-- Busco a alguien y le cuento cómo me siento
-	$> GameState.respuestas_inicio.append(2)
-$> ocultar_emocion()
-
-$> mostrar_emocion("culpa")
-Guía: Cuando sientes que te equivocaste, ¿qué haces?
-- Me castigo pensando en ello una y otra vez
-	$> GameState.respuestas_inicio.append(0)
-- Pienso en otra cosa y hago como si nada
-	$> GameState.respuestas_inicio.append(1)
-- Reconozco el error e intento repararlo
-	$> GameState.respuestas_inicio.append(2)
-$> ocultar_emocion()
-
-$> mostrar_emocion("ansiedad")
-Guía: Cuando sientes que todo se te junta y no alcanzas, ¿qué haces?
-- Me acelero y hago todo a la vez
-	$> GameState.respuestas_inicio.append(0)
-- Lo dejo para después
-	$> GameState.respuestas_inicio.append(1)
-- Respiro y hago una cosa a la vez
-	$> GameState.respuestas_inicio.append(2)
-$> ocultar_emocion()
-
-$> mostrar_emocion("verguenza")
-Guía: Cuando sientes vergüenza por algo que hiciste o dijiste, ¿qué haces?
-- Me escondo y evito que me vean
-	$> GameState.respuestas_inicio.append(0)
-- Lo tapo con una broma o hago como si nada
-	$> GameState.respuestas_inicio.append(1)
-- Lo reconozco y dejo que pase
-	$> GameState.respuestas_inicio.append(2)
-$> ocultar_emocion()
-
+~ despedida
 Guía: Gracias. Ya sé un poco más de ti.
 Guía: Ve. Lo que encuentres allí también es parte de ti.
 => END

@@ -41,6 +41,8 @@ func hay_menu() -> bool:
 func puede_abrir() -> bool:
 	if Dialogo.hay_dialogo() or not Dialogo.pausa_permitida():
 		return false
+	if Evaluacion.cuestionario_activo:
+		return false   # la evaluación no se interrumpe con la pausa ni el diario
 	if Habilidades.bloqueado_por("transicion"):
 		return false
 	return get_tree().get_first_node_in_group("player") != null

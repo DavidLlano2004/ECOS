@@ -62,8 +62,7 @@ var pistas: Array[Dictionary] = []
 var pista_niveles: Dictionary = {}
 ## Último paso sugerido por la Guía ("¿Qué hago ahora?"): lo usa la brújula (G). No se guarda.
 var paso_guia: Dictionary = {}
-var respuestas_inicio: Array[int] = []
-var respuestas_final: Array[int] = []
+## (Las respuestas de la evaluación inicial y final viven ahora en el autoload Evaluacion.)
 ## Mensajes capturados: [{"id": "rabia", "texto": "..."}]
 var diario: Array[Dictionary] = []
 ## true cuando la Guía ya explicó lo básico en el mundo (así solo lo hace la primera vez).
@@ -351,8 +350,6 @@ func nueva_partida() -> void:
 	recuerdos_completos = false
 	tiene_posicion = false
 	restaurar_posicion = false
-	respuestas_inicio.clear()
-	respuestas_final.clear()
 	diario.clear()
 	guia_conocida = false
 	cofres.clear()
@@ -377,8 +374,7 @@ func guardar() -> bool:
 		"fragmentos": fragmentos,
 		"consejos_vistos": consejos_vistos,
 		"recuerdos_completos": recuerdos_completos,
-		"respuestas_inicio": respuestas_inicio,
-		"respuestas_final": respuestas_final,
+		"evaluacion": Evaluacion.a_diccionario(),
 		"diario": diario,
 		"guia_conocida": guia_conocida,
 		"compuertas": compuertas,
@@ -464,13 +460,8 @@ func cargar() -> bool:
 				for indice in vistos[id]:
 					if (typeof(indice) == TYPE_FLOAT or typeof(indice) == TYPE_INT) and int(indice) >= 0:
 						marcar_consejo_visto(str(id), int(indice))
-	# JSON devuelve los números como float, se pasan a int
-	for r in _lista(lectura, "respuestas_inicio"):
-		if typeof(r) == TYPE_FLOAT or typeof(r) == TYPE_INT:
-			respuestas_inicio.append(int(r))
-	for r in _lista(lectura, "respuestas_final"):
-		if typeof(r) == TYPE_FLOAT or typeof(r) == TYPE_INT:
-			respuestas_final.append(int(r))
+	# La evaluación (pre, consentimiento...) vuelve a su sitio; el "pre" ya hecho no se repite
+	Evaluacion.desde_diccionario(lectura.get("evaluacion", null))
 	for entrada in _lista(lectura, "diario"):
 		if typeof(entrada) == TYPE_DICTIONARY and entrada.has("id") and entrada.has("texto"):
 			diario.append({"id": str(entrada["id"]), "texto": str(entrada["texto"])})

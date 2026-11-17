@@ -26,6 +26,8 @@ Opciones="*res://Autoload/Opciones.gd"
 Sonido="*res://Autoload/Sonido.gd"
 Guardado="*res://Autoload/Guardado.gd"
 Menus="*res://Autoload/Menus.gd"
+Evaluacion="*res://Autoload/Evaluacion.gd"
+Depuracion="*res://Autoload/Depuracion.gd"
 
 [dialogue_manager]
 

@@ -34,6 +34,10 @@ const SEGUNDOS_POR_LETRA := 0.03
 ## true si la última conversación terminó porque el jugador canceló (ESC o "Ahora no"). Se actualiza en mostrar().
 var cancelada := false
 
+## SOLO PARA PRUEBAS automáticas: si no es -99, mostrar_texto() no abre nada y devuelve al instante esa opción
+## (limitada a las que haya; -1 si no hay opciones). Nunca se toca en el juego.
+var respuesta_de_prueba := -99
+
 ## Retratos opcionales por nombre de personaje, para que el balloon los muestre a la izquierda.
 ## Ejemplo: Dialogo.retratos["Guía"] = textura. (Quien lo registre debe quitarlo al terminar.)
 var retratos: Dictionary = {}
@@ -103,6 +107,9 @@ func mostrar(recurso_dialogo: DialogueResource, titulo: String = "start", estado
 ## Devuelve el índice de la opción elegida (0, 1...) o -1 si no se eligió nada o se canceló (ESC o "Ahora no").
 ## Para distinguir cancelar de terminar, mira Dialogo.cancelada justo después de esperar.
 func mostrar_texto(nombre: String, texto: Variant, opciones: Array = [], retrato: Texture2D = null, automatico: bool = false) -> int:
+	if respuesta_de_prueba != -99:
+		await get_tree().process_frame
+		return mini(respuesta_de_prueba, opciones.size() - 1) if not opciones.is_empty() else -1
 	var paginas: Array = texto if texto is Array else [texto]
 	var guion := "~ start\n"
 	for pagina in paginas:

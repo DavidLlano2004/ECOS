@@ -1,9 +1,7 @@
 extends Node2D
-## Onboarding cinematográfico: el Guía explica el mundo, hace una pregunta por emoción
-## (con la criatura apareciendo detrás de él) y se despide abriendo el portal.
-##
-## Las respuestas se guardan solas en GameState.respuestas_inicio desde el .dialogue.
-## El .dialogue llama a mostrar_emocion() y ocultar_emocion() de esta escena (se pasa como estado extra).
+## Onboarding cinematográfico: el Guía explica el mundo, se muestra el consentimiento y la evaluación inicial
+## (Evaluacion, fase "pre", Cuestionario) y se despide abriendo el portal. Si el "pre" ya está hecho (partida
+## cargada), no se repite. Las preguntas ya no están aquí: están en Resources/Cuestionario/preguntas.json.
 
 ## TEMPORAL: a donde se va al terminar. Cambiar por el mapa real en el Paso 3.
 const ESCENA_SIGUIENTE := "res://Scenes/Mundo/Mundo.tscn"
@@ -39,9 +37,6 @@ var _tiempo := 0.0
 
 
 func _ready() -> void:
-	# Si se abre sola con F6, las respuestas no deben acumularse
-	GameState.respuestas_inicio.clear()
-
 	_crear_niebla()
 	linterna.texture = Atmosfera.crear_textura_luz(128)
 	luz_portal.texture = Atmosfera.crear_textura_luz(128)
@@ -77,12 +72,18 @@ func _process(delta: float) -> void:
 
 func _empezar() -> void:
 	await _aparecer_guia()
-	# El cuestionario de entrada NO se puede cancelar ni saltar (ni con "Ahora no" ni con ESC): es la
-	# evaluación del aprendizaje y debe quedar completo. Lo mismo vale para el cuestionario de salida.
-	# Por eso se pasa cancelable = false (y Dialogo.pausa_permitida() devuelve false mientras dura).
+	# La introducción del Guía no se puede cancelar (cancelable = false)
 	await Dialogo.mostrar(DIALOGO, "start", [self], false)
+	# Consentimiento y evaluación inicial (no se pueden cancelar ni saltar). Con el "pre" ya hecho, no se repite.
+	if not Evaluacion.pre_completo():
+		if not Evaluacion.consentimiento_dado:
+			await Consentimiento.mostrar(get_tree())
+		if Evaluacion.valido:
+			await Cuestionario.mostrar(get_tree(), "pre")
+		else:
+			push_warning("Onboarding: el banco de preguntas no es válido; se salta la evaluación inicial.")
+	await Dialogo.mostrar(DIALOGO, "despedida", [self], false)
 	ocultar_emocion()
-	_avisar_si_faltan_respuestas()
 	await _cierre()
 
 
@@ -158,12 +159,6 @@ func ocultar_emocion() -> void:
 
 
 # --- Cierre: portal, zoom y luz blanca ---
-
-func _avisar_si_faltan_respuestas() -> void:
-	var esperadas := GameState.ids_emociones().size()
-	if GameState.respuestas_inicio.size() != esperadas:
-		push_warning("Onboarding: se esperaban %d respuestas y hay %d." % [esperadas, GameState.respuestas_inicio.size()])
-
 
 func _cierre() -> void:
 	if _terminando:
