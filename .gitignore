@@ -16,3 +16,6 @@ __pycache__/
 
 # Audios originales descargados (se conservan fuera de Assets y no se suben al repositorio)
 audio_originales/
+
+# Datos reales de participantes (no subir al repositorio público)
+docs/analisis/datos_reales/
