@@ -40,12 +40,15 @@ var momento_inicio_juego := 0.0
 var cuestionario_activo := false
 
 var _semillas: Dictionary = {}
+## true cuando la fila de esta partida ya se agregó al CSV (así no se repite).
+var _exportado := false
 
 
 func _ready() -> void:
 	cargar_banco()
 	reiniciar()
 	GameState.partida_reiniciada.connect(reiniciar)
+	fase_terminada.connect(_on_fase_terminada)
 
 
 # --- Banco ---
@@ -128,6 +131,7 @@ func reiniciar() -> void:
 	momento_inicio_juego = 0.0
 	cuestionario_activo = false
 	_semillas.clear()
+	_exportado = false
 
 
 func _fase_vacia() -> Dictionary:
@@ -162,12 +166,21 @@ func iniciar_fase(fase: String) -> void:
 		push_warning("Evaluacion: fase '%s' no válida." % fase)
 		return
 	var vacia := _fase_vacia()
+	if fase == "post":
+		_exportado = false
 	if fase == "pre":
 		pre = vacia
 	else:
 		post = vacia
 	# Una semilla distinta por fase (y por participante)
 	_semillas[fase] = hash("%s|%s" % [participante_id, fase])
+
+
+## Al terminar el "post" se exporta la fila al CSV (solo con consentimiento; ver Exportacion).
+func _on_fase_terminada(fase: String) -> void:
+	if fase == "post" and post_completo() and not _exportado:
+		_exportado = true
+		Exportacion.agregar_fila()
 
 
 # --- Preguntas ---

@@ -285,7 +285,8 @@ func _cerrar_viaje() -> void:
 		await Cuestionario.mostrar(get_tree(), "post")
 		await Resultados.mostrar(get_tree())
 	secuencia_terminada.emit("titulo")
-	if not modo_prueba:
+	# Los resultados ya cambian de escena solos con "Jugar de nuevo" o "Salir"; si no, se vuelve al título
+	if not modo_prueba and Resultados.ultimo_destino == "":
 		get_tree().change_scene_to_file(ESCENA_TITULO)
 
 

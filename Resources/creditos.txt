@@ -1,0 +1,33 @@
+# Los créditos de ECOS. Se editan aquí, sin tocar código.
+# Formato: una línea que empieza con "# " es el título de una sección; una línea en blanco es un espacio;
+# una línea que empieza con "> " es la nota final; el resto son líneas de texto.
+# Donde dice [COMPLETAR] faltan nombres o datos.
+
+# Juego
+ECOS
+Un juego educativo sobre emociones
+"Lo que atiendes hoy define el mundo de mañana."
+
+# Programación
+[COMPLETAR: nombre de quien programó el juego]
+
+# Arte
+Arte pixel art generado con herramientas de IA y procesado a mano
+[COMPLETAR: herramientas de IA usadas]
+[COMPLETAR: nombre de quien procesó y ajustó el arte]
+
+# Música y sonido
+Efectos de sonido y música generados con ElevenLabs
+[COMPLETAR: nombre de quien eligió y procesó los audios]
+
+# Fuentes y herramientas
+Pixelify Sans, fuente tipográfica con licencia abierta (SIL Open Font License)
+Dialogue Manager, complemento para Godot (licencia MIT)
+Godot Engine (licencia MIT)
+[COMPLETAR: otras fuentes, bibliografía y herramientas]
+
+# Agradecimientos
+[COMPLETAR: personas e instituciones a quienes agradecer]
+A quienes probaron el juego y respondieron las preguntas.
+
+> ECOS es un juego educativo y no reemplaza la ayuda profesional. Si algo de lo que sentiste fue difícil, habla con alguien de confianza o busca el apoyo de tu universidad.
