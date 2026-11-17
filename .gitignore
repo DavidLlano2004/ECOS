@@ -19,3 +19,6 @@ audio_originales/
 
 # Datos reales de participantes (no subir al repositorio público)
 docs/analisis/datos_reales/
+
+# Exportación web
+build/
