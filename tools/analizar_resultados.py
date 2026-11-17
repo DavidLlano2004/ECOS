@@ -2,7 +2,7 @@
 """Análisis de los resultados de ECOS (evaluación antes y después de jugar).
 
 Uso:
-    python tools/analizar_resultados.py RUTA [RUTA ...] [--salida docs/analisis] [--permitir-prueba]
+    python tools/analizar_resultados.py RUTA [RUTA ...] [--salida docs/analisis] [--reportes CARPETA] [--permitir-prueba]
 
 RUTA puede ser un CSV (ECOS_resultados.csv de un computador) o una carpeta con varios CSV (se unen todos).
 Necesita pandas, numpy, matplotlib y scipy.
@@ -12,15 +12,20 @@ Genera en la carpeta de salida (por defecto docs/analisis/):
   preguntas.csv   porcentaje de acierto antes y después de cada pregunta
   emociones.csv   por emoción: aciertos antes y después, y cuántos mejoraron, se mantuvieron o bajaron
   barras_bloques.png, barras_emociones_trivia.png, lineas_participantes.png
-  informe.md      un párrafo por resultado en lenguaje claro y las limitaciones
+  barras_experiencia.png, distribucion_nota.png, sus_participantes.png, comparacion_frecuencia.png   (si hay opiniones)
+  comentarios.md  los comentarios libres agrupados por pregunta y por palabras o frases repetidas, y la tabla de errores
+  informe.md      un párrafo por resultado en lenguaje claro (aprendizaje y experiencia de usuario) y las limitaciones
 
 SEGURIDAD: se niega a procesar un CSV con la columna "dato_de_prueba" (datos inventados), salvo con
 --permitir-prueba; en ese caso escribe "DATOS DE PRUEBA" en cada gráfico y en el informe.
 """
 import argparse
 import glob
+import json
 import os
+import re
 import sys
+from collections import Counter
 
 import matplotlib
 matplotlib.use("Agg")
@@ -94,7 +99,7 @@ def wilcoxon(pre, post):
 
 def marca_prueba(ax_o_fig, es_prueba):
     if es_prueba:
-        plt.gcf().text(0.99, 0.012, "DATOS DE PRUEBA", ha="right", va="bottom", color="#e0a070", fontsize=11, fontweight="bold")
+        plt.gcf().text(0.01, 0.988, "DATOS DE PRUEBA", ha="left", va="top", color="#e0a070", fontsize=11, fontweight="bold")
 
 
 def estilo(ax):
@@ -121,12 +126,14 @@ def leyenda(ax):
     return l
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description="Análisis de resultados de ECOS")
     ap.add_argument("rutas", nargs="+", help="CSV o carpetas con CSV de ECOS_resultados")
     ap.add_argument("--salida", default=os.path.join(RAIZ, "docs", "analisis"), help="carpeta de salida")
     ap.add_argument("--permitir-prueba", action="store_true", help="acepta CSV de datos de prueba (NO reales)")
-    args = ap.parse_args()
+    ap.add_argument("--reportes", default=os.path.join(RAIZ, "docs", "analisis", "datos_reales", "reportes"),
+                    help="carpeta con los reportes JSON de F8 (por defecto docs/analisis/datos_reales/reportes)")
+    args = ap.parse_args(argv)
 
     df, archivos = leer_csvs(args.rutas)
     es_prueba = "dato_de_prueba" in df.columns
@@ -137,6 +144,8 @@ def main():
         print("Si solo quieres probar el script, usa --permitir-prueba.")
         print("=" * 70)
         sys.exit(2)
+    if es_prueba and args.permitir_prueba:
+        print("AVISO: DATOS DE PRUEBA (no reales): todo lo que se genere lleva esa marca.")
 
     # Una fila por participante (si un id aparece dos veces, se queda la última)
     antes = len(df)
@@ -283,13 +292,241 @@ def main():
     fig.savefig(os.path.join(args.salida, "lineas_participantes.png"), dpi=140, facecolor=FONDO)
     plt.close(fig)
 
+    # --- Experiencia de usuario y comentarios ---
+    ux = experiencia_usuario(df, args.salida, es_prueba, args.reportes)
+
     # --- informe.md ---
-    escribir_informe(args.salida, resumen, preguntas, emociones, n, excluidos, repetidos, archivos, es_prueba, avisos)
+    escribir_informe(args.salida, resumen, preguntas, emociones, n, excluidos, repetidos, archivos, es_prueba, avisos, ux)
 
     print("Participantes analizados: %d (excluidos por datos incompletos: %d; ids repetidos: %d)" % (n, excluidos, repetidos))
     for a in avisos:
         print("AVISO:", a)
     print("Resultados escritos en:", args.salida)
+
+
+
+# ----------------------------------------------------------------------------
+# Experiencia de usuario (opiniones val_*)
+
+AFIRMACIONES = {
+    "u1": "Entendí qué hacer", "u2": "Los controles fueron fáciles", "u3": "Se veía y sonaba bien",
+    "u4": "Los textos y pistas ayudaron", "u5": "Ganas de seguir jugando", "u6": "Me hizo pensar en mis emociones",
+}
+PREGUNTAS_LIBRES = [("val_gusto", "¿Qué fue lo que más te gustó?"), ("val_mejorar", "¿Qué te confundió o qué cambiarías?"),
+                    ("val_error", "¿Viste algún error? Cuéntanos qué pasó")]
+FRECUENCIAS = ["Nunca", "A veces", "Seguido"]
+PALABRAS_VACIAS = set("""a al algo algunas algunos ante antes como con cual cuando de del desde donde el ella ellas ellos en entre era eran es esa
+ese eso esta estaba estan este esto estos fue ha han hay la las le les lo los me mi mis muy no nos o para pero poco por porque que se si sin
+sobre son su sus tambien te tu tus un una uno unos y ya yo mas más fue fui ser era hubo esa ese hacer hizo""".split())
+
+
+def quitar_tildes(t):
+    for a, b in zip("áéíóúüñ", "aeiouun"):
+        t = t.replace(a, b)
+    return t
+
+
+def sus_interpretacion(media):
+    if media < 51:
+        return "pobre"
+    if media < 68:
+        return "por debajo del promedio"
+    if media < 80:
+        return "bueno"
+    return "excelente"
+
+
+def hay_datos(df, col):
+    return col in df.columns and pd.to_numeric(df[col], errors="coerce").notna().any()
+
+
+def experiencia_usuario(df, salida, es_prueba, reportes=None):
+    """Genera los gráficos de experiencia de usuario y comentarios.md. Devuelve un diccionario con lo que se calculó."""
+    ux = {"hay": False, "n": len(df), "u_medias": {}, "nota": None, "sus": None, "sus_n": 0, "frecuencia": {}, "errores": 0}
+    cols_u = [c for c in ["val_u%d" % i for i in range(1, 7)] if hay_datos(df, c)]
+    tiene_nota = hay_datos(df, "val_nota")
+    if not cols_u and not tiene_nota:
+        # Aun sin opiniones numéricas puede haber comentarios o reportes
+        escribir_comentarios(df, salida, es_prueba, reportes, ux)
+        return ux
+    ux["hay"] = True
+
+    # 1) Barras con la media de u1 a u6 (con su desviación)
+    if cols_u:
+        fig, ax = figura(9, 4.6)
+        medias = [pd.to_numeric(df[c], errors="coerce").mean() for c in cols_u]
+        sds = [pd.to_numeric(df[c], errors="coerce").std(ddof=1) if len(df) > 1 else 0 for c in cols_u]
+        sds = [0 if np.isnan(x) else x for x in sds]
+        x = np.arange(len(cols_u))
+        ax.bar(x, medias, 0.6, color=DORADO, yerr=sds, capsize=4, error_kw={"ecolor": CREMA})
+        for i, m in enumerate(medias):
+            ax.text(x[i], m + (sds[i] if sds[i] else 0) + 0.12, "%.1f" % m, ha="center", color=CREMA, fontsize=9)
+            ux["u_medias"][cols_u[i][4:]] = (float(m), float(sds[i]))
+        ax.set_xticks(x)
+        ax.set_xticklabels([AFIRMACIONES[c[4:]] for c in cols_u], fontsize=8, rotation=12, ha="right")
+        ax.set_ylim(1, 5.8)
+        ax.set_ylabel("Acuerdo medio (1 a 5)")
+        ax.set_title("Experiencia de uso: media de cada afirmación (n = %d)" % len(df))
+        marca_prueba(ax, es_prueba)
+        fig.tight_layout()
+        fig.savefig(os.path.join(salida, "barras_experiencia.png"), dpi=140, facecolor=FONDO)
+        plt.close(fig)
+
+    # 2) Distribución de la nota general
+    if tiene_nota:
+        nota = pd.to_numeric(df["val_nota"], errors="coerce").dropna().astype(int)
+        fig, ax = figura(6, 4.4)
+        cuenta = [int((nota == k).sum()) for k in range(1, 6)]
+        ax.bar(range(1, 6), cuenta, 0.6, color=DORADO)
+        for k, c in zip(range(1, 6), cuenta):
+            ax.text(k, c + 0.05, str(c), ha="center", color=CREMA)
+        ax.set_xticks(range(1, 6))
+        ax.set_xticklabels(["%d estrella%s" % (k, "" if k == 1 else "s") for k in range(1, 6)], fontsize=8)
+        ax.set_ylabel("Participantes")
+        ax.set_ylim(0, max(cuenta + [1]) + 1)
+        ax.set_title("Nota general del juego (media %.1f, n = %d)" % (nota.mean(), len(nota)))
+        marca_prueba(ax, es_prueba)
+        fig.tight_layout()
+        fig.savefig(os.path.join(salida, "distribucion_nota.png"), dpi=140, facecolor=FONDO)
+        plt.close(fig)
+        ux["nota"] = (float(nota.mean()), int(len(nota)))
+
+    # 3) SUS por participante (solo si se usó)
+    if hay_datos(df, "val_sus"):
+        sus = pd.to_numeric(df["val_sus"], errors="coerce").dropna()
+        fig, ax = figura(8, 4.6)
+        ax.bar(range(len(sus)), sus.values, 0.6, color=VIOLETA)
+        for nivel, color, texto in ((51, "#e0a070", "51"), (68, DORADO, "68"), (80, VERDE, "80")):
+            ax.axhline(nivel, color=color, linestyle="--", linewidth=1, alpha=0.8)
+            ax.text(len(sus) - 0.4, nivel + 1, texto, color=color, fontsize=8, ha="right")
+        ax.axhline(sus.mean(), color=DORADO, linewidth=2.5, label="Media %.1f (%s)" % (sus.mean(), sus_interpretacion(sus.mean())))
+        ax.set_xticks(range(len(sus)))
+        ax.set_xticklabels(["P%d" % (i + 1) for i in range(len(sus))], fontsize=8)
+        ax.set_ylim(0, 105)
+        ax.set_ylabel("Puntaje SUS (0 a 100)")
+        ax.set_title("Usabilidad (SUS) por participante (n = %d)" % len(sus))
+        leyenda(ax)
+        marca_prueba(ax, es_prueba)
+        fig.tight_layout()
+        fig.savefig(os.path.join(salida, "sus_participantes.png"), dpi=140, facecolor=FONDO)
+        plt.close(fig)
+        ux["sus"] = float(sus.mean())
+        ux["sus_n"] = int(len(sus))
+
+    # 4) Comparación por frecuencia de juego
+    if "val_frecuencia" in df.columns and df["val_frecuencia"].astype(str).isin(FRECUENCIAS).any():
+        d = df.copy()
+        d["_nota"] = pd.to_numeric(d.get("val_nota"), errors="coerce") if "val_nota" in d.columns else np.nan
+        d["_uso"] = d[cols_u].apply(pd.to_numeric, errors="coerce").mean(axis=1) if cols_u else np.nan
+        grupos = [(f, d[d["val_frecuencia"] == f]) for f in FRECUENCIAS]
+        fig, ax = figura(7, 4.6)
+        x = np.arange(len(FRECUENCIAS))
+        m_nota = [g["_nota"].mean() if len(g) else np.nan for _, g in grupos]
+        m_uso = [g["_uso"].mean() if len(g) else np.nan for _, g in grupos]
+        ax.bar(x - ancho_barra / 2, m_nota, ancho_barra, color=DORADO, label="Nota general (1 a 5)")
+        ax.bar(x + ancho_barra / 2, m_uso, ancho_barra, color=VIOLETA, label="Media de u1 a u6 (1 a 5)")
+        ax.set_xticks(x)
+        ax.set_xticklabels(["%s (n = %d)" % (f, len(g)) for f, g in grupos])
+        ax.set_ylim(0, 5.8)
+        ax.set_ylabel("Media")
+        ax.set_title("Opinión según cuánto juegan videojuegos")
+        leyenda(ax)
+        marca_prueba(ax, es_prueba)
+        fig.tight_layout()
+        fig.savefig(os.path.join(salida, "comparacion_frecuencia.png"), dpi=140, facecolor=FONDO)
+        plt.close(fig)
+        ux["frecuencia"] = {f: (len(g), float(g["_nota"].mean()) if len(g) and g["_nota"].notna().any() else None) for f, g in grupos}
+
+    escribir_comentarios(df, salida, es_prueba, reportes, ux)
+    return ux
+
+
+ancho_barra = 0.36
+
+
+def frases_repetidas(comentarios, minimo=2, maximo=10):
+    """Palabras (y pares de palabras) que aparecen en al menos `minimo` comentarios distintos, sin interpretarlas."""
+    por_comentario = []
+    for c in comentarios:
+        palabras = [quitar_tildes(w) for w in re.findall(r"[a-záéíóúüñ]+", c.lower())]
+        utiles = [w for w in palabras if w not in PALABRAS_VACIAS and len(w) > 2]
+        conjunto = set(utiles)
+        conjunto |= {"%s %s" % (palabras[i], palabras[i + 1]) for i in range(len(palabras) - 1)
+                     if palabras[i] not in PALABRAS_VACIAS and palabras[i + 1] not in PALABRAS_VACIAS}
+        por_comentario.append(conjunto)
+    cuenta = Counter()
+    for conjunto in por_comentario:
+        cuenta.update(conjunto)
+    repetidas = [(t, n) for t, n in cuenta.items() if n >= minimo]
+    # los pares ganan a las palabras sueltas que contienen; se ordena por veces y por largo
+    repetidas.sort(key=lambda x: (-x[1], -len(x[0].split()), x[0]))
+    return repetidas[:maximo]
+
+
+def leer_reportes(carpeta):
+    filas = []
+    if carpeta and os.path.isdir(carpeta):
+        for ruta in sorted(glob.glob(os.path.join(carpeta, "*.json"))):
+            try:
+                with open(ruta, encoding="utf-8") as f:
+                    d = json.load(f)
+            except (OSError, ValueError):
+                continue
+            filas.append({"fecha": str(d.get("fecha_iso", ""))[:16], "escena": os.path.basename(str(d.get("escena", ""))),
+                          "epoca": d.get("epoca", ""), "version": d.get("version_juego", ""), "texto": str(d.get("texto", "")).replace("\n", " "),
+                          "captura": d.get("captura", "")})
+    return filas
+
+
+def escribir_comentarios(df, salida, es_prueba, reportes, ux):
+    L = []
+    if es_prueba:
+        L += ["> **DATOS DE PRUEBA.** Estos comentarios son inventados (NO reales).", ""]
+    L += ["# Comentarios de los participantes", "",
+          "Aquí van los comentarios libres tal como se escribieron, agrupados por pregunta. Las palabras y frases que se repiten "
+          "se cuentan por número de comentarios distintos; son solo una ayuda para leer, no una interpretación.", ""]
+    for col, pregunta in PREGUNTAS_LIBRES:
+        L += ["## %s" % pregunta, ""]
+        if col not in df.columns:
+            L += ["_No hay datos de esta pregunta._", ""]
+            continue
+        comentarios = [str(c).strip() for c in df[col].fillna("") if str(c).strip() and str(c).strip().lower() != "nan"]
+        if not comentarios:
+            L += ["_Nadie escribió nada en esta pregunta._", ""]
+            continue
+        L += ["%d comentario%s de %d participantes." % (len(comentarios), "" if len(comentarios) == 1 else "s", len(df)), ""]
+        rep = frases_repetidas(comentarios)
+        if rep:
+            L.append("**Lo que más se repite:** " + "; ".join("«%s» (%d)" % (t, n) for t, n in rep))
+            L.append("")
+        elif len(comentarios) < 4:
+            L += ["_Hay pocos comentarios para encontrar ideas repetidas._", ""]
+        for c in comentarios:
+            L.append("- " + c.replace("\n", " "))
+        L.append("")
+    # Tabla de errores: lo escrito en val_error y los reportes de F8
+    L += ["## Errores reportados", ""]
+    errores = []
+    if "val_error" in df.columns:
+        for _, f in df.iterrows():
+            t = str(f.get("val_error", "")).strip()
+            if t and t.lower() != "nan" and t.lower() not in ("nada", "no", "ninguno", "ninguna"):
+                errores.append(("Valoración", str(f.get("id_participante", "")), "", t))
+    for r in leer_reportes(reportes):
+        errores.append(("Reporte F8 (%s, %s, v%s)" % (r["escena"], r["epoca"], r["version"]), r["fecha"], r["captura"], r["texto"]))
+    ux["errores"] = len(errores)
+    if errores:
+        L += ["| Origen | Participante o fecha | Captura | Qué pasó |", "|---|---|---|---|"]
+        for origen, quien, captura, texto in errores:
+            L.append("| %s | %s | %s | %s |" % (origen, quien, captura, texto.replace("|", "/").replace("\n", " ")))
+        L.append("")
+    else:
+        L += ["_No hay errores reportados._", ""]
+    if reportes:
+        L += ["_Los reportes de F8 se leen de `%s` (copia ahí la carpeta `reportes` de cada computador)._" % os.path.relpath(reportes, RAIZ) if os.path.isdir(reportes) else
+              "_No se encontró la carpeta de reportes de F8 (`%s`)._" % reportes, ""]
+    with open(os.path.join(salida, "comentarios.md"), "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(L))
 
 
 def fmt_p(p):
@@ -302,7 +539,7 @@ def coma(x, dec=2):
     return (("%." + str(dec) + "f") % x).replace(".", ",") if not np.isnan(x) else "—"
 
 
-def escribir_informe(salida, resumen, preguntas, emociones, n, excluidos, repetidos, archivos, es_prueba, avisos):
+def escribir_informe(salida, resumen, preguntas, emociones, n, excluidos, repetidos, archivos, es_prueba, avisos, ux=None):
     L = []
     if es_prueba:
         L += ["> **DATOS DE PRUEBA.** Este informe se generó con datos inventados (NO reales). No lo uses como resultado.", ""]
@@ -347,6 +584,22 @@ def escribir_informe(salida, resumen, preguntas, emociones, n, excluidos, repeti
         dificil = p.sort_values("pct_acierto_post").iloc[0]
         L += ["## Preguntas", "",
               "La pregunta con menos aciertos al final fue `%s` (%d %%). El detalle de cada pregunta está en `preguntas.csv`." % (dificil["id"], round(dificil["pct_acierto_post"])), ""]
+    if ux and ux["hay"]:
+        L += ["## Experiencia de usuario", ""]
+        if n < MINIMO_WILCOXON:
+            L += ["Con solo %d participantes estas cifras son una primera impresión, no una conclusión." % n, ""]
+        if ux["u_medias"]:
+            partes = ["%s: %s (desviación %s)" % (AFIRMACIONES[k], coma(m, 1), coma(sd, 1)) for k, (m, sd) in ux["u_medias"].items()]
+            L += ["En las afirmaciones de 1 (nada de acuerdo) a 5 (totalmente de acuerdo), las medias fueron: " + "; ".join(partes) + ".", ""]
+        if ux["nota"]:
+            L += ["La nota general media fue de **%s** estrellas sobre 5 (n = %d)." % (coma(ux["nota"][0], 1), ux["nota"][1]), ""]
+        if ux["sus"] is not None:
+            L += ["El puntaje SUS medio fue de **%s** sobre 100 (n = %d), que por la interpretación habitual se considera **%s** "
+                  "(menos de 51: pobre; 51 a 68: por debajo del promedio; 68 a 80: bueno; más de 80: excelente)." % (coma(ux["sus"], 1), ux["sus_n"], sus_interpretacion(ux["sus"])), ""]
+        if ux["frecuencia"]:
+            partes = ["%s: n = %d" % (f, c) for f, (c, _) in ux["frecuencia"].items()]
+            L += ["Según cuánto juegan videojuegos (%s), las medias se comparan en `comparacion_frecuencia.png`; con grupos tan pequeños sirve solo para mirar tendencias." % ", ".join(partes), ""]
+        L += ["Los comentarios libres y los errores reportados están en `comentarios.md` (%d error%s anotado%s)." % (ux["errores"], "" if ux["errores"] == 1 else "es", "" if ux["errores"] == 1 else "s"), ""]
     L += ["## Cómo leer estos números", "",
           "El valor p de Wilcoxon indica si la diferencia entre el antes y el después es mayor de lo que se esperaría solo por azar; "
           "un valor p pequeño apoya la idea de un cambio, pero no dice por qué ocurrió ni lo grande que es. "
@@ -356,6 +609,7 @@ def escribir_informe(salida, resumen, preguntas, emociones, n, excluidos, repeti
           "- **Mismos cuestionarios antes y después:** quienes participan pueden recordar sus respuestas anteriores.",
           "- **Autoinforme:** las situaciones y las escalas dependen de lo que cada persona dice de sí misma, no de lo que hace.",
           "- **Sin grupo de control:** no se puede saber cuánto del cambio se debe al juego y cuánto a otras causas (por ejemplo, haber hecho las preguntas antes).",
+          "- **Opiniones:** las valoraciones también son autoinforme y pueden estar influidas por querer agradar a quien hizo el juego.",
           "- **No es una medición psicológica validada:** las preguntas son una herramienta educativa de este proyecto, no un test psicológico ni dan diagnósticos.", ""]
     with open(os.path.join(salida, "informe.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(L))

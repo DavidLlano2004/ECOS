@@ -60,3 +60,14 @@ error con resultados reales.
 - Los datos reales de participantes no se suben al repositorio público (`docs/analisis/datos_reales/` está en
   `.gitignore`). Si publicas resultados, usa solo cifras agregadas (el `resumen.csv`, los gráficos y el informe).
 - Esto no es una medición psicológica validada: lee siempre la sección "Limitaciones" del informe.
+
+## 4. Experiencia de usuario y comentarios
+
+Si los CSV traen las columnas de opinión (`val_*`), el análisis también genera `barras_experiencia.png` (media de las seis
+afirmaciones con su desviación), `distribucion_nota.png`, `sus_participantes.png` (solo si se activó `usar_sus` en
+`Resources/config_valoracion.json`; con la interpretación habitual: menos de 51 pobre, 51 a 68 por debajo del promedio,
+68 a 80 bueno, más de 80 excelente), `comparacion_frecuencia.png` y `comentarios.md` (comentarios libres agrupados por
+pregunta y por palabras repetidas, y la tabla de errores). Los reportes de F8 se leen de `docs/analisis/datos_reales/reportes/`
+(copia ahí la carpeta `reportes` de cada computador; se puede cambiar con `--reportes`).
+
+El protocolo para hacer las pruebas con personas está en `docs/protocolo_pruebas.md`.

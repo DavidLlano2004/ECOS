@@ -31,7 +31,25 @@ def columnas(banco):
             c += ["pre_" + p["id"], "post_" + p["id"]]
             if bloque != "escala":
                 c += ["pre_ok_" + p["id"], "post_ok_" + p["id"]]
+    c += ["val_u%d" % i for i in range(1, 7)]
+    c += ["val_nota", "val_frecuencia", "val_sus", "val_gusto", "val_mejorar", "val_error"]
     return c
+
+
+GUSTOS = ["La música y los dibujos", "Me gustó el final y la música", "Las emociones y sus historias", "Los dibujos y el mundo en dos épocas",
+          "La historia de cada emoción", "", "El Guía y la música", "Los recuerdos de cada emoción"]
+MEJORAS = ["No entendí las compuertas al principio", "Las pistas eran poco claras", "Me confundió el diario", "", "Quería saber a dónde ir al principio",
+           "No entendí las compuertas", "", "Más pistas para las compuertas"]
+ERRORES = ["", "", "", "Se quedó pegado un texto al viajar de época", "", "", "", "No vi ninguno"]
+
+
+def sus_azar(azar):
+    """Un puntaje SUS inventado: respuestas de 1 a 5 y el cálculo oficial (impares valor-1, pares 5-valor, x 2.5)."""
+    suma = 0
+    for i in range(1, 11):
+        v = azar.choice([4, 4, 5, 3]) if i % 2 == 1 else azar.choice([1, 2, 2, 3])
+        suma += (v - 1) if i % 2 == 1 else (5 - v)
+    return suma * 2.5
 
 
 def main():
@@ -68,6 +86,15 @@ def main():
         for fase in ("pre", "post"):
             for bloque in ("trivia", "situaciones", "escala"):
                 fila["%s_%s" % (fase, bloque)] = totales[fase][bloque]
+        # Opinión sobre el juego (inventada)
+        for k in range(1, 7):
+            fila["val_u%d" % k] = azar.choice([3, 4, 4, 5, 5]) if k != 4 else azar.choice([2, 3, 4, 4])
+        fila["val_nota"] = azar.choice([3, 4, 4, 5, 5])
+        fila["val_frecuencia"] = azar.choice(["Nunca", "A veces", "A veces", "Seguido"])
+        fila["val_sus"] = sus_azar(azar) if i % 3 != 2 else ""   # no todos contestaron el SUS
+        fila["val_gusto"] = GUSTOS[i % len(GUSTOS)]
+        fila["val_mejorar"] = MEJORAS[i % len(MEJORAS)]
+        fila["val_error"] = ERRORES[i % len(ERRORES)]
         filas.append(fila)
     os.makedirs(os.path.dirname(SALIDA), exist_ok=True)
     with open(SALIDA, "w", encoding="utf-8", newline="") as f:
