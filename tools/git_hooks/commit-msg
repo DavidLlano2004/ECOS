@@ -1,0 +1,28 @@
+#!/bin/sh
+# Hook commit-msg de ECOS: quita del mensaje de commit cualquier rastro de atribución a Claude:
+#   - líneas "Co-Authored-By:" que mencionen a Claude o a Anthropic (sin distinguir mayúsculas),
+#   - líneas "Claude-Session:",
+#   - líneas que contengan "Generated with Claude Code" o "Claude Code",
+# y las líneas en blanco que queden al final. La primera línea (el título) nunca se toca.
+# Funciona con Git Bash en Windows (solo usa sh, grep y awk). Instalación: copiar a .git/hooks/commit-msg
+archivo="$1"
+[ -f "$archivo" ] || exit 0
+temporal="$archivo.limpio"
+awk '
+NR == 1 { print; next }
+{
+  linea = tolower($0)
+  if (linea ~ /^[ \t]*co-authored-by:.*(claude|anthropic)/) next
+  if (linea ~ /^[ \t]*claude-session:/) next
+  if (linea ~ /generated with claude code/) next
+  if (linea ~ /claude code/) next
+  print
+}' "$archivo" | awk '
+{ lineas[NR] = $0 }
+END {
+  fin = NR
+  while (fin > 1 && lineas[fin] ~ /^[ \t]*$/) fin--
+  for (i = 1; i <= fin; i++) print lineas[i]
+}' > "$temporal"
+mv "$temporal" "$archivo"
+exit 0
