@@ -1,0 +1,5 @@
+bloque,titulo,participantes,pre_media,pre_sd,post_media,post_sd,dif_media,dif_sd,ganancia_normalizada_media,n_ganancia,wilcoxon_p,n_wilcoxon,wilcoxon_nota
+trivia,Conocimiento (trivia),12,3.9167,1.505,5.25,1.7123,1.3333,2.0151,0.275,12,0.0352,12,
+situaciones,Cómo reaccionas (situaciones),12,3.6667,1.7753,5.25,1.5448,1.5833,2.3533,0.4667,11,0.0469,12,
+escala,Cómo te sientes (escala),12,5.9167,0.793,7.4167,1.1645,1.5,1.3143,0.3514,12,0.0039,12,
+total,Total (trivia + situaciones),12,7.5833,2.4664,10.5,2.9388,2.9167,3.1176,0.4584,12,0.0117,12,

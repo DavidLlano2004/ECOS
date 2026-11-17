@@ -1,0 +1,8 @@
+emocion,participantes,trivia_pct_pre,trivia_pct_post,situacion_pct_pre,situacion_pct_post,mejoraron,se_mantuvieron,bajaron
+rabia,12,58.3,83.3,58.3,75.0,6,4,2
+miedo,12,50.0,75.0,58.3,83.3,5,5,2
+tristeza,12,41.7,83.3,41.7,75.0,7,4,1
+soledad,12,75.0,75.0,50.0,66.7,5,4,3
+culpa,12,83.3,66.7,41.7,83.3,5,5,2
+ansiedad,12,50.0,50.0,75.0,75.0,3,6,3
+verguenza,12,33.3,91.7,41.7,66.7,7,5,0

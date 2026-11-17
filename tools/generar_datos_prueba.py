@@ -15,10 +15,15 @@ import csv
 import json
 import os
 import random
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import decodificar_codigos
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PREGUNTAS = os.path.join(RAIZ, "Resources", "Cuestionario", "preguntas.json")
 SALIDA = os.path.join(RAIZ, "docs", "analisis", "_PRUEBA", "datos_prueba_NO_REALES.csv")
+SALIDA_FORMULARIO = os.path.join(RAIZ, "docs", "analisis", "_PRUEBA", "respuestas_formulario_NO_REALES.csv")
 PARTICIPANTES = 12
 
 
@@ -50,6 +55,23 @@ def sus_azar(azar):
         v = azar.choice([4, 4, 5, 3]) if i % 2 == 1 else azar.choice([1, 2, 2, 3])
         suma += (v - 1) if i % 2 == 1 else (5 - v)
     return suma * 2.5
+
+
+def a_codigo(fila, banco):
+    """El código de resultados (formato ECOS1) que generaría el juego para esta fila inventada."""
+    rp, rq = "", ""
+    for bloque in ("trivia", "situaciones", "escala"):
+        for p in banco[bloque]:
+            rp += str(fila["pre_" + p["id"]])
+            rq += str(fila["post_" + p["id"]])
+    datos = {"v": 1, "id": fila["id_participante"], "f": fila["fecha_iso"][:16], "g": "1.0.0", "fin": fila["final"][0],
+             "i": fila["integradas"], "a": fila["atacadas"], "ig": fila["ignoradas"], "p": fila["pendientes"], "d": fila["duracion_min"],
+             "pre": [fila["pre_trivia"], fila["pre_situaciones"], fila["pre_escala"]],
+             "post": [fila["post_trivia"], fila["post_situaciones"], fila["post_escala"]], "rp": rp, "rq": rq,
+             "val": {"u": "".join(str(fila["val_u%d" % k]) for k in range(1, 7)), "n": fila["val_nota"],
+                     "fr": ["Nunca", "A veces", "Seguido"].index(fila["val_frecuencia"]), "s": "",
+                     "sp": fila["val_sus"] if fila["val_sus"] != "" else -1.0}}
+    return decodificar_codigos.codificar(datos)
 
 
 def main():
@@ -102,6 +124,15 @@ def main():
         w.writeheader()
         w.writerows(filas)
     print("Datos de prueba (NO REALES) escritos en:", SALIDA)
+    # Las mismas 12 personas, como las respuestas de un formulario de Google (con su código de resultados)
+    with open(SALIDA_FORMULARIO, "w", encoding="utf-8", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["dato_de_prueba", "Marca temporal", "¿Qué fue lo que más te gustó?", "¿Qué te confundió o qué cambiarías?",
+                    "¿Viste algún error? Cuéntanos qué pasó", "Pega aquí tu código de resultados"])
+        for fila in filas:
+            marca = fila["fecha_iso"].replace("T", " ")
+            w.writerow(["SI", marca, fila["val_gusto"], fila["val_mejorar"], fila["val_error"], a_codigo(fila, banco)])
+    print("Respuestas de formulario de prueba (NO REALES) escritas en:", SALIDA_FORMULARIO)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,17 @@
+id,bloque,emocion,pre_media,post_media,pct_acierto_pre,pct_acierto_post
+e_entiendo,escala,,3.0,3.8,,
+e_se_hacer,escala,,2.9,3.7,,
+s_ansiedad,situaciones,ansiedad,,,75.0,75.0
+s_culpa,situaciones,culpa,,,41.7,83.3
+s_miedo,situaciones,miedo,,,58.3,83.3
+s_rabia,situaciones,rabia,,,58.3,75.0
+s_soledad,situaciones,soledad,,,50.0,66.7
+s_tristeza,situaciones,tristeza,,,41.7,75.0
+s_verguenza,situaciones,verguenza,,,41.7,66.7
+t_ansiedad,trivia,ansiedad,,,50.0,50.0
+t_culpa,trivia,culpa,,,83.3,66.7
+t_miedo,trivia,miedo,,,50.0,75.0
+t_rabia,trivia,rabia,,,58.3,83.3
+t_soledad,trivia,soledad,,,75.0,75.0
+t_tristeza,trivia,tristeza,,,41.7,83.3
+t_verguenza,trivia,verguenza,,,33.3,91.7
