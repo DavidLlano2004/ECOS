@@ -37,6 +37,8 @@ var _scroll: ScrollContainer
 var _estado: Label
 var _boton_exportar: Button
 var _boton_carpeta: Button
+var _codigo := ""
+var _campo_codigo: LineEdit
 var _boton_opinion: Button
 var _boton_creditos: Button
 var _botones: Array[Button] = []
@@ -86,7 +88,7 @@ func _ready() -> void:
 	create_tween().tween_property(_raiz, "modulate:a", 1.0, 0.5)
 	_animar_barras.call_deferred()
 	Sonido.efecto("dialogo_abrir")
-	_botones[0].grab_focus.call_deferred()
+	_boton_exportar.grab_focus.call_deferred()
 
 
 # ESC, TAB y la habilidad no hacen nada; arriba y abajo desplazan los resultados
@@ -127,6 +129,7 @@ func _construir() -> void:
 	_scroll.custom_minimum_size = Vector2(580, 232)
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_scroll.focus_mode = Control.FOCUS_NONE
+	_scroll.follow_focus = true   # al navegar con el teclado, el desplazamiento sigue al botón enfocado
 	v.add_child(_scroll)
 	var contenido := VBoxContainer.new()
 	contenido.add_theme_constant_override("separation", 10)
@@ -142,6 +145,8 @@ func _construir() -> void:
 		contenido.add_child(_fila_emocion(id))
 	contenido.add_child(EstiloUI.etiqueta("Tu partida", 14, EstiloUI.DORADO))
 	contenido.add_child(_resumen(c))
+	contenido.add_child(EstiloUI.etiqueta("Tu código de resultados", 14, EstiloUI.DORADO))
+	contenido.add_child(_seccion_codigo())
 
 	_estado = _texto("", 10, EstiloUI.CREMA)
 	_estado.custom_minimum_size = Vector2(580, 0)
@@ -338,6 +343,38 @@ func _resumen(c: Dictionary) -> Control:
 	lineas.append("Habilidades: %d de %d" % [GameState.habilidades.size(), total])
 	lineas.append("Tu final: %s" % NOMBRE_FINAL.get(GameState.calcular_final(), GameState.calcular_final()))
 	return _texto("\n".join(lineas), 12, EstiloUI.CREMA)
+
+
+## "Tu código de resultados": una línea en un cuadro de solo lectura, con "Copiar código" y "Abrir formulario".
+## El código se muestra SIEMPRE (también si el jugador eligió jugar sin guardar): no se escribe en ningún archivo y
+## el jugador decide si lo comparte.
+func _seccion_codigo() -> Control:
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	_codigo = CodigoResultados.generar()
+	_campo_codigo = LineEdit.new()
+	_campo_codigo.text = _codigo
+	_campo_codigo.editable = false
+	_campo_codigo.selecting_enabled = true
+	_campo_codigo.custom_minimum_size = Vector2(540, 28)
+	_campo_codigo.add_theme_font_size_override("font_size", 10)
+	v.add_child(_campo_codigo)
+	v.add_child(_texto("Copia este código y pégalo en la última pregunta del formulario. Solo se comparte si tú lo pegas. No contiene tu nombre ni datos personales.", 10, Color("d9cfe8")))
+	var fila := HFlowContainer.new()
+	fila.add_theme_constant_override("h_separation", 8)
+	_boton(fila, "Copiar código", _copiar_codigo)
+	var url := CodigoResultados.url_formulario()
+	if url != "":
+		_boton(fila, "Abrir formulario", func() -> void: OS.shell_open(url))
+	else:
+		push_warning("Resultados: Resources/config_formulario.json no tiene 'url': no se muestra el botón 'Abrir formulario'.")
+	v.add_child(fila)
+	return v
+
+
+func _copiar_codigo() -> void:
+	DisplayServer.clipboard_set(_codigo)
+	_decir("Código copiado. Pégalo en la última pregunta del formulario.")
 
 
 # --- Animación ---
