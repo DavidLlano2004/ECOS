@@ -1,8 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://Scripts/Intro/Onboarding.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://Assets/UI/fondo_titulo.png" id="2_fondo"]
-[ext_resource type="Shader" path="res://Shaders/desenfoque_oscuro.gdshader" id="3_shader"]
+[ext_resource type="Texture2D" path="res://Assets/UI/fondo_onboarding.png" id="2_fondo"]
 [ext_resource type="SpriteFrames" path="res://Resources/Personajes/frames_guia.tres" id="4_guia"]
 [ext_resource type="SpriteFrames" path="res://Resources/Mundo/frames_portal.tres" id="5_portal"]
 
@@ -14,12 +13,6 @@ glow_strength = 1.0
 glow_bloom = 0.1
 glow_blend_mode = 1
 glow_hdr_threshold = 0.75
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_fondo"]
-shader = ExtResource("3_shader")
-shader_parameter/radio = 2.5
-shader_parameter/oscuridad = 0.3
-shader_parameter/tinte = Color(0.38, 0.45, 0.7, 1)
 
 [node name="Onboarding" type="Node2D"]
 script = ExtResource("1_script")
@@ -37,7 +30,7 @@ position = Vector2(320, 180)
 
 [node name="Fondo" type="Sprite2D" parent="Mundo"]
 z_index = -10
-material = SubResource("ShaderMaterial_fondo")
+texture_filter = 1
 texture = ExtResource("2_fondo")
 centered = false
 

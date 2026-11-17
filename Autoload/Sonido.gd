@@ -142,6 +142,8 @@ func _exit_tree() -> void:
 func _crear_jugador(bus: String) -> AudioStreamPlayer:
 	var j := AudioStreamPlayer.new()
 	j.bus = bus
+	# Reproducción de Godot (no Web Audio): en la web el modo "Sample" no soporta bien buses, fundidos ni cambios de tono
+	j.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
 	j.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(j)
 	return j
@@ -150,11 +152,17 @@ func _crear_jugador(bus: String) -> AudioStreamPlayer:
 ## Mira qué archivos del catálogo existen y avisa (una vez) de los que faltan.
 func _revisar_catalogo() -> void:
 	faltan.clear()
-	for nombre in EFECTOS + AMBIENTES + MUSICAS:
+	var todos: Array = EFECTOS + AMBIENTES + MUSICAS
+	for nombre in todos:
 		if _cargar(nombre) == null:
 			faltan.append(nombre)
 	if not faltan.is_empty():
 		push_warning("Sonido: faltan %d archivos de audio: %s" % [faltan.size(), ", ".join(faltan)])
+	# Registro visible (en la web sale en la consola del navegador): cuántos sonidos se cargaron y cómo está el audio
+	print("Audio: %d de %d sonidos cargados%s" % [todos.size() - faltan.size(), todos.size(), "" if faltan.is_empty() else ". No se pudieron cargar: " + ", ".join(faltan)])
+	print("Audio: Master %s a %.1f dB, Musica %.0f %%, Efectos %.0f %%, reproducción %s" % [
+		"SILENCIADO" if AudioServer.is_bus_mute(0) else "activo", AudioServer.get_bus_volume_db(0),
+		Opciones.volumen_musica * 100.0, Opciones.volumen_efectos * 100.0, "Stream (Godot)"])
 
 
 ## Busca el archivo por nombre (en Efectos, Ambiente y Musica; .wav, .ogg o .mp3). Guarda el resultado.

@@ -64,6 +64,10 @@ func poner_avisos_pistas(activos: bool) -> void:
 
 
 func _aplicar_todo() -> void:
+	# El bus Master no se toca desde las opciones: se asegura que nunca quede silenciado
+	AudioServer.set_bus_mute(0, false)
+	if AudioServer.get_bus_volume_db(0) < -40.0:
+		AudioServer.set_bus_volume_db(0, 0.0)
 	_aplicar_volumen(BUS_MUSICA, volumen_musica)
 	_aplicar_volumen(BUS_EFECTOS, volumen_efectos)
 	# En la web la pantalla completa solo se puede pedir tras un clic o una tecla: nunca al empezar
