@@ -1,2 +1,3 @@
-# Final del juego.
-# Se completa en el paso de los finales (usará GameState.calcular_final()).
+# SIN USO. El final del juego ya no es un diálogo: es la escena Scenes/Final/Final.tscn (Scripts/Final/Final.gd),
+# que según GameState.calcular_final() muestra sus textos con Dialogo.mostrar_texto. Este archivo se conserva vacío
+# porque no se borran archivos sin permiso; se puede borrar sin consecuencias.
