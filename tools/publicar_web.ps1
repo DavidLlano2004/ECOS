@@ -16,6 +16,9 @@
   Exporta y prepara build/web, pero no publica en la rama "web".
 .PARAMETER SinPush
   Hace el commit en la rama "web" pero no lo sube (git push).
+.PARAMETER ConVercelJson
+  Incluye también build/web/vercel.json (cabeceras de caché). Por defecto NO se incluye: si ya lo borraste de la rama "web"
+  en GitHub, no se vuelve a añadir.
 .PARAMETER ForzarPush
   Si el push normal es rechazado, permite un push forzado (--force-with-lease), pidiendo confirmación.
 
@@ -26,6 +29,7 @@ param(
     [string]$Godot = "",
     [switch]$SoloExportar,
     [switch]$SinPush,
+    [switch]$ConVercelJson,
     [switch]$ForzarPush
 )
 
@@ -84,7 +88,9 @@ $vercel = @'
   ]
 }
 '@
-[System.IO.File]::WriteAllText((Join-Path $salida "vercel.json"), $vercel, (New-Object System.Text.UTF8Encoding($false)))
+if ($ConVercelJson) {
+    [System.IO.File]::WriteAllText((Join-Path $salida "vercel.json"), $vercel, (New-Object System.Text.UTF8Encoding($false)))
+}
 
 # --- 3. Tamaños ---
 Write-Host ""
@@ -116,6 +122,11 @@ git worktree prune
 
 $existeLocal = [bool](git branch --list web)
 $existeRemota = [bool](git ls-remote --heads origin web 2>$null)
+if ($existeRemota) {
+    # Se parte SIEMPRE de lo que hay en GitHub (por si alguien cambió la rama allí, por ejemplo borrando un archivo)
+    git fetch origin web | Out-Null
+    if ($existeLocal) { git branch -f web origin/web | Out-Null }
+}
 if ($existeLocal) {
     git worktree add $tmp web | Out-Null
 } elseif ($existeRemota) {
