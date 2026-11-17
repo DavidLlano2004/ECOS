@@ -42,6 +42,8 @@ const PUERTA_REFLEJO := preload("res://Scenes/Objetos/PuertaReflejo.tscn")
 const RUTA_ACERTIJOS := "res://Resources/Mundo/acertijos.json"
 const ESCENA_ACERTIJO := "res://Scenes/Objetos/%s.tscn"
 const FRAGMENTO := preload("res://Scenes/Objetos/FragmentoMemoria.tscn")
+const RUTA_COMPUERTAS := "res://Resources/Mundo/compuertas.json"
+const COMPUERTA := preload("res://Scenes/Objetos/Compuerta.tscn")
 ## Zonas con emoción: en la entrada de cada una hay una grieta, y su criatura vive en el Pasado.
 const ZONAS_EMOCION := ["Rabia", "Miedo", "Tristeza", "Soledad", "Culpa", "Ansiedad", "Verguenza"]
 ## Saturación del Presente: 0.25 sin ninguna emoción integrada, 1.0 con todas.
@@ -77,6 +79,7 @@ func _ready() -> void:
 		return
 	add_to_group("mundo")   # el audio le pregunta qué suelo hay bajo los pies (suelo_en)
 	GameState.epoca_cambiada.connect(mostrar_epoca)
+	add_child(AyudaPistas.new())   # aviso suave y brújula (G)
 	var jugador := _jugador()
 	if jugador != null:
 		jugador.global_position = posicion_zona("Hub") + Vector2(0, 56)  # delante del portal
@@ -99,6 +102,7 @@ func reconstruir_todo() -> void:
 	construir_detalles()
 	colocar_entidades()
 	colocar_acertijos()
+	colocar_compuertas()
 	_crear_ambiente()
 	_crear_particulas()
 	_preparar_saturacion()
@@ -266,7 +270,7 @@ func colocar_props() -> int:
 		for marcador in marcadores_de(grupo):
 			posiciones.append(to_local(marcador.global_position))
 		marcadores[grupo] = posiciones
-	Decorador.reservadas = _reservas_acertijos()   # los recintos de los acertijos quedan libres
+	Decorador.reservadas = _reservas_acertijos() + _reservas_compuertas()   # recintos y compuertas quedan libres
 	var puestos := Decorador.generar(filas, zonas, marcadores)
 	_puestos = puestos
 	for epoca in ["Pasado", "Presente"]:
@@ -759,6 +763,57 @@ func colocar_entidades() -> void:
 					continue
 				var criatura := (load(ruta) as PackedScene).instantiate() as Node2D
 				_poner_entidad(objetos, criatura, id.capitalize(), posicion_zona(id.capitalize()))
+
+
+# --- Compuertas de habilidad (en las dos épocas) ---
+
+## Lee Resources/Mundo/compuertas.json (lo escribe tools/generar_mapa.py): la lista de compuertas.
+func _leer_compuertas() -> Array:
+	if not FileAccess.file_exists(RUTA_COMPUERTAS):
+		return []
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_COMPUERTAS))
+	if typeof(datos) != TYPE_DICTIONARY:
+		return []
+	return datos.get("compuertas", [])
+
+
+## Rectángulos (px) que el Decorador debe dejar libres: las casillas de cada compuerta y su alrededor.
+func _reservas_compuertas() -> Array[Rect2]:
+	var reservas: Array[Rect2] = []
+	for c in _leer_compuertas():
+		for celda in c["celdas"]:
+			reservas.append(Rect2(celda[0] * TAMANO_TILE, celda[1] * TAMANO_TILE, TAMANO_TILE, TAMANO_TILE).grow(24.0))
+	return reservas
+
+
+## Crea las tres compuertas de habilidad en el Pasado Y en el Presente, en la misma posición. Su estado
+## es uno solo (GameState.compuertas). El barranco del puente va a ras de suelo, entre el suelo y los objetos.
+func colocar_compuertas() -> void:
+	if Engine.is_editor_hint():
+		return
+	var lista := _leer_compuertas()
+	for epoca in ["Pasado", "Presente"]:
+		var nodo_epoca := get_node_or_null(epoca)
+		var objetos := get_node_or_null("%s/Objetos" % epoca)
+		if nodo_epoca == null or objetos == null:
+			continue
+		for padre in [nodo_epoca, objetos]:
+			for viejo in padre.get_children():
+				if viejo.is_in_group("compuerta_mundo"):
+					viejo.free()
+		for datos in lista:
+			if datos["tipo"] == "puente":
+				var ravina := RavinaCompuerta.new()
+				ravina.configurar(datos)
+				ravina.name = "Ravina_%s" % datos["id"]
+				ravina.add_to_group("compuerta_mundo")
+				nodo_epoca.add_child(ravina)
+				nodo_epoca.move_child(ravina, objetos.get_index())   # sobre el suelo y bajo los objetos
+			var compuerta := COMPUERTA.instantiate() as Compuerta
+			compuerta.configurar(datos)
+			compuerta.name = "Compuerta_%s" % datos["id"]
+			compuerta.add_to_group("compuerta_mundo")
+			objetos.add_child(compuerta)
 
 
 # --- Acertijos de habilidad y fragmentos de memoria (solo en el Presente) ---

@@ -1,0 +1,65 @@
+{
+ "orden_libres": ["culpa", "miedo", "tristeza", "soledad"],
+ "emociones": {
+  "culpa":    {"direccion_zona": "al este del hub, al otro lado del río"},
+  "miedo":    {"direccion_zona": "al sur del hub, en el bosque oscuro"},
+  "tristeza": {"direccion_zona": "al suroeste del hub, junto al lago"},
+  "soledad":  {"direccion_zona": "al oeste del hub, en la colina"},
+  "rabia":    {"direccion_zona": "al noreste del hub, en el volcán"},
+  "verguenza": {"direccion_zona": "al noroeste del hub, en el jardín"},
+  "ansiedad": {"direccion_zona": "al sureste del hub, en la plaza de adoquines"}
+ },
+ "compuertas": [
+  {
+   "id": "puente_rabia",
+   "tipo": "puente",
+   "nombre": "El puente roto",
+   "habilidad_requerida": "reparacion",
+   "emocion_que_la_da": "culpa",
+   "zona_destino": "rabia",
+   "aviso": "Quizás Culpa pueda ayudar con esto.",
+   "pistas_sin": [
+    "Un barranco corta el camino y el puente está roto. Parece algo que se puede arreglar.",
+    "Está roto. Culpa sabe cómo se repara lo que se rompió. Quizás ella pueda ayudarte.",
+    "Está roto. Culpa sabe cómo se repara lo que se rompió. Escúchala (al este del hub, al otro lado del río) y vuelve con su habilidad: Reparar."
+   ],
+   "pista_con": "Ya tienes Reparar. Elígela (casilla {n} del HUD) y mantén ESPACIO junto al puente.",
+   "guia_con": "Culpa ya camina contigo. En el camino al noreste hay un puente roto: con Reparar puedes cruzarlo y llegar a Rabia.",
+   "mensaje_abierta": "El puente vuelve a estar entero."
+  },
+  {
+   "id": "roca_verguenza",
+   "tipo": "roca",
+   "nombre": "La roca enorme",
+   "habilidad_requerida": "impulso",
+   "emocion_que_la_da": "rabia",
+   "zona_destino": "verguenza",
+   "aviso": "Quizás Rabia pueda ayudar con esto.",
+   "pistas_sin": [
+    "Una roca enorme tapa el paso. Es demasiado pesada para moverla sin más.",
+    "Hace falta empuje. Rabia tiene fuerza de sobra y sabe usarla. Quizás ella pueda ayudarte.",
+    "Hace falta empuje. Rabia sabe cómo se abre paso lo que estorba. Escúchala (al noreste del hub, en el volcán) y vuelve con su habilidad: Impulso."
+   ],
+   "pista_con": "Ya tienes Impulso. Elígelo (casilla {n} del HUD), mira hacia la roca y pulsa ESPACIO para lanzarte contra ella.",
+   "guia_con": "Rabia ya camina contigo. En el camino al noroeste hay una roca enorme: con Impulso puedes abrir el paso hacia Vergüenza.",
+   "mensaje_abierta": "La roca se hizo pedazos. El paso está libre."
+  },
+  {
+   "id": "zarzal_ansiedad",
+   "tipo": "zarzal",
+   "nombre": "El zarzal oscuro",
+   "habilidad_requerida": "vision",
+   "emocion_que_la_da": "miedo",
+   "zona_destino": "ansiedad",
+   "aviso": "Quizás Miedo pueda ayudar con esto.",
+   "pistas_sin": [
+    "Un zarzal oscuro cierra el camino. No se ve qué hay dentro.",
+    "Está muy oscuro. Miedo conoce bien lo que se esconde en la oscuridad. Quizás ella pueda ayudarte.",
+    "Está muy oscuro. Miedo sabe ver donde otros no ven. Escúchala (al sur del hub, en el bosque oscuro) y vuelve con su habilidad: Visión."
+   ],
+   "pista_con": "Ya tienes Visión. Elígela (casilla {n} del HUD) y pulsa ESPACIO cerca del zarzal para encenderla.",
+   "guia_con": "Miedo ya camina contigo. En el camino al sureste hay un zarzal oscuro: con Visión podrás ver a través de él y llegar a Ansiedad.",
+   "mensaje_abierta": "La oscuridad se aparta. Ya se ve el camino."
+  }
+ ]
+}

@@ -62,6 +62,9 @@ func _sigue_valido() -> bool:
 		return false
 	if Habilidades.habilidad_seleccionada != "reparacion" or not jugador.can_move:
 		return false
+	# Una compuerta se mide por su área (cubre todo el objeto), no por su origen
+	if objetivo.has_method("solapa_area"):
+		return objetivo.solapa_area(jugador.global_position)
 	return jugador.global_position.distance_to(objetivo.global_position) <= DISTANCIA_MAXIMA
 
 

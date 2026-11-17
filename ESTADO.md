@@ -9,6 +9,8 @@ Godot 4.7.2, GDScript. Todo en español. Un commit por tarea y **sin líneas de 
 
 ## Lo hecho en la última etapa (commits, de más nuevo a más viejo)
 
+- Compuertas de habilidad, progresión y pistas (prompt 4.5): ver `CLAUDE.md`, sección "Compuertas de habilidad y progresión". Antes, "Sprite del cofre de memoria" (`CofreMemoria.tscn`, `frames_cofre.tres`; aún no está colocado en el mundo).
+
 - `1850757` Tecla E, texto unificado y consejos: los textos dicen E para portales y grietas (Q sigue funcionando pero oculta); `Dialogo.mostrar_texto(nombre, texto, opciones, retrato, automatico)` es la única vía para mostrar texto (borrados `GloboCierre` y `Dialogo.preguntar`); `EmocionData.nombre_bloqueo`; 84 consejos en `Resources/Consejos/*.json` (`Consejos.charlar`), `GameState.consejos_vistos`; `docs/consejos_para_revision.md`.
 - `0e8561f` Sistema de audio (`Sonido`: efectos, música y ambientes con fundido, pasos, portal por cercanía, panel de depuración con la tecla M).
 - `6e81819` Audio del juego: los 60 audios de ElevenLabs procesados (`tools/procesar_audio.py`) e importados; originales en `audio_originales/` (ignorado por git).

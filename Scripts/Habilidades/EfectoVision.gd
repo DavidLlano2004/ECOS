@@ -129,6 +129,9 @@ func _actualizar_zonas() -> void:
 
 ## Cuánto falta para estar al alcance de una zona (<= 0: está al alcance).
 func _alcance_a(nodo: Node2D) -> float:
+	# Una compuerta se mide por su área (cubre todo el objeto), no por su origen
+	if nodo.has_method("solapa_area") and nodo.solapa_area(jugador.global_position):
+		return -1.0
 	var extra := float(nodo.get("radio_sombra")) if "radio_sombra" in nodo else 0.0
 	return jugador.global_position.distance_to(nodo.global_position) - (ALCANCE_SOMBRA + extra)
 

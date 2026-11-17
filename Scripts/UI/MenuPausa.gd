@@ -23,6 +23,7 @@ const CONTROLES := [
 	["E", "Hablar, recoger y usar portales y grietas para viajar entre el Pasado y el Presente"],
 	["ESPACIO", "Usar la habilidad elegida (Reparar: mantenlo pulsado; Visión: enciende y apaga)"],
 	["1 a 7 y rueda del ratón", "Elegir habilidad (también R y F)"],
+	["G", "Brújula: una flecha hacia donde te sugiere la Guía (tras pedirle una pista)"],
 	["TAB", "Diario"],
 	["ESC", "Pausa"],
 ]
@@ -43,6 +44,7 @@ var _tween_aviso: Tween
 var _slider_musica: HSlider
 var _slider_efectos: HSlider
 var _casilla_pantalla: CheckButton
+var _casilla_avisos: CheckButton
 var _sincronizando := false
 var _silenciar_foco := false   # true mientras el foco se pone por código (al cambiar de pantalla)
 
@@ -234,6 +236,15 @@ func _construir_opciones() -> VBoxContainer:
 	_casilla_pantalla.mouse_entered.connect(_casilla_pantalla.grab_focus)
 	_casilla_pantalla.focus_entered.connect(_sonar_foco)
 	v.add_child(_casilla_pantalla)
+	_casilla_avisos = CheckButton.new()
+	_casilla_avisos.text = "Avisos de pistas"
+	_casilla_avisos.focus_mode = Control.FOCUS_ALL
+	_casilla_avisos.toggled.connect(func(activa: bool) -> void:
+		if not _sincronizando:
+			Opciones.poner_avisos_pistas(activa))
+	_casilla_avisos.mouse_entered.connect(_casilla_avisos.grab_focus)
+	_casilla_avisos.focus_entered.connect(_sonar_foco)
+	v.add_child(_casilla_avisos)
 	var volver := _boton("Volver", func() -> void: _ir_a(Pagina.PRINCIPAL), "ui_cancelar")
 	v.add_child(volver)
 	_primer_foco[Pagina.OPCIONES] = _slider_musica
@@ -312,6 +323,7 @@ func _sincronizar_opciones() -> void:
 	_slider_musica.value = Opciones.volumen_musica
 	_slider_efectos.value = Opciones.volumen_efectos
 	_casilla_pantalla.button_pressed = Opciones.pantalla_completa
+	_casilla_avisos.button_pressed = Opciones.avisos_pistas
 	_sincronizando = false
 
 

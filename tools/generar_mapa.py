@@ -18,6 +18,7 @@ from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import acertijos_mapa
+import compuertas_mapa
 
 W, H = 96, 54
 TILE = 32
@@ -428,6 +429,9 @@ def construir():
                     for (a, b) in comp:
                         m.g[b][a] = "a" if base_plaza(m, a, b) else "."
 
+    # 12. compuertas de habilidad: tres zonas cercadas con un hueco tapado (ver compuertas_mapa.py)
+    m.compuertas = compuertas_mapa.estampar(m, W, H, TILE)
+
     # 11. acertijos de habilidad: recintos cerrados con un fragmento de memoria (ver acertijos_mapa.py)
     m.acertijos = acertijos_mapa.estampar(m, ZONAS, W, H, dentro, transitable)
 
@@ -498,7 +502,7 @@ def verificar_acertijos(m):
     """Con la rejilla: sin habilidades el camino principal y las 7 zonas se alcanzan y ningún fragmento;
     resolviendo cada acertijo, su fragmento se alcanza y se puede volver al hub."""
     hub = ZONAS["Hub"]
-    todos = set()
+    todos = set()   # (las compuertas se dan por abiertas aquí: los acertijos son opcionales y van aparte)
     for s in m.acertijos:
         todos |= {tuple(c) for c in s["bloqueo"]}
 
@@ -572,6 +576,8 @@ def main():
     bien = verificar(m)
     print("Comprobando los acertijos de habilidad...")
     bien = verificar_acertijos(m) and bien
+    print("Comprobando las compuertas de habilidad (físico, cada 8 px)...")
+    bien = compuertas_mapa.verificar(m, W, H, TILE, ZONAS, m.compuertas) and bien
     filas = ["".join(f) for f in m.g]
     assert all(len(f) == W for f in filas) and len(filas) == H
     ruta = os.path.join(RAIZ, "Resources", "Mundo", "mapa.txt")
@@ -582,6 +588,9 @@ def main():
     ruta_acertijos = os.path.join(RAIZ, "Resources", "Mundo", "acertijos.json")
     acertijos_mapa.escribir_json(m.acertijos, ruta_acertijos)
     print("Acertijos escritos:", ruta_acertijos)
+    ruta_comp = os.path.join(RAIZ, "Resources", "Mundo", "compuertas.json")
+    compuertas_mapa.escribir_json(m.compuertas, ruta_comp)
+    print("Compuertas escritas:", ruta_comp)
     if "--vista" in args:
         escribir_vista(m, args[args.index("--vista") + 1])
     if not bien:

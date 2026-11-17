@@ -14,6 +14,8 @@ const VOLUMEN_POR_DEFECTO := 0.8
 var volumen_musica := VOLUMEN_POR_DEFECTO
 var volumen_efectos := VOLUMEN_POR_DEFECTO
 var pantalla_completa := false
+## Aviso suave junto a una compuerta cerrada ("Quizás Culpa pueda ayudar con esto").
+var avisos_pistas := true
 
 
 func _ready() -> void:
@@ -56,6 +58,11 @@ func poner_pantalla_completa(activa: bool) -> void:
 	guardar()
 
 
+func poner_avisos_pistas(activos: bool) -> void:
+	avisos_pistas = activos
+	guardar()
+
+
 func _aplicar_todo() -> void:
 	_aplicar_volumen(BUS_MUSICA, volumen_musica)
 	_aplicar_volumen(BUS_EFECTOS, volumen_efectos)
@@ -82,6 +89,7 @@ func guardar() -> void:
 	config.set_value("audio", "musica", volumen_musica)
 	config.set_value("audio", "efectos", volumen_efectos)
 	config.set_value("pantalla", "completa", pantalla_completa)
+	config.set_value("ayuda", "avisos_pistas", avisos_pistas)
 	var error := config.save(RUTA)
 	if error != OK:
 		push_warning("Opciones: no se pudieron guardar (error %d)." % error)
@@ -95,3 +103,4 @@ func cargar() -> void:
 	volumen_musica = clampf(float(config.get_value("audio", "musica", VOLUMEN_POR_DEFECTO)), 0.0, 1.0)
 	volumen_efectos = clampf(float(config.get_value("audio", "efectos", VOLUMEN_POR_DEFECTO)), 0.0, 1.0)
 	pantalla_completa = bool(config.get_value("pantalla", "completa", false))
+	avisos_pistas = bool(config.get_value("ayuda", "avisos_pistas", true))

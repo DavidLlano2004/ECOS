@@ -10,7 +10,7 @@ extends CanvasLayer
 
 signal cerrado
 
-const SECCIONES := ["Emociones", "Habilidades", "Recuerdos", "Progreso"]
+const SECCIONES := ["Emociones", "Habilidades", "Recuerdos", "Conexiones", "Pistas", "Progreso"]
 const RUTA_ICONOS := "res://Assets/UI/iconos_habilidades.png"
 const TAMANO_LIBRO := Vector2(580, 316)
 const COLOR_ESTADO := {
@@ -162,7 +162,7 @@ func _construir() -> void:
 	_libro.add_child(cabecera)
 	cabecera.add_child(_boton("<", 26, func() -> void: cambiar_seccion(-1)))
 	for i in SECCIONES.size():
-		var b := _boton(SECCIONES[i], 112, ir_a_seccion.bind(i))
+		var b := _boton(SECCIONES[i], 76, ir_a_seccion.bind(i))
 		_botones.append(b)
 		cabecera.add_child(b)
 	cabecera.add_child(_boton(">", 26, func() -> void: cambiar_seccion(1)))
@@ -221,6 +221,10 @@ func _mostrar_seccion() -> void:
 		2:
 			_crear_recuerdos()
 		3:
+			_crear_conexiones()
+		4:
+			_crear_pistas()
+		5:
 			_crear_progreso()
 	for i in _botones.size():
 		var activa := i == seccion
@@ -414,6 +418,113 @@ func _elegir_recuerdo(indice: int) -> void:
 	else:
 		_detalle_titulo.text = "???"
 		_detalle_texto.text = "Un recuerdo aún sin encontrar"
+
+
+# Conexiones ------------------------------------------------------------
+
+## Un esquema de tarjetas y flechas: emoción -> habilidad -> obstáculo -> zona que abre. Hasta que el
+## jugador ve el obstáculo por primera vez, la conexión sale como "???"; después se ve completa y, con
+## un visto, cuando ya está abierta.
+func _crear_conexiones() -> void:
+	var columna := VBoxContainer.new()
+	columna.add_theme_constant_override("separation", 8)
+	columna.size = _contenido.size
+	_contenido.add_child(columna)
+	var intro := EstiloUI.etiqueta("Lo que cada emoción te enseña abre caminos nuevos.", 11, EstiloUI.GRIS)
+	intro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	columna.add_child(intro)
+	for c in Progresion.compuertas():
+		columna.add_child(_fila_conexion(c))
+
+
+func _fila_conexion(c: Dictionary) -> Control:
+	var id: String = c["id"]
+	var vista := GameState.compuerta_vista(id)
+	var abierta := GameState.compuerta_esta_abierta(id)
+	var emocion := GameState.obtener_datos(str(c["emocion_que_la_da"]))
+	var destino := GameState.obtener_datos(str(c["zona_destino"]))
+	var color: Color = emocion.color if emocion != null else EstiloUI.DORADO
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 4)
+	fila.alignment = BoxContainer.ALIGNMENT_CENTER
+	var habilidad: String = Progresion.nombre_habilidad(str(c["habilidad_requerida"])) if vista else "???"
+	var textos := [
+		emocion.nombre if (vista and emocion != null) else "???",
+		habilidad,
+		str(c["nombre"]) if vista else "???",
+		destino.nombre if (vista and destino != null) else "???",
+	]
+	for i in textos.size():
+		if i > 0:
+			fila.add_child(_flecha(color if vista else EstiloUI.GRIS))
+		fila.add_child(_tarjeta_conexion(textos[i], color if vista else EstiloUI.GRIS, abierta))
+	fila.add_child(_visto(abierta))
+	return fila
+
+
+func _tarjeta_conexion(texto: String, color: Color, abierta: bool) -> Control:
+	var tarjeta := PanelContainer.new()
+	tarjeta.custom_minimum_size = Vector2(102, 40)
+	tarjeta.add_theme_stylebox_override("panel", EstiloUI.caja(Color("1e1b2e"), Color(color, 0.9 if abierta else 0.55), 2 if abierta else 1, 4, 3))
+	var e := EstiloUI.etiqueta(texto, 11, color.lightened(0.3))
+	e.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	e.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	e.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tarjeta.add_child(e)
+	return tarjeta
+
+
+func _flecha(color: Color) -> Control:
+	var f := Control.new()
+	f.custom_minimum_size = Vector2(16, 40)
+	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	f.draw.connect(func() -> void:
+		var y := f.size.y / 2.0
+		f.draw_line(Vector2(1, y), Vector2(13, y), color, 2.0)
+		f.draw_line(Vector2(8, y - 5), Vector2(14, y), color, 2.0)
+		f.draw_line(Vector2(8, y + 5), Vector2(14, y), color, 2.0))
+	return f
+
+
+## El visto de una conexión ya abierta (dibujado, sin depender de la fuente).
+func _visto(abierta: bool) -> Control:
+	var v := Control.new()
+	v.custom_minimum_size = Vector2(22, 40)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if abierta:
+		v.draw.connect(func() -> void:
+			var y := v.size.y / 2.0
+			v.draw_polyline(PackedVector2Array([Vector2(3, y), Vector2(9, y + 6), Vector2(19, y - 7)]), Color("8fd19e"), 3.0, true))
+	return v
+
+
+# Pistas ----------------------------------------------------------------
+
+func _crear_pistas() -> void:
+	var desplazable := ScrollContainer.new()
+	desplazable.size = _contenido.size
+	desplazable.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	desplazable.focus_mode = Control.FOCUS_NONE
+	_contenido.add_child(desplazable)
+	var columna := VBoxContainer.new()
+	columna.add_theme_constant_override("separation", 8)
+	columna.custom_minimum_size = Vector2(_contenido.size.x - 14, 0)
+	desplazable.add_child(columna)
+	if GameState.pistas.is_empty():
+		var vacio := EstiloUI.etiqueta("Aún no has recibido pistas. Si algo te cierra el paso, pulsa E junto a él o habla con la Guía.", 12, EstiloUI.GRIS)
+		vacio.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		columna.add_child(vacio)
+		return
+	for p in GameState.pistas:
+		var caja := PanelContainer.new()
+		caja.add_theme_stylebox_override("panel", EstiloUI.caja(Color("1e1b2e"), EstiloUI.DORADO.darkened(0.5), 1, 6, 3))
+		var v := VBoxContainer.new()
+		caja.add_child(v)
+		v.add_child(EstiloUI.etiqueta(str(p["titulo"]), 12, EstiloUI.DORADO))
+		var t := EstiloUI.etiqueta(str(p["texto"]), 11, EstiloUI.CREMA)
+		t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(t)
+		columna.add_child(caja)
 
 
 # Progreso --------------------------------------------------------------

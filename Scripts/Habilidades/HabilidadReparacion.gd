@@ -43,6 +43,11 @@ func _buscar_objetivo(player: Player) -> Node2D:
 	for nodo in player.get_tree().get_nodes_in_group("reparable"):
 		if not (nodo is Node2D) or not nodo.has_method("reparar") or not nodo.is_visible_in_tree():
 			continue  # lo de la época oculta no se ve ni se toca
+		# Las compuertas se detectan por su área de interacción (cubre todo el objeto), no por su origen
+		if nodo.has_method("solapa_area"):
+			if nodo.solapa_area(player.global_position):
+				return nodo
+			continue
 		var distancia := player.global_position.distance_to(nodo.global_position)
 		if distancia <= mejor_distancia:
 			mejor_distancia = distancia

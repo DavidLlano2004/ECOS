@@ -20,6 +20,13 @@ func puede_usar(player: Player) -> bool:
 
 
 func ejecutar(player: Player) -> bool:
+	# Una roca enorme (compuerta) se rompe si el jugador está en su área y mira hacia ella; el área cubre
+	# todo el objeto, no solo su origen. (Si no, el dash la rompe igualmente al chocar con ella.)
+	for nodo in player.get_tree().get_nodes_in_group("rompible"):
+		if nodo.has_method("solapa_area") and nodo.is_visible_in_tree() and nodo.solapa_area(player.global_position):
+			var hacia: Vector2 = (nodo.global_position - player.global_position).normalized()
+			if hacia.dot(player.facing) > 0.2:
+				nodo.romper()
 	player.iniciar_impulso(DISTANCIA, SEGUNDOS, color)
 	return true
 

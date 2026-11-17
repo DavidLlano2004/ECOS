@@ -9,6 +9,10 @@ signal habilidad_desbloqueada(habilidad_id: String)
 ## Se recogió un fragmento de memoria (id = el de la emoción a la que pertenece, ej. "rabia").
 signal fragmento_recogido(id: String)
 ## Se emiten al reiniciar la partida y al cargar una guardada (las habilidades y el HUD se actualizan).
+## Una compuerta de habilidad se abrió (vale para las dos épocas).
+signal compuerta_abierta(id: String)
+## Llegó una pista nueva (para el diario).
+signal pista_registrada(id: String)
 signal partida_reiniciada
 signal partida_cargada
 
@@ -40,6 +44,16 @@ var posicion_jugador: Vector2 = Vector2.ZERO
 var tiene_posicion: bool = false
 ## true justo después de cargar una partida con posición: Mundo coloca al jugador ahí y lo apaga.
 var restaurar_posicion: bool = false
+## id de compuerta -> true si está abierta. UN solo estado para las dos épocas. Se guarda con la partida.
+var compuertas: Dictionary = {}
+## ids de las compuertas que el jugador ya vio (el diario muestra "???" hasta entonces). Se guardan.
+var compuertas_vistas: Array[String] = []
+## Pistas recibidas: [{"id", "titulo", "texto"}]. Se guardan para el diario.
+var pistas: Array[Dictionary] = []
+## id de compuerta -> cuántas veces se pidió su pista (sube el nivel de la pista, de 1 a 3). Se guarda.
+var pista_niveles: Dictionary = {}
+## Último paso sugerido por la Guía ("¿Qué hago ahora?"): lo usa la brújula (G). No se guarda.
+var paso_guia: Dictionary = {}
 var respuestas_inicio: Array[int] = []
 var respuestas_final: Array[int] = []
 ## Mensajes capturados: [{"id": "rabia", "texto": "..."}]
@@ -126,6 +140,63 @@ func _guardar_en_diario(id: String, texto: String) -> void:
 		if entrada["id"] == id:
 			return
 	diario.append({"id": id, "texto": texto})
+
+
+## true si la compuerta está abierta (en las dos épocas a la vez).
+func compuerta_esta_abierta(id: String) -> bool:
+	return bool(compuertas.get(id, false))
+
+
+## Abre una compuerta para siempre. Devuelve false si ya estaba abierta.
+func abrir_compuerta(id: String) -> bool:
+	if compuerta_esta_abierta(id):
+		return false
+	compuertas[id] = true
+	compuerta_abierta.emit(id)
+	return true
+
+
+## Anota que el jugador vio una compuerta (así sus conexiones dejan de ser "???" en el diario).
+func marcar_compuerta_vista(id: String) -> void:
+	if not compuertas_vistas.has(id):
+		compuertas_vistas.append(id)
+
+
+func compuerta_vista(id: String) -> bool:
+	return compuertas_vistas.has(id)
+
+
+## Guarda una pista en el diario (sin repetir el mismo id).
+func registrar_pista(id: String, titulo: String, texto: String) -> void:
+	for p in pistas:
+		if p["id"] == id:
+			return
+	pistas.append({"id": id, "titulo": titulo, "texto": texto})
+	pista_registrada.emit(id)
+
+
+## La pista de una compuerta: sube de nivel cada vez que se pide (insinúa, nombra, dice dónde) y se anota.
+func pista_de_compuerta(id: String) -> String:
+	var nivel := int(pista_niveles.get(id, 0)) + 1
+	pista_niveles[id] = mini(nivel, 3)
+	var c := Progresion.compuerta(id)
+	var texto := Progresion.texto_pista(id, nivel)
+	var con_habilidad := tiene_habilidad(str(c.get("habilidad_requerida", "")))
+	registrar_pista("%s|%s" % [id, "con" if con_habilidad else str(mini(nivel, 3))], str(c.get("nombre", "")), texto)
+	return texto
+
+
+## El texto de "¿Qué hago ahora?" de la Guía (y recuerda el paso para la brújula).
+func texto_siguiente_paso() -> String:
+	paso_guia = Progresion.siguiente_paso()
+	return str(paso_guia["texto"])
+
+
+## La Guía dio su pista: se anota en el diario.
+func registrar_pista_guia() -> void:
+	if paso_guia.is_empty():
+		paso_guia = Progresion.siguiente_paso()
+	registrar_pista("guia|" + str(paso_guia["texto"]).sha1_text().substr(0, 8), "La Guía", str(paso_guia["texto"]))
 
 
 func tiene_habilidad(habilidad_id: String) -> bool:
@@ -249,6 +320,11 @@ func nueva_partida() -> void:
 	respuestas_final.clear()
 	diario.clear()
 	guia_conocida = false
+	compuertas.clear()
+	compuertas_vistas.clear()
+	pistas.clear()
+	pista_niveles.clear()
+	paso_guia = {}
 	partida_reiniciada.emit()
 
 
@@ -267,6 +343,10 @@ func guardar() -> bool:
 		"respuestas_final": respuestas_final,
 		"diario": diario,
 		"guia_conocida": guia_conocida,
+		"compuertas": compuertas,
+		"compuertas_vistas": compuertas_vistas,
+		"pistas": pistas,
+		"pista_niveles": pista_niveles,
 	}
 	if tiene_posicion:
 		contenido["posicion"] = [posicion_jugador.x, posicion_jugador.y]
@@ -354,6 +434,27 @@ func cargar() -> bool:
 	for entrada in _lista(lectura, "diario"):
 		if typeof(entrada) == TYPE_DICTIONARY and entrada.has("id") and entrada.has("texto"):
 			diario.append({"id": str(entrada["id"]), "texto": str(entrada["texto"])})
+
+	# Compuertas: solo las que existen en Progresion.json; pistas con su forma comprobada
+	var ids_compuertas: Array[String] = []
+	for c in Progresion.compuertas():
+		ids_compuertas.append(str(c["id"]))
+	var guardadas: Variant = lectura.get("compuertas", {})
+	if typeof(guardadas) == TYPE_DICTIONARY:
+		for id in guardadas:
+			if ids_compuertas.has(str(id)) and typeof(guardadas[id]) == TYPE_BOOL and guardadas[id]:
+				compuertas[str(id)] = true
+	for id in _lista(lectura, "compuertas_vistas"):
+		if ids_compuertas.has(str(id)) and not compuertas_vistas.has(str(id)):
+			compuertas_vistas.append(str(id))
+	for p in _lista(lectura, "pistas"):
+		if typeof(p) == TYPE_DICTIONARY and p.has("id") and p.has("texto"):
+			registrar_pista(str(p["id"]), str(p.get("titulo", "")), str(p["texto"]))
+	var niveles: Variant = lectura.get("pista_niveles", {})
+	if typeof(niveles) == TYPE_DICTIONARY:
+		for id in niveles:
+			if ids_compuertas.has(str(id)) and (typeof(niveles[id]) == TYPE_FLOAT or typeof(niveles[id]) == TYPE_INT):
+				pista_niveles[str(id)] = clampi(int(niveles[id]), 0, 3)
 
 	var conocida: Variant = lectura.get("guia_conocida", false)
 	guia_conocida = typeof(conocida) == TYPE_BOOL and conocida

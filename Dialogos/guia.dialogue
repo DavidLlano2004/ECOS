@@ -1,8 +1,10 @@
 # La Guía en el mundo. Los textos cambian según el progreso:
-#   1) la primera vez explica lo básico;
+#   1) la primera vez explica lo básico (y que hay caminos cerrados);
 #   2) si ya se resolvieron todas las emociones, anima a ir a la Puerta del Reflejo;
 #   3) si hay emociones integradas, comenta que el mundo recupera color;
 #   4) si no, un recordatorio corto.
+# Al final siempre ofrece "¿Qué hago ahora?": GameState.texto_siguiente_paso() calcula la siguiente
+# emoción o camino útil según el progreso (ver Scripts/Sistemas/Progresion.gd) y la brújula (G) lo señala.
 
 ~ start
 if not GameState.guia_conocida
@@ -11,6 +13,7 @@ if not GameState.guia_conocida
 	Guía: Cuando alguien o algo esté cerca, pulsa E para hablar.
 	Guía: Los portales y las grietas pequeñas te llevan al Presente. Párate junto a uno y pulsa E.
 	Guía: Cada emoción que encuentres solo quiere una cosa: que la escuches. No hace falta vencerla.
+	Guía: Hay caminos cerrados. Cada obstáculo te dirá qué emoción puede ayudarte.
 	Guía: Ve a tu ritmo. Aquí estaré.
 	$> GameState.marcar_guia_conocida()
 elif GameState.todas_resueltas()
@@ -23,4 +26,11 @@ elif GameState.cantidad_integradas() > 0
 else
 	Guía: Si no sabes por dónde seguir, sal de la plaza por cualquier camino.
 	Guía: Recuerda: ellas no vienen a pelear. Solo quieren que alguien las escuche.
+Guía: ¿Quieres una pista?
+- ¿Qué hago ahora?
+	Guía: {{GameState.texto_siguiente_paso()}}
+	Guía: Si te sirve, pulsa G y una flecha te mostrará el camino.
+	$> GameState.registrar_pista_guia()
+- Estoy bien, gracias.
+	Guía: Aquí estaré.
 => END
