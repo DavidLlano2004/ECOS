@@ -29,6 +29,7 @@ const EFECTOS := [
 	"paso", "paso_piedra",
 	"roca_rompe", "planta_florece", "placa_activa", "porton_repara", "puente_aparece", "niebla_disipa",
 	"titulo_comenzar", "luz_blanca",
+	"cofre_abre", "mejora_habilidad", "compuerta_abre", "pista",
 ]
 const AMBIENTES := ["amb_pasado", "amb_presente", "amb_lluvia", "portal_activo"]
 const MUSICAS := ["musica_titulo", "musica_pasado", "musica_presente", "final_bueno", "final_neutro", "final_dificil"]
@@ -301,6 +302,9 @@ func _conectar_senales() -> void:
 	GameState.emocion_resuelta.connect(_on_emocion_resuelta)
 	GameState.habilidad_desbloqueada.connect(func(_id: String) -> void: efecto("habilidad_desbloqueada"))
 	GameState.fragmento_recogido.connect(func(_id: String) -> void: efecto("fragmento_recogido"))
+	# Mejora de habilidad: suena un poco después del cofre (cuando sale el aviso de la mejora)
+	GameState.cofre_abierto.connect(func(_id: String) -> void: efecto("mejora_habilidad", NAN, 0.0, 0.7))
+	GameState.compuerta_abierta.connect(func(_id: String) -> void: efecto("compuerta_abre"))
 	Habilidades.habilidad_usada.connect(func(id: String) -> void: efecto(SONIDO_DE_HABILIDAD.get(id, "")))
 	Habilidades.uso_denegado.connect(func(_id: String) -> void: efecto("hab_denegada"))
 	Dialogo.dialogo_abierto.connect(func() -> void: efecto("dialogo_abrir"))

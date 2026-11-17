@@ -35,7 +35,8 @@ emo_culpa_integrada emo_ansiedad_integrada emo_verguenza_integrada
 integrar_exito atacar_ignorar habilidad_desbloqueada fragmento_recogido viaje_epoca bloqueo_abre
 hab_impulso hab_vision hab_calma hab_vinculo hab_reparar hab_pausa hab_revelar hab_denegada
 paso paso_piedra
-roca_rompe planta_florece placa_activa porton_repara puente_aparece niebla_disipa titulo_comenzar luz_blanca""".split()
+roca_rompe planta_florece placa_activa porton_repara puente_aparece niebla_disipa titulo_comenzar luz_blanca
+cofre_abre mejora_habilidad compuerta_abre pista""".split()
 AMBIENTE = "amb_pasado amb_presente amb_lluvia portal_activo".split()
 MUSICA = "musica_titulo musica_pasado musica_presente final_bueno final_neutro final_dificil".split()
 FINALES = {"final_bueno", "final_neutro", "final_dificil"}

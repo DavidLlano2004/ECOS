@@ -82,7 +82,7 @@ func _dejar_abierto(con_efecto: bool) -> void:
 		_sprite.play(&"abierto")
 		_luz_dorada.energy = 0.0
 		return
-	Sonido.efecto("fragmento_recogido")
+	Sonido.efecto("cofre_abre")
 	_sprite.play(&"abriendo")
 	_luz_dorada.energy = 1.4
 	var datos := GameState.obtener_datos(emocion_id)
