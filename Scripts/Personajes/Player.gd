@@ -12,7 +12,7 @@ const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
 
 @export_group("Movimiento")
 ## Velocidad máxima en píxeles por segundo.
-@export var velocidad: float = 70.0
+@export var velocidad: float = 85.0
 ## Qué tan rápido alcanza la velocidad máxima (px/s²).
 @export var aceleracion: float = 600.0
 ## Qué tan rápido se frena al soltar las teclas (px/s²).
