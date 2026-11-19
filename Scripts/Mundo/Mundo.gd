@@ -964,6 +964,11 @@ func _reservas_acertijos() -> Array[Rect2]:
 ## cierra un recinto con una sola entrada (ver tools/acertijos_mapa.py) y guarda un fragmento.
 ## Los abismos van como una capa entre el suelo y los objetos (así se dibujan bajo el jugador).
 ## Un fragmento ya recogido no vuelve a aparecer.
+## Objetos de acertijo que son suelo (placas, puentes, plataformas y la planta con su tierra): se dibujan
+## siempre debajo del jugador y de todo lo alto. El resto (roca, portón, niebla, puerta) se ordena por su base.
+const OBJETOS_PLANOS := ["PlacaDoble", "CaminoOculto", "PlataformaMovil", "PlantaMarchita"]
+
+
 func colocar_acertijos() -> void:
 	if Engine.is_editor_hint():
 		return
@@ -990,7 +995,12 @@ func colocar_acertijos() -> void:
 			nodo.position = Vector2(objeto["pos"][0], objeto["pos"][1])
 			nodo.add_to_group("acertijo")
 			nodo.name = "%s_%s" % [objeto["escena"], acertijo["emocion"]]
-			objetos.add_child(nodo)
+			if OBJETOS_PLANOS.has(str(objeto["escena"])):
+				# Lo plano es suelo: va entre el suelo y los objetos, siempre bajo el jugador
+				presente.add_child(nodo)
+				presente.move_child(nodo, objetos.get_index())
+			else:
+				objetos.add_child(nodo)
 		if not GameState.tiene_fragmento(acertijo["emocion"]):
 			var fragmento := FRAGMENTO.instantiate() as FragmentoMemoria
 			fragmento.id = acertijo["emocion"]

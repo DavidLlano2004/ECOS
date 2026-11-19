@@ -94,6 +94,8 @@ func _ready() -> void:
 	_forma_zona.position = Vector2(0, -16)
 
 	_preparar_particulas()
+	if datos.id == "tristeza":
+		_poner_sprite_en_el_suelo.call_deferred()   # el estanque es suelo: siempre bajo el jugador
 	GameState.epoca_cambiada.connect(_on_epoca_cambiada)
 	GameState.emocion_resuelta.connect(_on_emocion_resuelta)
 	actualizar(false)
@@ -103,6 +105,20 @@ func _process(delta: float) -> void:
 	_tiempo += delta
 	if _vibra:
 		_sprite.offset = -APOYO + Vector2(randf_range(-1.0, 1.0), randf_range(-0.6, 0.6)) * 1.3
+
+
+## El estanque de Tristeza es plano: su dibujo pasa a ser hermano de `Objetos` (sin ordenar en Y), justo
+## encima del suelo, y desaparece junto con este nodo. La colisión y la lluvia se quedan aquí.
+func _poner_sprite_en_el_suelo() -> void:
+	var objetos := get_parent()
+	if objetos == null or objetos.get_parent() == null or not is_instance_valid(_sprite):
+		return
+	var epoca := objetos.get_parent()
+	_sprite.reparent(epoca, true)
+	epoca.move_child(_sprite, objetos.get_index())
+	tree_exiting.connect(func() -> void:
+		if is_instance_valid(_sprite):
+			_sprite.queue_free())
 
 
 ## Al entrar al Presente se vuelve a leer el estado (cuando el efecto del viaje ya se está yendo).

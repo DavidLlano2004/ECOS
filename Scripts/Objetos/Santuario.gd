@@ -22,6 +22,8 @@ var _tiempo := 0.0
 
 func _ready() -> void:
 	add_to_group("santuario")
+	# Altar, farolitos y cofre se ordenan cada uno por su propia base (no como un bloque por el centro)
+	y_sort_enabled = true
 	_crear_altar()
 	_crear_luces()
 	_crear_cofre()
