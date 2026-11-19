@@ -42,7 +42,7 @@ func _crear_altar() -> void:
 	cuerpo.collision_mask = 0
 	var forma := CollisionShape2D.new()
 	var caja := RectangleShape2D.new()
-	caja.size = Vector2(26, 10)
+	caja.size = Vector2(30, 10)   # todo el ancho de la base del altar (30 px)
 	forma.shape = caja
 	forma.position = Vector2(0, -5)
 	cuerpo.add_child(forma)

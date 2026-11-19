@@ -24,12 +24,30 @@ var _tiempo := 0.0
 var _ocupado := false
 
 
+## Base del dibujo (px, con el origen en el centro de la base): el cofre mide ~40 px de ancho y ~35 de alto
+## cerrado. La colisión cubre todo el ancho y algo más del 40 % inferior, también abierto.
+const BASE_COFRE := Vector2(42, 15)
+
+
 func _ready() -> void:
 	add_to_group("cofres")
+	_ajustar_colision()
 	_sprite.play(&"cerrado")
 	GameState.partida_reiniciada.connect(_leer_estado)
 	GameState.partida_cargada.connect(_leer_estado)
 	_leer_estado()
+
+
+## Cuerpo sólido sobre toda la base (capa 1 = mundo; el jugador la colisiona). Nunca se apaga: solo Mundo la
+## desactiva con la época oculta. La zona para interactuar (la del jugador al pulsar E) es más grande.
+func _ajustar_colision() -> void:
+	collision_layer = 1
+	collision_mask = 0
+	var forma := $Forma as CollisionShape2D
+	var caja := RectangleShape2D.new()
+	caja.size = BASE_COFRE
+	forma.shape = caja
+	forma.position = Vector2(0, -BASE_COFRE.y / 2.0)
 
 
 ## Deja el cofre como dice GameState (cerrado o ya abierto, sin animación).
