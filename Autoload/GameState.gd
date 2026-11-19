@@ -58,6 +58,11 @@ var compuertas: Dictionary = {}
 var compuertas_vistas: Array[String] = []
 ## Pistas recibidas: [{"id", "titulo", "texto"}]. Se guardan para el diario.
 var pistas: Array[Dictionary] = []
+## Historial de avisos (tarjetas de Notificacion): los últimos MAX_AVISOS, con título, texto y hora de juego.
+const MAX_AVISOS := 30
+var avisos: Array[Dictionary] = []
+## Segundos de juego acumulados (se guardan con la partida; sirven para la hora de cada aviso).
+var tiempo_jugado := 0.0
 ## id de compuerta -> cuántas veces se pidió su pista (sube el nivel de la pista, de 1 a 3). Se guarda.
 var pista_niveles: Dictionary = {}
 ## Último paso sugerido por la Guía ("¿Qué hago ahora?"): lo usa la brújula (G). No se guarda.
@@ -337,6 +342,17 @@ func calcular_final() -> String:
 	return "neutro"
 
 
+func _process(delta: float) -> void:
+	tiempo_jugado += delta
+
+
+## Anota un aviso en el historial (los más viejos se descartan al pasar de MAX_AVISOS).
+func registrar_aviso(titulo: String, texto: String) -> void:
+	avisos.append({"titulo": titulo, "texto": texto, "hora": tiempo_jugado})
+	while avisos.size() > MAX_AVISOS:
+		avisos.remove_at(0)
+
+
 ## Reinicia todo el progreso.
 func nueva_partida() -> void:
 	epoca = "pasado"
@@ -359,6 +375,8 @@ func nueva_partida() -> void:
 	compuertas_vistas.clear()
 	pistas.clear()
 	pista_niveles.clear()
+	avisos.clear()
+	tiempo_jugado = 0.0
 	paso_guia = {}
 	partida_reiniciada.emit()
 
@@ -383,6 +401,8 @@ func guardar() -> bool:
 		"compuertas_vistas": compuertas_vistas,
 		"pistas": pistas,
 		"pista_niveles": pista_niveles,
+		"avisos": avisos,
+		"tiempo_jugado": tiempo_jugado,
 	}
 	if tiene_posicion:
 		contenido["posicion"] = [posicion_jugador.x, posicion_jugador.y]
@@ -486,6 +506,15 @@ func cargar() -> bool:
 	for p in _lista(lectura, "pistas"):
 		if typeof(p) == TYPE_DICTIONARY and p.has("id") and p.has("texto"):
 			registrar_pista(str(p["id"]), str(p.get("titulo", "")), str(p["texto"]))
+	for a in _lista(lectura, "avisos"):
+		if typeof(a) == TYPE_DICTIONARY and a.has("titulo") and a.has("texto"):
+			var hora: Variant = a.get("hora", 0.0)
+			avisos.append({"titulo": str(a["titulo"]), "texto": str(a["texto"]), "hora": float(hora) if typeof(hora) in [TYPE_INT, TYPE_FLOAT] else 0.0})
+	while avisos.size() > MAX_AVISOS:
+		avisos.remove_at(0)
+	var tj: Variant = lectura.get("tiempo_jugado", 0.0)
+	if typeof(tj) in [TYPE_INT, TYPE_FLOAT]:
+		tiempo_jugado = maxf(float(tj), 0.0)
 	var niveles: Variant = lectura.get("pista_niveles", {})
 	if typeof(niveles) == TYPE_DICTIONARY:
 		for id in niveles:

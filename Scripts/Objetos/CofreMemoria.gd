@@ -68,8 +68,8 @@ func interactuar() -> void:
 	var datos := GameState.obtener_datos(emocion_id)
 	await get_tree().create_timer(0.9).timeout   # la tarjeta de la mejora sale a la vez que suena mejora_habilidad
 	if datos != null:
-		Notificacion.mostrar("Mejora: %s" % datos.habilidad_nombre + " II", datos.mejora_descripcion)
-		Notificacion.mostrar("Regalo: %s" % datos.regalo_nombre, datos.regalo_texto)
+		Notificacion.mostrar("Mejora: %s" % datos.habilidad_nombre + " II", datos.mejora_descripcion, true)
+		Notificacion.mostrar("Regalo: %s" % datos.regalo_nombre, datos.regalo_texto, true)
 	await get_tree().create_timer(0.6).timeout
 	await _agradecer()
 	_ocupado = false

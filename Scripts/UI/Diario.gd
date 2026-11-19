@@ -10,7 +10,7 @@ extends CanvasLayer
 
 signal cerrado
 
-const SECCIONES := ["Emociones", "Habilidades", "Recuerdos", "Regalos", "Conexiones", "Pistas", "Progreso"]
+const SECCIONES := ["Emociones", "Habilidades", "Recuerdos", "Regalos", "Conexiones", "Pistas", "Progreso", "Avisos"]
 const RUTA_ICONOS := "res://Assets/UI/iconos_habilidades.png"
 const TAMANO_LIBRO := Vector2(580, 316)
 const COLOR_ESTADO := {
@@ -162,7 +162,7 @@ func _construir() -> void:
 	_libro.add_child(cabecera)
 	cabecera.add_child(_boton("<", 26, func() -> void: cambiar_seccion(-1)))
 	for i in SECCIONES.size():
-		var b := _boton(SECCIONES[i], 64, ir_a_seccion.bind(i))
+		var b := _boton(SECCIONES[i], 56, ir_a_seccion.bind(i))
 		_botones.append(b)
 		cabecera.add_child(b)
 	cabecera.add_child(_boton(">", 26, func() -> void: cambiar_seccion(1)))
@@ -228,6 +228,8 @@ func _mostrar_seccion() -> void:
 			_crear_pistas()
 		6:
 			_crear_progreso()
+		7:
+			_crear_avisos()
 	for i in _botones.size():
 		var activa := i == seccion
 		_botones[i].add_theme_stylebox_override("normal", EstiloUI.caja(EstiloUI.MORADO_PULSADO if activa else EstiloUI.MORADO, EstiloUI.DORADO if activa else EstiloUI.MORADO, 2 if activa else 1, 4))
@@ -601,3 +603,50 @@ func _linea_progreso(texto: String) -> Label:
 	var e := EstiloUI.etiqueta(texto, 18, EstiloUI.DORADO)
 	e.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return e
+
+
+# Avisos ----------------------------------------------------------------
+
+## Los últimos avisos (el más nuevo arriba), con la hora de juego en que llegaron.
+func _crear_avisos() -> void:
+	var desplazable := ScrollContainer.new()
+	desplazable.size = _contenido.size
+	desplazable.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	desplazable.focus_mode = Control.FOCUS_NONE
+	_contenido.add_child(desplazable)
+	var columna := VBoxContainer.new()
+	columna.add_theme_constant_override("separation", 8)
+	columna.custom_minimum_size = Vector2(_contenido.size.x - 14, 0)
+	desplazable.add_child(columna)
+	if GameState.avisos.is_empty():
+		var vacio := EstiloUI.etiqueta("Aún no has recibido avisos. Aquí podrás releer los últimos 30.", 12, EstiloUI.GRIS)
+		vacio.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		columna.add_child(vacio)
+		return
+	for i in range(GameState.avisos.size() - 1, -1, -1):
+		var a: Dictionary = GameState.avisos[i]
+		var caja := PanelContainer.new()
+		caja.add_theme_stylebox_override("panel", EstiloUI.caja(Color("1e1b2e"), EstiloUI.DORADO.darkened(0.5), 1, 6, 3))
+		var v := VBoxContainer.new()
+		caja.add_child(v)
+		var fila := HBoxContainer.new()
+		var titulo := EstiloUI.etiqueta(str(a["titulo"]), 12, EstiloUI.DORADO)
+		titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		fila.add_child(titulo)
+		fila.add_child(EstiloUI.etiqueta(_formatear_hora(float(a["hora"])), 10, EstiloUI.GRIS))
+		v.add_child(fila)
+		if str(a["texto"]) != "":
+			var t := EstiloUI.etiqueta(str(a["texto"]), 11, EstiloUI.CREMA)
+			t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(t)
+		columna.add_child(caja)
+
+
+## Segundos de juego como "h:mm:ss" o "m:ss".
+static func _formatear_hora(segundos: float) -> String:
+	var total := int(segundos)
+	var h := total / 3600
+	var m := (total % 3600) / 60
+	var s := total % 60
+	return "%d:%02d:%02d" % [h, m, s] if h > 0 else "%d:%02d" % [m, s]

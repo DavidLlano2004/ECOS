@@ -25,6 +25,7 @@ const CONTROLES := [
 	["1 a 7 y rueda del ratón", "Elegir habilidad (también R y F)"],
 	["G", "Brújula: una flecha hacia donde te sugiere la Guía (tras pedirle una pista)"],
 	["F8", "Reportar un problema (si juegas desde el editor de Godot, la tecla Y)"],
+	["X", "Cerrar el aviso que aparece arriba a la derecha"],
 	["TAB", "Diario"],
 	["ESC", "Pausa"],
 ]
@@ -37,6 +38,7 @@ var _fondo: ColorRect
 var _material: ShaderMaterial
 var _panel: PanelContainer
 var _paginas: Dictionary = {}   # Pagina -> VBoxContainer
+var _boton_duracion: Button
 var _primer_foco: Dictionary = {}   # Pagina -> Control que recibe el foco al entrar
 var _boton_guardar: Button
 var _aviso: Label
@@ -262,6 +264,11 @@ func _construir_opciones() -> VBoxContainer:
 	_casilla_avisos.mouse_entered.connect(_casilla_avisos.grab_focus)
 	_casilla_avisos.focus_entered.connect(_sonar_foco)
 	v.add_child(_casilla_avisos)
+	# Duración de los avisos: cada pulsación pasa a la siguiente (Normal, Larga, Hasta cerrar)
+	_boton_duracion = _boton("", func() -> void:
+		Opciones.poner_duracion_avisos((Opciones.duracion_avisos + 1) % Opciones.DURACION_AVISOS_NOMBRES.size())
+		_sincronizar_opciones())
+	v.add_child(_boton_duracion)
 	var volver := _boton("Volver", func() -> void: _ir_a(Pagina.PRINCIPAL), "ui_cancelar")
 	v.add_child(volver)
 	_primer_foco[Pagina.OPCIONES] = _slider_musica
@@ -341,6 +348,7 @@ func _sincronizar_opciones() -> void:
 	_slider_efectos.value = Opciones.volumen_efectos
 	_casilla_pantalla.button_pressed = Opciones.pantalla_completa
 	_casilla_avisos.button_pressed = Opciones.avisos_pistas
+	_boton_duracion.text = "Duración de los avisos: %s" % Opciones.DURACION_AVISOS_NOMBRES[Opciones.duracion_avisos]
 	_sincronizando = false
 
 

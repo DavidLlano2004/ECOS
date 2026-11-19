@@ -13,7 +13,8 @@ const COLOR_TEXTO := Color("fff4dc")
 const COLOR_PASADO := Color("f4b860")
 const COLOR_PRESENTE := Color("7f9cc4")
 const SEGUNDOS_FUNDIDO := 0.25
-const SEGUNDOS_PISTA := 6.0
+## La pista de "Pulsa N..." se queda al menos esto (o hasta que se cierre con la ✕ o la tecla X).
+const SEGUNDOS_PISTA := 10.0
 
 var _raiz: Control
 var _casillas: Dictionary = {}  # id de habilidad -> CasillaHabilidad
@@ -26,6 +27,10 @@ var _fuente: Font
 var _por_celebrar: Array[String] = []
 var _visible_objetivo := false
 var _tween_pista: Tween
+var _boton_pista: Button
+## Habilidades que ya se usaron: su pista no vuelve a salir.
+var _usadas: Array[String] = []
+var _pista_id := ""
 
 
 func _ready() -> void:
@@ -45,6 +50,7 @@ func _ready() -> void:
 	Habilidades.cooldown_cambiado.connect(_on_cooldown_cambiado)
 	Habilidades.intento_bloqueado.connect(_on_intento_bloqueado)
 	GameState.habilidad_desbloqueada.connect(_on_habilidad_desbloqueada)
+	Habilidades.habilidad_usada.connect(_on_habilidad_usada)
 	Habilidades.nivel_cambiado.connect(func(_id: String, _n: int) -> void: _refrescar_casillas())
 	GameState.epoca_cambiada.connect(func(_e: String) -> void: _refrescar_indicadores())
 	GameState.emocion_resuelta.connect(func(_i: String, _r: String) -> void: _refrescar_indicadores())
@@ -104,6 +110,16 @@ func _construir_casillas() -> void:
 	_pista.offset_top = fila.offset_top - 18.0
 	_pista.modulate.a = 0.0
 	_raiz.add_child(_pista)
+	_boton_pista = Button.new()
+	_boton_pista.text = "✕"
+	_boton_pista.flat = true
+	_boton_pista.focus_mode = Control.FOCUS_NONE
+	_boton_pista.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_boton_pista.add_theme_font_size_override("font_size", 12)
+	_boton_pista.add_theme_color_override("font_color", COLOR_DORADO)
+	_boton_pista.add_theme_color_override("font_hover_color", Color("fff4dc"))
+	_boton_pista.pressed.connect(_cerrar_pista)
+	_pista.add_child(_boton_pista)
 
 
 func _construir_indicadores() -> void:
@@ -184,7 +200,8 @@ func _refrescar_indicadores() -> void:
 
 func _on_partida_cambiada() -> void:
 	_por_celebrar.clear()
-	_pista.modulate.a = 0.0
+	_usadas.clear()
+	_cerrar_pista(true)
 	_refrescar_casillas()
 	_refrescar_indicadores()
 
@@ -213,14 +230,47 @@ func _celebrar(id: String) -> void:
 		return
 	casilla.brillar()
 	_reproducir_sonido_desbloqueo()
+	if _usadas.has(id):
+		return   # ya la usó: no hace falta explicarle cómo
+	_pista_id = id
 	var numero := Habilidades.indice_de(id) + 1
 	_pista.text = "Pulsa %d para elegirla y ESPACIO para usarla" % numero
 	if _tween_pista != null:
 		_tween_pista.kill()
 	_tween_pista = create_tween()
 	_tween_pista.tween_property(_pista, "modulate:a", 1.0, 0.3)
+	_boton_pista.position = Vector2(_pista.get_minimum_size().x + 6.0, -3.0)
+	_boton_pista.mouse_filter = Control.MOUSE_FILTER_STOP
 	_tween_pista.tween_interval(SEGUNDOS_PISTA)
-	_tween_pista.tween_property(_pista, "modulate:a", 0.0, 0.6)
+	_tween_pista.tween_callback(_cerrar_pista)
+
+
+## Oculta la pista (con un fundido corto, o de golpe si `ya`).
+func _cerrar_pista(ya := false) -> void:
+	_boton_pista.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pista_id = ""
+	if _tween_pista != null:
+		_tween_pista.kill()
+	if ya:
+		_pista.modulate.a = 0.0
+		return
+	_tween_pista = create_tween()
+	_tween_pista.tween_property(_pista, "modulate:a", 0.0, 0.25)
+
+
+## Al usar una habilidad, su pista ya no hace falta ni vuelve a salir.
+func _on_habilidad_usada(id: String) -> void:
+	if not _usadas.has(id):
+		_usadas.append(id)
+	if _pista_id == id:
+		_cerrar_pista()
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	# X cierra la pista (si hay una tarjeta de aviso, la tecla es para ella)
+	if evento.is_action_pressed("CERRAR_AVISO") and _pista_id != "" and not Notificacion.mostrando:
+		_cerrar_pista()
+		get_viewport().set_input_as_handled()
 
 
 ## Hueco para el sonido de desbloqueo (todavía no hay audio).

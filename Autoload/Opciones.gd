@@ -16,6 +16,9 @@ var volumen_efectos := VOLUMEN_POR_DEFECTO
 var pantalla_completa := false
 ## Aviso suave junto a una compuerta cerrada ("Quizás Culpa pueda ayudar con esto").
 var avisos_pistas := true
+## Cuánto duran los avisos: 0 Normal, 1 Larga (el doble), 2 Hasta cerrar.
+const DURACION_AVISOS_NOMBRES := ["Normal", "Larga", "Hasta cerrar"]
+var duracion_avisos := 0
 
 
 func _ready() -> void:
@@ -63,6 +66,11 @@ func poner_avisos_pistas(activos: bool) -> void:
 	guardar()
 
 
+func poner_duracion_avisos(valor: int) -> void:
+	duracion_avisos = clampi(valor, 0, DURACION_AVISOS_NOMBRES.size() - 1)
+	guardar()
+
+
 func _aplicar_todo() -> void:
 	# El bus Master no se toca desde las opciones: se asegura que nunca quede silenciado
 	AudioServer.set_bus_mute(0, false)
@@ -96,6 +104,7 @@ func guardar() -> void:
 	config.set_value("audio", "efectos", volumen_efectos)
 	config.set_value("pantalla", "completa", pantalla_completa)
 	config.set_value("ayuda", "avisos_pistas", avisos_pistas)
+	config.set_value("ayuda", "duracion_avisos", duracion_avisos)
 	var error := config.save(RUTA)
 	if error != OK:
 		push_warning("Opciones: no se pudieron guardar (error %d)." % error)
@@ -110,3 +119,5 @@ func cargar() -> void:
 	volumen_efectos = clampf(float(config.get_value("audio", "efectos", VOLUMEN_POR_DEFECTO)), 0.0, 1.0)
 	pantalla_completa = bool(config.get_value("pantalla", "completa", false)) and not OS.has_feature("web")
 	avisos_pistas = bool(config.get_value("ayuda", "avisos_pistas", true))
+	var d: Variant = config.get_value("ayuda", "duracion_avisos", 0)
+	duracion_avisos = clampi(int(d), 0, DURACION_AVISOS_NOMBRES.size() - 1) if typeof(d) in [TYPE_INT, TYPE_FLOAT] else 0
