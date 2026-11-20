@@ -283,6 +283,10 @@ func _escribir_informe() -> void:
 				partes.append("%s %.0fx%.0f en (%.0f, %.0f)" % [n, r.size.x, r.size.y, r.position.x, r.position.y])
 			primeros = "; ".join(partes)
 		t += "| %s | %d | %d (%s) | %s | %s |\n" % [e["nombre"], e["frames"].size(), e["primer_visible"], primeros, "sin cambios" if ok else ("cambia (informativo)" if informativo else "SALTO"), "<br>".join(cambios) if not ok else "-"]
+	t += "\n## Diagnóstico inicial (antes de corregir)\n\n"
+	t += "- **Avisos (Notificacion): reproducía el salto.** La tarjeta se hacía visible (opacidad 1) y esperaba 2 fotogramas antes de medirse y colocarse: el primer fotograma se veía en la posición anterior (la primera vez, la esquina (0, 0)) y después saltaba fuera de la pantalla para entrar deslizando. Corregido: se prepara oculta (opacidad 0), con el texto completo, se espera a que el tamaño se estabilice (hasta 4 fotogramas), se fijan tamaño y posición, y entra solo con fundido y un desplazamiento vertical de 8 px.\n"
+	t += "- **Caja de diálogo (balloon): sin salto al abrir ni al escribir.** El texto completo se asigna antes de mostrarse y `visible_characters` no cambia el alto. Una excepción de diseño: cuando el texto termina y aparecen las opciones, la caja crece (115 a 193 px en la prueba) porque está anclada abajo; no ocurre al abrir ni durante la escritura y no se cambió.\n"
+	t += "- **Cuestionario, resultados y diario: sin salto.** Sus paneles tienen tamaño fijo y las etiquetas tienen ancho mínimo desde el principio.\n"
 	t += "\nEscenarios con salto: %d de %d.\n" % [_fallos, _escenarios.size()]
 	var f := FileAccess.open("res://docs/revision_saltos.md", FileAccess.WRITE)
 	f.store_string(t)
