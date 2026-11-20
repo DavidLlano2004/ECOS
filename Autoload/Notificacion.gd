@@ -17,7 +17,9 @@ const RUTA_FUENTE := "res://Assets/PixelifySans-VariableFont_wght.ttf"
 
 const ANCHO := 220.0
 const MARGEN := 12.0
-const SEGUNDOS_ENTRADA := 0.4
+const SEGUNDOS_ENTRADA := 0.3
+## Cuánto baja la tarjeta al entrar (px): lo único que se mueve además de la opacidad.
+const DESPLAZAMIENTO_ENTRADA := 8.0
 const SEGUNDOS_SALIDA := 0.25
 const SEGUNDOS_ENTRE_AVISOS := 0.4
 const BASE_SEGUNDOS := 4.0
@@ -130,24 +132,31 @@ func _mostrar_una(aviso: Dictionary) -> void:
 	_numero_en_tanda += 1
 	_actualizar_contador()
 	_cerrar_pedido = false
+	# La tarjeta se prepara OCULTA (opacidad 0): texto completo, tamaño estable y posición final antes de verse
+	_tarjeta.modulate.a = 0.0
 	_titulo.text = aviso["titulo"]
 	_texto.text = aviso["texto"]
 	_texto.visible = aviso["texto"] != ""
-	_tarjeta.modulate.a = 1.0
 	_tarjeta.visible = true
-	# Un contenedor no encoge solo: se pide el tamaño mínimo para que el alto se ajuste al texto
-	await get_tree().process_frame
-	_tarjeta.reset_size()
-	await get_tree().process_frame
+	# Un contenedor no encoge solo: se pide el tamaño mínimo y se espera (hasta 4 fotogramas) a que se estabilice
+	var anterior := Vector2(-1, -1)
+	for i in 4:
+		await get_tree().process_frame
+		_tarjeta.reset_size()
+		if _tarjeta.size == anterior:
+			break
+		anterior = _tarjeta.size
+	var tamano_final := _tarjeta.size
+	_tarjeta.size = tamano_final
 
 	var ancho_pantalla := _tarjeta.get_viewport_rect().size.x
-	var destino := ancho_pantalla - ANCHO - MARGEN
-	_tarjeta.position = Vector2(ancho_pantalla + 10.0, MARGEN)
+	var destino := Vector2(ancho_pantalla - ANCHO - MARGEN, MARGEN)
+	_tarjeta.position = destino - Vector2(0, DESPLAZAMIENTO_ENTRADA)
 
-	# Entra deslizando desde la derecha
-	var entrada := create_tween()
-	entrada.tween_property(_tarjeta, "position:x", destino, SEGUNDOS_ENTRADA) \
-		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# Entra con un fundido y un pequeño desplazamiento vertical (el tamaño y la posición horizontal no cambian)
+	var entrada := create_tween().set_parallel(true)
+	entrada.tween_property(_tarjeta, "modulate:a", 1.0, SEGUNDOS_ENTRADA)
+	entrada.tween_property(_tarjeta, "position:y", destino.y, SEGUNDOS_ENTRADA) 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	await entrada.finished
 
 	# Cuenta atrás: se detiene con el ratón encima y con diálogos o menús abiertos
