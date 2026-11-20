@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tools/probar_saltos.gd" id="1_s"]
+
+[node name="ProbarSaltos" type="Node"]
+script = ExtResource("1_s")
